@@ -1,0 +1,28 @@
+LIBRARY libkmfl.dll
+
+EXPORTS
+	kmfl_interpret
+	kmfl_load_keyboard
+	kmfl_check_keyboard
+	kmfl_reload_keyboard
+	kmfl_reload_all_keyboards
+	kmfl_unload_keyboard
+	kmfl_unload_all_keyboards
+	kmfl_make_keyboard_instance
+	kmfl_delete_keyboard_instance
+	kmfl_delete_all_keyboard_instances
+	kmfl_attach_keyboard
+	kmfl_detach_keyboard
+	kmfl_keyboard_number
+	kmfl_keyboard_name
+	kmfl_icon_file
+	kmfl_register_callbacks
+	set_history
+	clear_history
+	IConvertUTF8toUTF16
+	IConvertUTF16toUTF8
+	IConvertUTF8toUTF32
+	IConvertUTF32toUTF8
+	IConvertUTF32toUTF16
+	IConvertUTF16toUTF32
+

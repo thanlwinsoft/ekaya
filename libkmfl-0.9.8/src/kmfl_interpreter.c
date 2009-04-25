@@ -610,7 +610,7 @@ void process_output_queue(KMSI *p_kmsi)
 	size_t result;
 	
 	pout = &utfout[0];
-	for (i=0; i < p_kmsi->noutput_queue; i++) {
+	for (i=0; i < (int)p_kmsi->noutput_queue; i++) {
 #if 0
 		output_item(p_kmsi->connection, p_kmsi->output_queue[i]);
 #else
@@ -750,6 +750,6 @@ int kmfl_get_header(KMSI *p_kmsi,int hdrID,char *buf,int buflen)
 	if(nitems == 0) return -4;
 	
 	memset(buf,0,buflen);
-	return IConvertUTF32toUTF8((const UTF32**)&p32,p32+nitems,&p8,p8+buflen-1);
+	return (int)IConvertUTF32toUTF8((const UTF32**)&p32,p32+nitems,&p8,p8+buflen-1);
 }
 
