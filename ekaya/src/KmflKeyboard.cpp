@@ -13,7 +13,7 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public
- * License along with the KMFL library; if not, write to the Free Software
+ * License along with the Ekaya library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  *
  */
@@ -22,6 +22,7 @@
 #include <kmfl/kmflutfconv.h>
 
 #include "KmflKeyboard.h"
+#include "MessageLogger.h"
 
 // callback functions
 void ekayaKmflOutputString(void *connection, char *p)
@@ -97,7 +98,7 @@ int KmflKeyboard::processKey(long keyId, std::basic_string<Utf32> & context, siz
 	size_t contextLen = std::min(static_cast<size_t>(KMFL_MAX_CONTEXT), contextPos);
 	for (UINT i = 0; i < contextLen; i++)
 	{
-		contextItems[i] = context[contextPos - contextLen + i];
+		contextItems[i] = context[contextLen - 1 - i];//[contextPos - contextLen + i];
 	}
 
 	set_history(mKmsi, contextItems, static_cast<UINT>(contextLen));
@@ -150,6 +151,7 @@ void KmflKeyboard::outputBeep(void)
 
 void KmflKeyboard::forwardKeyevent(UINT key, UINT state)
 {
+	MessageLogger::logMessage("forwardKeyevent %x %x", (int)key, (int)state);
 	// TODO
 }
 

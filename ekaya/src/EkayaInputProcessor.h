@@ -12,7 +12,7 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public
- * License along with the KMFL library; if not, write to the Free Software
+ * License along with the Ekaya library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  *
  */
@@ -87,11 +87,11 @@ public:
 	const std::wstring getMessage(const wchar_t * defaultMessage);
 	const std::vector <EkayaKeyboard*> & getKeyboards() { return mKeyboards; }
 
-	void logMessage(const char * msg);
-	void logMessage(const char * msg, int param);
-	void logMessage(const char * msg, int paramA, int paramB);
-	void logMessage(const char * msg, int paramA, int paramB, int paramC);
 	void setComposition(ITfComposition * composition) { mpComposition = composition; }
+	ITfComposition * getComposition() { return mpComposition; };
+
+	
+	
 private:
 	HRESULT setTextEditSink(ITfDocumentMgr *pDocMgrFocus);
 	bool ignoreKey(WPARAM code);

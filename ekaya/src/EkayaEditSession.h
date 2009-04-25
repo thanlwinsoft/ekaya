@@ -12,7 +12,7 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public
- * License along with the KMFL library; if not, write to the Free Software
+ * License along with the Ekaya library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  *
  */
@@ -88,5 +88,72 @@ private:
 	EkayaInputProcessor * mpTextService;
 	long mcRef;
 };
+
+class EkayaEndContextSession : public ITfEditSession
+{
+public:
+    EkayaEndContextSession(EkayaInputProcessor *pTextService, ITfContext *pContext, WPARAM wParam)
+    {
+		mwParam = wParam;
+		mcRef = 1;
+        mpContext = pContext;
+        mpContext->AddRef();
+
+        mpTextService = pTextService;
+        mpTextService->AddRef();
+    }
+	virtual ~EkayaEndContextSession()
+    {
+        mpContext->Release();
+        mpTextService->Release();
+    }
+
+	// IUnknown
+    STDMETHODIMP QueryInterface(REFIID riid, void **ppvObj)
+    {
+        if (ppvObj == NULL)
+            return E_INVALIDARG;
+
+        *ppvObj = NULL;
+
+        if (IsEqualIID(riid, IID_IUnknown) ||
+            IsEqualIID(riid, IID_ITfEditSession))
+        {
+            *ppvObj = (ITfLangBarItemButton *)this;
+        }
+
+        if (*ppvObj)
+        {
+            AddRef();
+            return S_OK;
+        }
+
+        return E_NOINTERFACE;
+    }
+
+    // ITfEditSession
+    STDMETHODIMP DoEditSession(TfEditCookie ec);
+
+	STDMETHODIMP_(ULONG) AddRef(void)
+    {
+        return ++mcRef;
+    }
+    STDMETHODIMP_(ULONG) Release(void)
+    {
+        long cr = --mcRef;
+        assert(mcRef >= 0);
+        if (mcRef == 0)
+        {
+            delete this;
+        }
+        return cr;
+    }
+private:
+    WPARAM mwParam;
+	ITfContext * mpContext;
+	EkayaInputProcessor * mpTextService;
+	long mcRef;
+};
+
 
 #endif

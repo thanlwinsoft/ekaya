@@ -12,7 +12,7 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public
- * License along with the KMFL library; if not, write to the Free Software
+ * License along with the Ekaya library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  *
  */
@@ -28,6 +28,7 @@
 #include "EkayaEditSession.h"
 #include "EkayaInputProcessor.h"
 #include "KmflKeyboardFactory.h"
+#include "MessageLogger.h"
 
 static const TF_PRESERVEDKEY KEY_ONOFF = { 0x20, TF_MOD_CONTROL };
 
@@ -83,6 +84,10 @@ STDAPI EkayaInputProcessor::QueryInterface(REFIID riid, void **ppvObj)
     else if (IsEqualIID(riid, IID_ITfKeyEventSink))
     {
         *ppvObj = (ITfKeyEventSink *)this;
+    }
+	else if (IsEqualIID(riid, IID_ITfCompositionSink))
+    {
+        *ppvObj = (ITfCompositionSink *)this;
     }
 
     if (*ppvObj)
@@ -324,6 +329,7 @@ STDAPI EkayaInputProcessor::OnEndEdit(ITfContext *pContext, TfEditCookie ecReadO
     if (pEditRecord->GetSelectionStatus(&fSelectionChanged) == S_OK &&
         fSelectionChanged)
     {
+		MessageLogger::logMessage("Selection changed\n");
     }
 
     // text modification?
@@ -350,11 +356,14 @@ STDAPI EkayaInputProcessor::OnSetFocus(BOOL fForeground)
 	return S_OK;
 }
 
+/**
+* Test whether the specified key is a special character that should be ignored
+*/
 bool EkayaInputProcessor::ignoreKey(WPARAM wParam)
 {
 	if (wParam < 0x30)
 	{
-		if (wParam != VK_SHIFT && wParam != VK_CONTROL)
+		if (wParam != VK_SHIFT && wParam != VK_CONTROL && wParam != VK_SPACE)
 			return true;
 		return false;
 	}
@@ -371,7 +380,8 @@ bool EkayaInputProcessor::ignoreKey(WPARAM wParam)
 
 STDAPI EkayaInputProcessor::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pfEaten)
 {
-	logMessage("OnTestKeyDown %d %d\n", (int)wParam, (int)lParam);
+	MessageLogger::logMessage("OnTestKeyDown %x %x\n", (int)wParam, (int)lParam);
+	HRESULT hr = S_OK;
 	if (isKeyboardOpen() && !isKeyboardDisabled())
 	{
 		*pfEaten = FALSE;
@@ -381,13 +391,24 @@ STDAPI EkayaInputProcessor::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, L
 		if (ignoreKey(wParam)) 
 		{
 			*pfEaten = FALSE;
+			// exit the context otherwise we get strange effects
+			EkayaEndContextSession * pEditSession = NULL;
+			if ((pEditSession = new EkayaEndContextSession(this, pContext, wParam)) == NULL)
+				return E_FAIL;
+
+			// A lock is required
+			// nb: this method is one of the few places where it is legal to use
+			// the TF_ES_SYNC flag
+			hr = pContext->RequestEditSession(mClientId, pEditSession, TF_ES_SYNC | TF_ES_READWRITE, &hr);
+
+			pEditSession->Release();
 		}
 		else
 		{
 			*pfEaten = TRUE;
 		}
 	}
-	return S_OK;
+	return hr;
 }
 
 STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pfEaten)
@@ -403,7 +424,7 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 
 	EkayaEditSession *pEditSession;
     HRESULT hr = E_FAIL;
-	logMessage("OnKeyDown %x %x\n", (int)wParam, (int)lParam);
+	MessageLogger::logMessage("OnKeyDown %x %x\n", (int)wParam, (int)lParam);
 	// check for control keys
 	if (wParam < 0x30)
 	{
@@ -411,16 +432,18 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 		{
 		case VK_SHIFT:
 			mKeyState.set(KEY_SHIFT);
-			break;
+			return S_OK;
 		case VK_CONTROL:
 			mKeyState.set(KEY_CTRL);
+			return S_OK;
+		case VK_SPACE:
 			break;
 		default:
 			// ignore
 			*pfEaten = FALSE;
-			break;
+			return S_OK;
 		}
-		return S_OK;
+		
 	}
 
 	if (!mKeyState.at(KEY_SHIFT))
@@ -555,7 +578,7 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 
 STDMETHODIMP EkayaInputProcessor::OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pfEaten)
 {
-	logMessage("OnTestKeyUp %d %d\n", (int)wParam, (int)lParam);
+	MessageLogger::logMessage("OnTestKeyUp %x %x\n", (int)wParam, (int)lParam);
 	if (isKeyboardOpen() && !isKeyboardDisabled())
 	{
 		*pfEaten = FALSE;
@@ -576,6 +599,7 @@ STDMETHODIMP EkayaInputProcessor::OnTestKeyUp(ITfContext *pContext, WPARAM wPara
 
 STDMETHODIMP EkayaInputProcessor::OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pfEaten)
 {
+	MessageLogger::logMessage("OnKeyUp %x %x\n", (int)wParam, (int)lParam);
 	// check for control keys
 	if (wParam < 0x30)
 	{
@@ -587,13 +611,14 @@ STDMETHODIMP EkayaInputProcessor::OnKeyUp(ITfContext *pContext, WPARAM wParam, L
 		case VK_CONTROL:
 			mKeyState.flip(KEY_CTRL);
 			break;
+		case VK_SPACE:
+			break;
 		default:
 			*pfEaten = TRUE;
-			break;
+			return S_OK;
 		}
-		return S_OK;
+		
 	}
-	logMessage("OnKeyUp %x %x\n", (int)wParam, (int)lParam);
 	if (isKeyboardOpen() && !isKeyboardDisabled())
 	{
 		*pfEaten = FALSE;
@@ -607,7 +632,7 @@ STDMETHODIMP EkayaInputProcessor::OnKeyUp(ITfContext *pContext, WPARAM wParam, L
 
 STDMETHODIMP EkayaInputProcessor::OnPreservedKey(ITfContext *pContext, REFGUID rguid, BOOL *pfEaten)
 {
-	logMessage("OnPreservedKey\n");
+	MessageLogger::logMessage("OnPreservedKey\n");
 	if (IsEqualGUID(rguid, GUID_PRESERVEDKEY_ONOFF))
     {
         BOOL fOpen = isKeyboardOpen();
@@ -772,37 +797,11 @@ void EkayaInputProcessor::initKeyboards()
 	{
 		mActiveKeyboard = 0;
 	}
-	logMessage("initKeyboards %d", (int)mKeyboards.size());
+	MessageLogger::logMessage("initKeyboards %d", (int)mKeyboards.size());
 }
 
 void EkayaInputProcessor::setActiveKeyboard(int keyboardIndex)
 {
-	logMessage("setActiveKeyboard %d", keyboardIndex);
+	MessageLogger::logMessage("setActiveKeyboard %d", keyboardIndex);
 	mActiveKeyboard = keyboardIndex;
-}
-
-void EkayaInputProcessor::logMessage(const char * msg)
-{
-	OutputDebugString(msg);
-}
-
-void EkayaInputProcessor::logMessage(const char * msg, int param)
-{
-	char msgText[256];
-	sprintf_s(msgText, msg, param);
-	OutputDebugString(msgText);
-}
-
-void EkayaInputProcessor::logMessage(const char * msg, int paramA, int paramB)
-{
-	char msgText[256];
-	sprintf_s(msgText, msg, paramA, paramB);
-	OutputDebugString(msgText);
-}
-
-void EkayaInputProcessor::logMessage(const char * msg, int paramA, int paramB, int paramC)
-{
-	char msgText[256];
-	sprintf_s(msgText, msg, paramA, paramB, paramC);
-	OutputDebugString(msgText);
 }

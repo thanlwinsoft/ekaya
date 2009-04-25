@@ -12,7 +12,7 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public
- * License along with the KMFL library; if not, write to the Free Software
+ * License along with the Ekaya library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  *
  */
@@ -26,6 +26,7 @@
 #include "Ekaya.h"
 #include "EkayaKeyboard.h"
 #include "EkayaLangBarButton.h"
+#include "MessageLogger.h"
 
 const DWORD TEXTSERVICE_LANGBARITEMSINK_COOKIE = 0xae4e6c21;
 
@@ -61,7 +62,8 @@ EkayaLangBarButton::EkayaLangBarButton(EkayaInputProcessor *pTextService)
 EkayaLangBarButton::~EkayaLangBarButton()
 {
     DllRelease();
-    mpTextService->Release();
+	if (mpTextService)
+	    mpTextService->Release();
 }
 
 //+---------------------------------------------------------------------------
@@ -250,7 +252,7 @@ STDAPI EkayaLangBarButton::InitMenu(ITfMenu *pMenu)
 STDAPI EkayaLangBarButton::OnMenuSelect(UINT wID)
 {
     bool fOpen;
-	mpTextService->logMessage("OnMenuSelect %d", wID);
+	MessageLogger::logMessage("OnMenuSelect %d", wID);
 	fOpen = mpTextService->isKeyboardOpen();
     //
     // This is callback when the menu item is selected.
