@@ -52,6 +52,34 @@ STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 	{
 		return S_FALSE;
 	}
+	if (pComposition)
+	{
+		if (pComposition->GetRange(&pCompositionRange) != S_OK)
+		{
+			tfSelection.range->Release();
+			return S_FALSE;
+		}
+		LONG resultStart = 0, resultEnd = 0;
+		if (pCompositionRange->CompareStart(ec, tfSelection.range, TF_ANCHOR_START, &resultStart) == S_OK &&
+			pCompositionRange->CompareEnd(ec, tfSelection.range, TF_ANCHOR_END, &resultEnd) == S_OK)
+		{
+			MessageLogger::logMessage("Compare range start %d end %d\n", resultStart, resultEnd);
+			if (resultStart > 0 || resultEnd < 0)
+			{
+				// selection has moved out of composition range, so end composition
+				pComposition->EndComposition(ec);
+				mpTextService->setComposition(NULL);// releases composition
+				pComposition = NULL;
+			}
+			pCompositionRange->Release();
+			pCompositionRange = NULL;
+		}
+		else
+		{
+			tfSelection.range->Release();
+			return S_FALSE;
+		}
+	}
 
 	// TODO decide if we really need a composition
     // Start the new compositon if there is no composition.
@@ -126,57 +154,13 @@ STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 		tfSelection.range->Release();
 		return S_FALSE;
 	}
-	MessageLogger::logMessage("CompositionRange length %d\n", contextLength);
-	/*ITfRange * editRange = NULL;
-	if (tfSelection.range->Clone(&editRange) != S_OK)
-	{
-		tfSelection.range->Release();
-		return S_FALSE;
-	}
-
-	if (contextLength == 0)
-	{
-		TF_HALTCOND halt;
-		halt.pHaltRange = NULL;
-		halt.aHaltPos = TF_ANCHOR_START;
-		halt.dwFlags = 0;
-		LONG shift = 0;
-		if (editRange->ShiftStart(ec, -1, &shift, NULL) != S_OK)
-		{
-			tfSelection.range->Release();
-			editRange->Release();
-			return S_FALSE;
-		}
-		BOOL noRegion = false;
-		if (shift == 0)
-		{
-			if (editRange->ShiftStartRegion(ec, TF_SD_BACKWARD, &noRegion) != S_OK)
-			{
-				tfSelection.range->Release();
-				editRange->Release();
-			}
-		}
-		if (editRange->GetText(ec, 0, wBuffer, MAX_CONTEXT_LEN * 2, &contextLength) != S_OK)
-			return S_FALSE;
-	}*/
+	MessageLogger::logMessage("CompositionRange length %d\n", (int)contextLength);
 
 	std::basic_string<Utf32>context = UtfConversion::convertUtf16ToUtf32(std::wstring(wBuffer, contextLength));
 	size_t oldContextPos = context.length();
 	int keyResult = keyboard->processKey(static_cast<long>(mwParam), context, static_cast<int>(context.length()));
 	MessageLogger::logMessage("processKey %d\n", keyResult);
-	
-    // is the insertion point covered by a composition?
-    //if (_pComposition->GetRange(&pRangeComposition) == S_OK)
-    //{
-    //    fCovered = IsRangeCovered(ec, tfSelection.range, pRangeComposition);
-    //    pRangeComposition->Release();
-    //}
 
-	//if (keyResult == oldContextPos)
-	//{
-	//	// no change
-	//	return S_FALSE;
-	//}
 	// convert context back to UTF16
 	std::wstring convertedContext = UtfConversion::convertUtf32ToUtf16(context);
 
@@ -197,8 +181,7 @@ STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 	if (convertedContext.length() && convertedContext[convertedContext.length()-1] == 0x20 && pComposition)
 	{
 		pComposition->EndComposition(ec);
-		pComposition->Release();
-		mpTextService->setComposition(NULL);
+		mpTextService->setComposition(NULL);// includes Release
 		pComposition = NULL;
 	}
 	// end the composition now or later?
@@ -215,8 +198,7 @@ STDAPI EkayaEndContextSession::DoEditSession(TfEditCookie ec)
 	if (mpTextService->getComposition())
 	{
 		hr = mpTextService->getComposition()->EndComposition(ec);
-		mpTextService->getComposition()->Release();
-		mpTextService->setComposition(NULL);
+		mpTextService->setComposition(NULL);// releases composition
 	}
 	return hr;
 }

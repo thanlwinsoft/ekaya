@@ -49,8 +49,9 @@ EkayaLangBarButton::EkayaLangBarButton(EkayaInputProcessor *pTextService)
 
     mpTextService = pTextService;
 	if (mpTextService)
+	{
 	    mpTextService->AddRef();
-
+	}
 }
 
 //+---------------------------------------------------------------------------
@@ -63,7 +64,10 @@ EkayaLangBarButton::~EkayaLangBarButton()
 {
     DllRelease();
 	if (mpTextService)
+	{
 	    mpTextService->Release();
+		mpTextService = NULL;
+	}
 }
 
 //+---------------------------------------------------------------------------
@@ -163,6 +167,7 @@ STDAPI EkayaLangBarButton::GetStatus(DWORD *pdwStatus)
 
 STDAPI EkayaLangBarButton::Show(BOOL fShow)
 {
+	MessageLogger::logMessage("EkayaLangBarButton::Show %d\n", (int)fShow);
     return E_NOTIMPL;
 }
 
@@ -199,7 +204,10 @@ STDAPI EkayaLangBarButton::OnClick(TfLBIClick click, POINT pt, const RECT *prcAr
 
 STDAPI EkayaLangBarButton::InitMenu(ITfMenu *pMenu)
 {
-
+	if (pMenu == NULL)
+	{
+		return E_FAIL;
+	}
     // 
     // Add the keyboard open close item.
     // 
@@ -252,7 +260,7 @@ STDAPI EkayaLangBarButton::InitMenu(ITfMenu *pMenu)
 STDAPI EkayaLangBarButton::OnMenuSelect(UINT wID)
 {
     bool fOpen;
-	MessageLogger::logMessage("OnMenuSelect %d", wID);
+	MessageLogger::logMessage("OnMenuSelect %d", (int)wID);
 	fOpen = mpTextService->isKeyboardOpen();
     //
     // This is callback when the menu item is selected.
@@ -282,7 +290,8 @@ STDAPI EkayaLangBarButton::OnMenuSelect(UINT wID)
 STDAPI EkayaLangBarButton::GetIcon(HICON *phIcon)
 {
     *phIcon = (HICON)LoadImage(g_hInst, TEXT("IDI_TEXTSERVICE"), IMAGE_ICON, 16, 16, 0);
- 
+	// TODO get icon from keyboard
+
     return (*phIcon != NULL) ? S_OK : E_FAIL;
 }
 

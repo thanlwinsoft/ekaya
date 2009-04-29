@@ -34,7 +34,9 @@ class EkayaInputProcessor : public ITfTextInputProcessor,
                      public ITfThreadMgrEventSink,
                      public ITfTextEditSink,
                      public ITfKeyEventSink,
-					 public ITfCompositionSink
+					 public ITfCompositionSink,
+					 public ITfMouseSink,
+					 public ITfTextLayoutSink
 {
 public:
 	enum
@@ -61,6 +63,9 @@ public:
     STDMETHODIMP OnPushContext(ITfContext *pContext);
     STDMETHODIMP OnPopContext(ITfContext *pContext);
 
+	// ITfTextLayoutSink
+	STDMETHODIMP OnLayoutChange(ITfContext *pContext, TfLayoutCode lcode, ITfContextView *pContextView);
+
     // ITfTextEditSink
     STDMETHODIMP OnEndEdit(ITfContext *pContext, TfEditCookie ecReadOnly, ITfEditRecord *pEditRecord);
 
@@ -72,7 +77,10 @@ public:
     STDMETHODIMP OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pfEaten);
     STDMETHODIMP OnPreservedKey(ITfContext *pContext, REFGUID rguid, BOOL *pfEaten);
 	STDMETHODIMP OnCompositionTerminated(TfEditCookie,ITfComposition *);
-
+	STDMETHODIMP OnMouseEvent(ULONG uEdge,
+                         ULONG uQuadrant,
+                         DWORD dwBtnStatus,
+                         BOOL *pfEaten);
     // factory callback
     static HRESULT CreateInstance(IUnknown *pUnkOuter, REFIID riid, void **ppvObj);
 
@@ -87,8 +95,8 @@ public:
 	const std::wstring getMessage(const wchar_t * defaultMessage);
 	const std::vector <EkayaKeyboard*> & getKeyboards() { return mKeyboards; }
 
-	void setComposition(ITfComposition * composition) { mpComposition = composition; }
-	ITfComposition * getComposition() { return mpComposition; };
+	void setComposition(ITfComposition * composition);
+	ITfComposition * getComposition();
 
 	
 	
@@ -104,6 +112,8 @@ private:
 	TfClientId mClientId;
 	DWORD mThreadEventCookie;
 	DWORD mEditEventCookie;
+	DWORD mMouseCookie;
+	DWORD mTextLayoutCookie;
 	ITfThreadMgr * mpThreadMgr;
 	ITfContext * mpTextEditSinkContext;
 	EkayaLangBarButton * mpLangBarButton;
@@ -111,6 +121,7 @@ private:
 	std::vector <EkayaKeyboard*> mKeyboards;
 	std::wstring mContext;
 	ITfComposition * mpComposition;
+	ITfRange * mpCompositionRange;
 };
 
 #endif

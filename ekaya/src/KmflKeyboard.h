@@ -29,9 +29,10 @@ enum { KMFL_MAX_CONTEXT = 16 };
 class KmflKeyboard : public EkayaKeyboard
 {
 public:
-	KmflKeyboard(int kmflId);
+	KmflKeyboard(int kmflId, std::string baseDir);
 	~KmflKeyboard();
 	virtual int processKey(long keyId, std::basic_string<Utf32> & context, size_t contextPos);
+	virtual std::string getIconFileName();
 
 	virtual std::basic_string<Utf32> getDescription();
 	// KMFL call back methods
@@ -46,6 +47,7 @@ private:
 	std::basic_string<Utf32> & mContextBuffer;
 	size_t mContextPosition;
 	static std::basic_string<Utf32> sDummy;
+	std::string mBaseDir;
 };
 
 

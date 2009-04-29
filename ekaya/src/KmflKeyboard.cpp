@@ -74,8 +74,8 @@ void ekayaKmflEraseChar(void *connection)
 std::basic_string<Utf32> KmflKeyboard::sDummy;
 
 
-KmflKeyboard::KmflKeyboard(int kmflId)
-: mKmflId(kmflId), mContextBuffer(sDummy)
+KmflKeyboard::KmflKeyboard(int kmflId, std::string baseDir)
+: mKmflId(kmflId), mContextBuffer(sDummy), mBaseDir(baseDir)
 {
 	mKmsi = kmfl_make_keyboard_instance(this);
 	kmfl_register_callbacks(ekayaKmflOutputString, ekayaKmflOutputChar, 
@@ -124,6 +124,11 @@ std::basic_string<Utf32> KmflKeyboard::getDescription()
 	}
 	status = kmfl_detach_keyboard(mKmsi);
 	return desc;
+}
+
+std::string KmflKeyboard::getIconFileName()
+{
+	return std::string(mBaseDir + kmfl_icon_file(mKmflId));
 }
 
 void KmflKeyboard::outputString(char *p)

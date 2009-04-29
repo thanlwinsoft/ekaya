@@ -27,6 +27,8 @@ public:
 	KmflKeyboardFactory(){};
 	~KmflKeyboardFactory();
 	virtual std::vector <EkayaKeyboard * > loadKeyboards();
+	static const std::string KMFL_PATTERN;
+	static const std::string KMFL_DIR;
 };
 
 #endif

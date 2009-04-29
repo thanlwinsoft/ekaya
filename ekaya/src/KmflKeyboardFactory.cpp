@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  *
  */
-
+#include <windows.h>
 #include <stdio.h>
 
 #include <kmfl/kmfl.h>
@@ -25,6 +25,8 @@
 #include "KmflKeyboard.h"
 #include "KmflKeyboardFactory.h"
 
+const std::string KmflKeyboardFactory::KMFL_DIR = "\\ThanLwinSoft.org\\Ekaya\\kmfl\\";
+const std::string KmflKeyboardFactory::KMFL_PATTERN = "*.kmn";
 
 std::vector<EkayaKeyboard*>
 KmflKeyboardFactory::loadKeyboards()
@@ -33,40 +35,57 @@ KmflKeyboardFactory::loadKeyboards()
 
 	char* appDir = NULL;
     size_t requiredSize;
-
+	
     getenv_s( &requiredSize, NULL, 0, "APPDATA");
 	appDir = new char[requiredSize];
-	std::string dataPath;
+	if (!appDir)
+		return keyboards;
+	std::string basePath;
+	std::string pattern;
 	if (appDir)
 	{
 		getenv_s( &requiredSize, appDir, requiredSize, "APPDATA" );
-		dataPath = std::string(appDir) + "\\ThanLwinSoft.org\\Ekaya\\kmfl";
+		basePath = std::string(appDir) + KMFL_DIR;
+		pattern = basePath + KMFL_PATTERN;
 	}
+	else
+	{
+		return keyboards;
+	}
+	HANDLE hFind = INVALID_HANDLE_VALUE;
+	WIN32_FIND_DATA ffd;
 
-	// TODO find system and user application directories and iterate over *.kmn files
-	// temp HACK
-	std::string path = "C:\\Users\\keith\\projects\\ekaya\\myWin2.2.kmn";
-	//DIR *dir = opendir(dataPath.c_str());
-
- //   if (dir != NULL)
-	//{
- //       struct dirent *file = readdir(dir);
-	//	while (file != NULL)
-	//	{
-	//		//"C:\\Users\\keith\\projects\\ekaya\\myWin2.2.kmn";
-	//		std::string absPath = path + "\\" + file->d_name;
-	//		if (absPath.substr(absPath.length() - 4, 4) == ".kmn")
-	//		{
-				int kmflId = kmfl_load_keyboard(path.c_str());
-				if (kmflId > -1)
-				{
-					keyboards.push_back(new KmflKeyboard(kmflId));
-				}
-	//		}
-	//		file = readdir(dir);
-	//	}
-	//}
-
+	// read files in user's APPDATA dir
+	hFind = FindFirstFileA(pattern.c_str(), &ffd);
+	while (INVALID_HANDLE_VALUE != hFind)
+	{
+		int kmflId = kmfl_load_keyboard((basePath + ffd.cFileName).c_str());
+		if (kmflId > -1)
+		{
+			keyboards.push_back(new KmflKeyboard(kmflId, basePath));
+		}
+		if (FindNextFile(hFind, &ffd) == 0) break;
+	}
+	delete [] appDir;
+	// read files under Program Files
+	getenv_s( &requiredSize, NULL, 0, "ProgramFiles");
+	appDir = new char[requiredSize];
+	if (!appDir)
+		return keyboards;
+	getenv_s( &requiredSize, appDir, requiredSize, "ProgramFiles" );
+	basePath = std::string(appDir) + KMFL_DIR;
+	pattern = basePath + KMFL_PATTERN;
+	hFind = FindFirstFileA(pattern.c_str(), &ffd);
+	while (INVALID_HANDLE_VALUE != hFind)
+	{
+		int kmflId = kmfl_load_keyboard((basePath + ffd.cFileName).c_str());
+		if (kmflId > -1)
+		{
+			keyboards.push_back(new KmflKeyboard(kmflId, basePath));
+		}
+		if (FindNextFile(hFind, &ffd) == 0) break;
+	}
+	delete [] appDir;
 	return keyboards;
 }
 

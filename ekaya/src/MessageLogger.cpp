@@ -45,3 +45,10 @@ void MessageLogger::logMessage(const char * msg, int paramA, int paramB, int par
 	sprintf_s(msgText, msg, paramA, paramB, paramC);
 	OutputDebugString(msgText);
 }
+
+void MessageLogger::logMessage(const char * msg, long param)
+{
+	char msgText[256];
+	sprintf_s(msgText, msg, param);
+	OutputDebugString(msgText);
+}

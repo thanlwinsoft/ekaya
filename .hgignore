@@ -1,14 +1,23 @@
 syntax: glob
-libkmfl-0.9.8\Debug/*.htm
 *.gz
+*.vcproj.*
 kmflcomp-0.9.8/Debug/*.ilk
 kmflcomp-0.9.8/Debug/*.res
 kmflcomp-0.9.8/Debug/*.exe
 kmflcomp-0.9.8/Debug/*.dll
-kmflcomp-0.9.8/Debug\RDa05584
+kmflcomp-0.9.8/Debug/RDa05584
 kmflcomp-0.9.8/Debug/*.manifest
 kmflcomp-0.9.8/Debug/*.dep
 kmflcomp-0.9.8/Debug/*.htm
+kmflcomp-0.9.8/config.guess
+kmflcomp-0.9.8/config.h.in
+kmflcomp-0.9.8/config.sub
+kmflcomp-0.9.8/acconfig.h
+kmflcomp-0.9.8/acinclude.m4
+kmflcomp-0.9.8/aclocal.m4
+kmflcomp-0.9.8/configure
+kmflcomp-0.9.8/Makefile.in
+libkmfl-0.9.8/Debug/*.htm
 libkmfl-0.9.8/Debug/*.res
 libkmfl-0.9.8/Debug/*.manifest
 libkmfl-0.9.8/Debug/*.ilk

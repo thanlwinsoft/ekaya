@@ -90,7 +90,9 @@ extern "C" {
 #ifdef __int32_t_defined
 	typedef int32_t INT;
 #else
+#ifndef WIN32
 	typedef long INT;	// 32-bit unsigned integer (general purpose)
+#endif
 #endif
 
 #ifdef __uint8_t_defined

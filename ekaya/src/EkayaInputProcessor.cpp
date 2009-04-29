@@ -43,7 +43,9 @@ EkayaInputProcessor::EkayaInputProcessor()
 : mOpen(false), mDisabled(true), mRefCount(1), mActiveKeyboard(-1),
   mClientId(TF_CLIENTID_NULL),
   mThreadEventCookie(TF_INVALID_COOKIE), mEditEventCookie(TF_INVALID_COOKIE),
-  mpThreadMgr(NULL), mpLangBarButton(NULL), mpComposition(NULL)
+  mMouseCookie(TF_INVALID_COOKIE),
+  mpThreadMgr(NULL), mpLangBarButton(NULL), 
+  mpComposition(NULL), mpCompositionRange(NULL)
 {
 	DllAddRef();
 	mKeyboardFactories.push_back(new KmflKeyboardFactory());
@@ -56,6 +58,7 @@ EkayaInputProcessor::~EkayaInputProcessor()
 	while (i != mKeyboardFactories.end())
 	{
 		delete (*i);
+		++i;
 	}
 	DllRelease();
 }
@@ -88,6 +91,10 @@ STDAPI EkayaInputProcessor::QueryInterface(REFIID riid, void **ppvObj)
 	else if (IsEqualIID(riid, IID_ITfCompositionSink))
     {
         *ppvObj = (ITfCompositionSink *)this;
+    }
+	else if (IsEqualIID(riid, IID_ITfMouseSink))
+    {
+        *ppvObj = (ITfMouseSink *)this;
     }
 
     if (*ppvObj)
@@ -162,6 +169,8 @@ STDAPI EkayaInputProcessor::Activate(ITfThreadMgr *pThreadMgr, TfClientId tfClie
 	}
 	else status = E_FAIL;
 
+	
+
 	// language bar
 	ITfLangBarItemMgr *pLangBarItemMgr;
     if (status == S_OK &&
@@ -175,6 +184,7 @@ STDAPI EkayaInputProcessor::Activate(ITfThreadMgr *pThreadMgr, TfClientId tfClie
 				mpLangBarButton = NULL;
 				status = E_FAIL;
 			}
+			else mpLangBarButton->AddRef();
 		}
 	    pLangBarItemMgr->Release();
 	}
@@ -189,13 +199,6 @@ STDAPI EkayaInputProcessor::Activate(ITfThreadMgr *pThreadMgr, TfClientId tfClie
 
 STDAPI EkayaInputProcessor::Deactivate()
 {
-	// Release ALL refs to mpThreadMgr in Deactivate
-    if (mpThreadMgr != NULL)
-    {
-        mpThreadMgr->Release();
-        mpThreadMgr = NULL;
-    }
-
 
 	ITfSource *pSource;
 	if (mThreadEventCookie != TF_INVALID_COOKIE)
@@ -206,6 +209,17 @@ STDAPI EkayaInputProcessor::Deactivate()
 			pSource->Release();
 		}
 	    mThreadEventCookie = TF_INVALID_COOKIE;
+	}
+
+	if (mMouseCookie != TF_INVALID_COOKIE)
+	{
+		ITfMouseTracker * pMouseTracker;
+		if (mpThreadMgr->QueryInterface(IID_ITfMouseTracker, (void **)&pMouseTracker) == S_OK)
+		{
+			pMouseTracker->UnadviseMouseSink(mMouseCookie);
+			pMouseTracker->Release();
+		}
+		mMouseCookie = TF_INVALID_COOKIE;
 	}
 
 	setTextEditSink(NULL);
@@ -224,9 +238,9 @@ STDAPI EkayaInputProcessor::Deactivate()
 		mpThreadMgr->QueryInterface(IID_ITfLangBarItemMgr, (void **)&pLangBarItemMgr) == S_OK)
     {
         pLangBarItemMgr->RemoveItem(mpLangBarButton);
-        pLangBarItemMgr->Release();
 	    mpLangBarButton->Release();
 		mpLangBarButton = NULL;
+        pLangBarItemMgr->Release();
     }
 
     mClientId = TF_CLIENTID_NULL;
@@ -242,7 +256,8 @@ HRESULT EkayaInputProcessor::setTextEditSink(ITfDocumentMgr *pDocMgrFocus)
     // clear out any previous sink first
     if (mEditEventCookie != TF_INVALID_COOKIE)
     {
-        if (mpTextEditSinkContext->QueryInterface(IID_ITfSource, (void **)&pSource) == S_OK)
+        if (mpTextEditSinkContext &&
+			mpTextEditSinkContext->QueryInterface(IID_ITfSource, (void **)&pSource) == S_OK)
         {
             pSource->UnadviseSink(mEditEventCookie);
             pSource->Release();
@@ -265,18 +280,29 @@ HRESULT EkayaInputProcessor::setTextEditSink(ITfDocumentMgr *pDocMgrFocus)
 
     fRet = E_FAIL;
 
-    if (mpTextEditSinkContext->QueryInterface(IID_ITfSource, (void **)&pSource) == S_OK)
-    {
-        if (pSource->AdviseSink(IID_ITfTextEditSink, (ITfTextEditSink *)this, &mEditEventCookie) == S_OK)
-        {
-            fRet = S_OK;
-        }
-        else
-        {
-            mEditEventCookie = TF_INVALID_COOKIE;
-        }
-        pSource->Release();
-    }
+    if (mpTextEditSinkContext)
+	{
+		if (mpTextEditSinkContext->QueryInterface(IID_ITfSource, (void **)&pSource) == S_OK)
+		{
+			if (pSource->AdviseSink(IID_ITfTextEditSink, (ITfTextEditSink *)this, &mEditEventCookie) == S_OK)
+			{
+				fRet = S_OK;
+			}
+			else
+			{
+				mEditEventCookie = TF_INVALID_COOKIE;
+			}
+			if (pSource->AdviseSink(IID_ITfTextLayoutSink, (ITfTextLayoutSink *)this, &mTextLayoutCookie) == S_OK)
+			{
+				fRet = S_OK;
+			}
+			else
+			{
+				mTextLayoutCookie = TF_INVALID_COOKIE;
+			}
+			pSource->Release();
+		}
+	}
 
     if (fRet != S_OK)
     {
@@ -289,27 +315,32 @@ HRESULT EkayaInputProcessor::setTextEditSink(ITfDocumentMgr *pDocMgrFocus)
 // ITfThreadMgrEventSink
 STDAPI EkayaInputProcessor::OnInitDocumentMgr(ITfDocumentMgr *pDocMgr)
 {
+	MessageLogger::logMessage("InitDocumentMgr %lx\n", (long)pDocMgr);
 	return S_OK;
 }
 
 STDAPI EkayaInputProcessor::OnUninitDocumentMgr(ITfDocumentMgr *pDocMgr)
 {
+	MessageLogger::logMessage("UninitDocumentMgr %lx\n", (long)pDocMgr);
 	return S_OK;
 }
 
 STDAPI EkayaInputProcessor::OnSetFocus(ITfDocumentMgr *pDocMgrFocus, ITfDocumentMgr *pDocMgrPrevFocus)
 {
-
+	MessageLogger::logMessage("SetFocus %lx\n", (long)pDocMgrFocus);
 	return setTextEditSink(pDocMgrFocus);
 }
 
 STDAPI EkayaInputProcessor::OnPushContext(ITfContext *pContext)		
 {
+	MessageLogger::logMessage("PushContext %lx\n", (long)pContext);
+
 	return S_OK;
 }
 
 STDAPI EkayaInputProcessor::OnPopContext(ITfContext *pContext)
 {
+	MessageLogger::logMessage("PopContext %lx\n", (long)pContext);
 	return S_OK;
 }
 
@@ -319,7 +350,7 @@ STDAPI EkayaInputProcessor::OnEndEdit(ITfContext *pContext, TfEditCookie ecReadO
 	BOOL fSelectionChanged;
     IEnumTfRanges *pEnumTextChanges;
     ITfRange *pRange;
-
+	MessageLogger::logMessage("EndEdit ");
     //
     // did the selection change?
     // The selection change includes the movement of caret as well. 
@@ -353,6 +384,7 @@ STDAPI EkayaInputProcessor::OnEndEdit(ITfContext *pContext, TfEditCookie ecReadO
     // ITfKeyEventSink
 STDAPI EkayaInputProcessor::OnSetFocus(BOOL fForeground)
 {
+	MessageLogger::logMessage("SetFocus %d\n", fForeground);
 	return S_OK;
 }
 
@@ -402,6 +434,11 @@ STDAPI EkayaInputProcessor::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, L
 			hr = pContext->RequestEditSession(mClientId, pEditSession, TF_ES_SYNC | TF_ES_READWRITE, &hr);
 
 			pEditSession->Release();
+		}
+		// ignore ctrl keys
+		else if (mKeyState.at(KEY_CTRL) && (wParam != VK_CONTROL))
+		{
+			*pfEaten = FALSE;
 		}
 		else
 		{
@@ -589,6 +626,11 @@ STDMETHODIMP EkayaInputProcessor::OnTestKeyUp(ITfContext *pContext, WPARAM wPara
 		{
 			*pfEaten = FALSE;
 		}
+		// ignore ctrl keys
+		else if (mKeyState.at(KEY_CTRL) && (wParam != VK_CONTROL))
+		{
+			*pfEaten = FALSE;
+		}
 		else
 		{
 			*pfEaten = TRUE;
@@ -660,11 +702,24 @@ STDAPI EkayaInputProcessor::OnCompositionTerminated(TfEditCookie ecWrite, ITfCom
     // releae our cached composition
     if (mpComposition != NULL)
     {
+		if (mpCompositionRange)
+		{
+			mpCompositionRange->Release();
+			mpCompositionRange = NULL;
+		}
         mpComposition->Release();
         mpComposition = NULL;
     }
 
     return S_OK;
+}
+
+STDAPI EkayaInputProcessor::OnMouseEvent(ULONG uEdge,
+                         ULONG uQuadrant,
+                         DWORD dwBtnStatus,
+                         BOOL *pfEaten)
+{
+	return S_OK;
 }
 
 // CClassFactory factory callback
@@ -691,6 +746,19 @@ HRESULT EkayaInputProcessor::CreateInstance(IUnknown *pUnkOuter, REFIID riid, vo
 		pCase->Release(); // caller still holds ref if hr == S_OK
 	}
     return hr;
+}
+
+STDAPI EkayaInputProcessor::OnLayoutChange(ITfContext *pContext, TfLayoutCode lcode, ITfContextView *pContextView)
+{
+	switch (lcode)
+	{
+	case TF_LC_CHANGE:
+		break;
+	case TF_LC_DESTROY:
+		break;
+	}
+	MessageLogger::logMessage("OnLayoutChange\n");
+	return S_OK;
 }
 
 // utility function for compartment
@@ -778,6 +846,41 @@ const std::wstring EkayaInputProcessor::getMessage(const wchar_t * defaultMessag
 	return std::wstring(defaultMessage);
 }
 
+void EkayaInputProcessor::setComposition(ITfComposition * composition)
+{
+	if (mpComposition != composition)
+	{
+		if (mpComposition)
+			mpComposition->Release();
+		if (mpCompositionRange)
+		{
+			mpCompositionRange->Release();
+			mpCompositionRange = NULL;
+		}
+		mpComposition = composition;
+		if (mpComposition && mpComposition->GetRange(&mpCompositionRange) == S_OK)
+		{
+			
+			// Mouse
+			ITfMouseTracker * pMouseTracker;
+			if (mpThreadMgr->QueryInterface(IID_ITfMouseTracker, (void **)&pMouseTracker) == S_OK)
+			{
+				ITfRange * range = NULL;
+				if (pMouseTracker->AdviseMouseSink(mpCompositionRange, this, &mMouseCookie) != S_OK)
+				{
+					MessageLogger::logMessage("AdviseMouseSink failed\n");
+				}
+				pMouseTracker->Release();
+			}
+		}
+	}
+}
+
+ITfComposition * EkayaInputProcessor::getComposition()
+{
+	if (mpCompositionRange) mpCompositionRange->Release();
+	return mpComposition;
+};
 
 void EkayaInputProcessor::initKeyboards()
 {
