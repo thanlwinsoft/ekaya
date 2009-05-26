@@ -21,6 +21,7 @@
 #define EkayaLangBarButton_h
 
 #include <msctf.h>
+#include <gdiplus.h>
 
 #include "EkayaInputProcessor.h"
 
@@ -59,6 +60,7 @@ private:
 
     EkayaInputProcessor *mpTextService;
     long mRefCount;
+    std::vector<Gdiplus::Bitmap *> mIcons;
 };
 
 #endif

@@ -60,7 +60,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libkmfl.lib"
+				AdditionalDependencies="libkmfl.lib gdiplus.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;C:\Users\keith\projects\ekaya\libkmfl-0.9.8\Debug&quot;"
 				ModuleDefinitionFile="src\ekaya.def"

@@ -32,7 +32,7 @@ public:
 	KmflKeyboard(int kmflId, std::string baseDir);
 	~KmflKeyboard();
 	virtual int processKey(long keyId, std::basic_string<Utf32> & context, size_t contextPos);
-	virtual std::string getIconFileName();
+	virtual std::basic_string<Utf32> getIconFileName();
 
 	virtual std::basic_string<Utf32> getDescription();
 	// KMFL call back methods

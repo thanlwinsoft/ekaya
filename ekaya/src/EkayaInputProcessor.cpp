@@ -40,10 +40,10 @@ static const GUID GUID_PRESERVEDKEY_ONOFF =
 
 
 EkayaInputProcessor::EkayaInputProcessor()
-: mOpen(false), mDisabled(true), mRefCount(1), mActiveKeyboard(-1),
+: mOpen(false), mDisabled(true), mRawCodes(true), mRefCount(1), mActiveKeyboard(-1),
   mClientId(TF_CLIENTID_NULL),
   mThreadEventCookie(TF_INVALID_COOKIE), mEditEventCookie(TF_INVALID_COOKIE),
-  mMouseCookie(TF_INVALID_COOKIE),
+  mMouseCookie(TF_INVALID_COOKIE), mGdiToken(NULL),
   mpThreadMgr(NULL), mpLangBarButton(NULL), 
   mpComposition(NULL), mpCompositionRange(NULL)
 {
@@ -92,6 +92,10 @@ STDAPI EkayaInputProcessor::QueryInterface(REFIID riid, void **ppvObj)
     {
         *ppvObj = (ITfCompositionSink *)this;
     }
+	else if (IsEqualIID(riid, IID_ITfContextOwnerCompositionSink))
+	{
+		*ppvObj = (ITfContextOwnerCompositionSink*)this;
+	}
 	else if (IsEqualIID(riid, IID_ITfMouseSink))
     {
         *ppvObj = (ITfMouseSink *)this;
@@ -143,6 +147,14 @@ STDAPI EkayaInputProcessor::Activate(ITfThreadMgr *pThreadMgr, TfClientId tfClie
 	}
 	else status = E_FAIL;
     pSource->Release();
+
+	// GDIPlus
+	Gdiplus::GdiplusStartupInput gdiInput;
+	Gdiplus::GdiplusStartupOutput gdiOutput;
+	if (	Gdiplus::GdiplusStartup(&mGdiToken, &gdiInput, &gdiOutput) != S_OK)
+	{
+		MessageLogger::logMessage("Failed to start GDIPlus");
+	}
 
 	// Document and Keystroke manager
 	ITfDocumentMgr *pDocMgrFocus;
@@ -201,15 +213,26 @@ STDAPI EkayaInputProcessor::Deactivate()
 {
 
 	ITfSource *pSource;
-	if (mThreadEventCookie != TF_INVALID_COOKIE)
+	
+	if (mpThreadMgr->QueryInterface(IID_ITfSource, (void **)&pSource) == S_OK)
 	{
-		if (mpThreadMgr->QueryInterface(IID_ITfSource, (void **)&pSource) == S_OK)
+		if (mThreadEventCookie != TF_INVALID_COOKIE)
 		{
 			pSource->UnadviseSink(mThreadEventCookie);
-			pSource->Release();
 		}
-	    mThreadEventCookie = TF_INVALID_COOKIE;
+		if (mTextLayoutCookie != TF_INVALID_COOKIE)
+		{
+			pSource->UnadviseSink(mTextLayoutCookie);
+		}
+		if (mContextOwnerCookie != TF_INVALID_COOKIE)
+		{
+			pSource->UnadviseSink(mContextOwnerCookie);	
+		}
+		pSource->Release();
 	}
+    mThreadEventCookie = TF_INVALID_COOKIE;
+	mTextLayoutCookie = TF_INVALID_COOKIE;
+	mContextOwnerCookie = TF_INVALID_COOKIE;
 
 	if (mMouseCookie != TF_INVALID_COOKIE)
 	{
@@ -242,6 +265,9 @@ STDAPI EkayaInputProcessor::Deactivate()
 		mpLangBarButton = NULL;
         pLangBarItemMgr->Release();
     }
+
+	if (mGdiToken) Gdiplus::GdiplusShutdown(mGdiToken);
+	mGdiToken = NULL;
 
     mClientId = TF_CLIENTID_NULL;
 
@@ -299,6 +325,14 @@ HRESULT EkayaInputProcessor::setTextEditSink(ITfDocumentMgr *pDocMgrFocus)
 			else
 			{
 				mTextLayoutCookie = TF_INVALID_COOKIE;
+			}
+			if (pSource->AdviseSink(IID_ITfContextOwnerCompositionSink, (ITfContextOwnerCompositionSink*)this, &mContextOwnerCookie) == S_OK)
+			{
+				fRet = S_OK;
+			}
+			else
+			{
+				mContextOwnerCookie = TF_INVALID_COOKIE;
 			}
 			pSource->Release();
 		}
@@ -362,6 +396,10 @@ STDAPI EkayaInputProcessor::OnEndEdit(ITfContext *pContext, TfEditCookie ecReadO
     {
 		MessageLogger::logMessage("Selection changed\n");
     }
+	else
+	{
+		MessageLogger::logMessage("End edit\n");
+	}
 
     // text modification?
     if (pEditRecord->GetTextAndPropertyUpdates(TF_GTP_INCL_TEXT, NULL, 0, &pEnumTextChanges) == S_OK)
@@ -388,6 +426,30 @@ STDAPI EkayaInputProcessor::OnSetFocus(BOOL fForeground)
 	return S_OK;
 }
 
+
+STDAPI EkayaInputProcessor::OnStartComposition( 
+            /* [in] */ __RPC__in_opt ITfCompositionView *pComposition,
+            /* [out] */ __RPC__out BOOL *pfOk)
+{
+	MessageLogger::logMessage("StartComposition");
+	return S_OK;
+}
+        
+STDAPI EkayaInputProcessor::OnUpdateComposition( 
+            /* [in] */ __RPC__in_opt ITfCompositionView *pComposition,
+            /* [in] */ __RPC__in_opt ITfRange *pRangeNew)
+{
+	MessageLogger::logMessage("UpdateComposition");
+	return S_OK;
+}
+        
+STDAPI EkayaInputProcessor::OnEndComposition( 
+            /* [in] */ __RPC__in_opt ITfCompositionView *pComposition)
+{
+	MessageLogger::logMessage("EndComposition");
+	return S_OK;
+}
+
 /**
 * Test whether the specified key is a special character that should be ignored
 */
@@ -395,7 +457,7 @@ bool EkayaInputProcessor::ignoreKey(WPARAM wParam)
 {
 	if (wParam < 0x30)
 	{
-		if (wParam != VK_SHIFT && wParam != VK_CONTROL && wParam != VK_SPACE)
+		if (wParam != VK_SHIFT && wParam != VK_CONTROL && wParam != VK_SPACE && wParam != VK_ESCAPE)
 			return true;
 		return false;
 	}
@@ -473,6 +535,8 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 		case VK_CONTROL:
 			mKeyState.set(KEY_CTRL);
 			return S_OK;
+		case VK_ESCAPE:
+		//case VK_DELETE:
 		case VK_SPACE:
 			break;
 		default:
@@ -482,127 +546,154 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 		}
 		
 	}
-
-	if (!mKeyState.at(KEY_SHIFT))
+	
+	if (mRawCodes)
 	{
-		if (wParam > 0x40 && wParam < 0x5B)
+		if (!mKeyState.at(KEY_SHIFT))
 		{
-			// allow for lower case
-			wParam += 0x20;
+			if (wParam > 0x40 && wParam < 0x5B)
+			{
+				// allow for lower case
+				wParam += 0x20;
+			}
+			else
+			{
+				switch (wParam)
+				{
+				case VK_OEM_1:// 0xBA ';:' for US
+					wParam = 0x3B;
+					break;
+				case VK_OEM_PLUS: // 0xBB   // '+' any country
+					wParam = 0x3D;
+					break;
+				case VK_OEM_COMMA: // 0xBC   // ',' any country
+					wParam = 0x2C;
+					break;
+				case VK_OEM_MINUS: // 0xBD   // '-' any country
+					wParam = 0x2D;
+					break;
+				case VK_OEM_PERIOD: // 0xBE   // '.' any country
+					wParam = 0x2E;
+					break;
+				case VK_OEM_2: // 0xBF   // '/?' for US
+					wParam = 0x2F;
+					break;
+				case VK_OEM_3: // 0xC0   // '`~' for US
+					wParam = 0x60;
+					break;
+				case VK_OEM_4: // 0xDB  //  '[{' for US
+					wParam = 0x5B;
+					break;
+				case VK_OEM_5: // 0xDC  //  '\|' for US
+					wParam = 0x5C;
+					break;
+				case VK_OEM_6: // 0xDD  //  ']}' for US
+					wParam = 0x5D;
+					break;
+				case VK_OEM_7: // 0xDE  //  ''"' for US
+					wParam = 0x27;
+					break;
+				}
+			}
 		}
 		else
 		{
+			// shifted
 			switch (wParam)
 			{
+			case 0x30:
+				wParam = 0x29;//)
+				break;
+			case 0x31:
+				wParam = 0x21;//!
+				break;
+			case 0x32:
+				wParam = 0x40;//@
+				break;
+			case 0x33:
+				wParam = 0x23;//#
+				break;
+			case 0x34:
+				wParam = 0x24;//$
+				break;
+			case 0x35:
+				wParam = 0x25;//%
+				break;
+			case 0x36:
+				wParam = 0x5E;//^
+				break;
+			case 0x37:
+				wParam = 0x26;//&
+				break;
+			case 0x38:
+				wParam = 0x2A;//*
+				break;
+			case 0x39:
+				wParam = 0x28;//(
+				break;
 			case VK_OEM_1:// 0xBA ';:' for US
-				wParam = 0x3B;
+				wParam = 0x3A;
 				break;
 			case VK_OEM_PLUS: // 0xBB   // '+' any country
-				wParam = 0x3D;
+				wParam = 0x2B;
 				break;
-			case VK_OEM_COMMA: // 0xBC   // ',' any country
-				wParam = 0x2C;
+			case VK_OEM_COMMA: // 0xBC   // ',<' any country
+				wParam = 0x3C;
 				break;
 			case VK_OEM_MINUS: // 0xBD   // '-' any country
-				wParam = 0x2D;
+				wParam = 0x5F;
 				break;
-			case VK_OEM_PERIOD: // 0xBE   // '.' any country
-				wParam = 0x2E;
+			case VK_OEM_PERIOD: // 0xBE   // '.>' any country
+				wParam = 0x3E;
 				break;
 			case VK_OEM_2: // 0xBF   // '/?' for US
-				wParam = 0x2F;
+				wParam = 0x3F;
 				break;
 			case VK_OEM_3: // 0xC0   // '`~' for US
-				wParam = 0x60;
+				wParam = 0x7E;
 				break;
 			case VK_OEM_4: // 0xDB  //  '[{' for US
-				wParam = 0x5B;
+				wParam = 0x7B;
 				break;
 			case VK_OEM_5: // 0xDC  //  '\|' for US
-				wParam = 0x5C;
+				wParam = 0x7C;
 				break;
 			case VK_OEM_6: // 0xDD  //  ']}' for US
-				wParam = 0x5D;
+				wParam = 0x7D;
 				break;
 			case VK_OEM_7: // 0xDE  //  ''"' for US
-				wParam = 0x27;
+				wParam = 0x22;
 				break;
 			}
 		}
+		// we'll insert a char ourselves in place of this keystroke
+		if ((pEditSession = new EkayaEditSession(this, pContext, wParam)) == NULL)
+			return E_FAIL;
 	}
 	else
 	{
-		// shifted
-		switch (wParam)
+		// should we use ToUnicodeEx?
+		BYTE keyState = 0;
+		const int BUFFER_LEN = 4;
+		wchar_t uniBuffer[BUFFER_LEN];
+		// currently doesn't work, perhaps because the keystate is wrong
+		int uCount = ToUnicode(wParam, lParam, &keyState, uniBuffer, BUFFER_LEN, 0);
+		if (uCount <= 0)
 		{
-		case 0x30:
-			wParam = 0x29;
-			break;
-		case 0x31:
-			wParam = 0x21;
-			break;
-		case 0x32:
-			wParam = 0x40;
-			break;
-		case 0x33:
-			wParam = 0x23;
-			break;
-		case 0x34:
-			wParam = 0x24;
-			break;
-		case 0x35:
-			wParam = 0x25;
-			break;
-		case 0x36:
-			wParam = 0x5E;
-			break;
-		case 0x37:
-			wParam = 0x26;
-			break;
-		case 0x38:
-			wParam = 0x2A;
-			break;
-		case 0x39:
-			wParam = 0x28;
-			break;
-		case VK_OEM_1:// 0xBA ';:' for US
-			wParam = 0x3A;
-			break;
-		case VK_OEM_PLUS: // 0xBB   // '+' any country
-			wParam = 0x2B;
-			break;
-		case VK_OEM_COMMA: // 0xBC   // ',<' any country
-			wParam = 0x3C;
-			break;
-		case VK_OEM_MINUS: // 0xBD   // '-' any country
-			wParam = 0x5F;
-			break;
-		case VK_OEM_PERIOD: // 0xBE   // '.>' any country
-			wParam = 0x3E;
-			break;
-		case VK_OEM_2: // 0xBF   // '/?' for US
-			wParam = 0x3F;
-			break;
-		case VK_OEM_3: // 0xC0   // '`~' for US
-			wParam = 0x7E;
-			break;
-		case VK_OEM_4: // 0xDB  //  '[{' for US
-			wParam = 0x7B;
-			break;
-		case VK_OEM_5: // 0xDC  //  '\|' for US
-			wParam = 0x7C;
-			break;
-		case VK_OEM_6: // 0xDD  //  ']}' for US
-			wParam = 0x7D;
-			break;
-		case VK_OEM_7: // 0xDE  //  ''"' for US
-			wParam = 0x22;
-			break;
+			*pfEaten = FALSE;
+			return S_OK;
 		}
+		// TODO handle > 1 character case
+		if ((pEditSession = new EkayaEditSession(this, pContext, uniBuffer[0])) == NULL)
+			return E_FAIL;
 	}
-    // we'll insert a char ourselves in place of this keystroke
-    if ((pEditSession = new EkayaEditSession(this, pContext, wParam)) == NULL)
-		return E_FAIL;
+    
+	ITfContextView * contextView;
+	pContext->GetActiveView(&contextView);
+	HWND hWindow;
+	contextView->GetWnd(&hWindow);
+	contextView->Release();
+	MessageLogger::logMessage("Window:%lx %lx\n", (long)hWindow, (long)GetActiveWindow());
 
     // A lock is required
     // nb: this method is one of the few places where it is legal to use
@@ -858,27 +949,26 @@ void EkayaInputProcessor::setComposition(ITfComposition * composition)
 			mpCompositionRange = NULL;
 		}
 		mpComposition = composition;
-		if (mpComposition && mpComposition->GetRange(&mpCompositionRange) == S_OK)
-		{
-			
-			// Mouse
-			ITfMouseTracker * pMouseTracker;
-			if (mpThreadMgr->QueryInterface(IID_ITfMouseTracker, (void **)&pMouseTracker) == S_OK)
-			{
-				ITfRange * range = NULL;
-				if (pMouseTracker->AdviseMouseSink(mpCompositionRange, this, &mMouseCookie) != S_OK)
-				{
-					MessageLogger::logMessage("AdviseMouseSink failed\n");
-				}
-				pMouseTracker->Release();
-			}
-		}
+		//if (mpComposition && mpComposition->GetRange(&mpCompositionRange) == S_OK)
+		//{
+		//	
+		//	// Mouse
+		//	ITfMouseTracker * pMouseTracker;
+		//	if (mpThreadMgr->QueryInterface(IID_ITfMouseTracker, (void **)&pMouseTracker) == S_OK)
+		//	{
+		//		ITfRange * range = NULL;
+		//		if (pMouseTracker->AdviseMouseSink(mpCompositionRange, this, &mMouseCookie) != S_OK)
+		//		{
+		//			MessageLogger::logMessage("AdviseMouseSink failed\n");
+		//		}
+		//		pMouseTracker->Release();
+		//	}
+		//}
 	}
 }
 
 ITfComposition * EkayaInputProcessor::getComposition()
 {
-	if (mpCompositionRange) mpCompositionRange->Release();
 	return mpComposition;
 };
 

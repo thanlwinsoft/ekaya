@@ -38,7 +38,6 @@ STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 	}
 
 	// Even with compositions we don't seem to be able to be able to shift the end of the selection reliably
-
 	ITfRange *pCompositionRange = NULL;
     TF_SELECTION tfSelection;
     ULONG cFetched = 0;
@@ -60,8 +59,13 @@ STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 			return S_FALSE;
 		}
 		LONG resultStart = 0, resultEnd = 0;
-		if (pCompositionRange->CompareStart(ec, tfSelection.range, TF_ANCHOR_START, &resultStart) == S_OK &&
-			pCompositionRange->CompareEnd(ec, tfSelection.range, TF_ANCHOR_END, &resultEnd) == S_OK)
+		ITfRange * prevRange = NULL;
+		if (mpTextService->getCompositionRange())
+			mpTextService->getCompositionRange()->Restore(ec, prevRange);
+		//if (pCompositionRange->CompareStart(ec, tfSelection.range, TF_ANCHOR_START, &resultStart) == S_OK &&
+		//	pCompositionRange->CompareEnd(ec, tfSelection.range, TF_ANCHOR_END, &resultEnd) == S_OK)
+		if (prevRange == NULL || (pCompositionRange->CompareStart(ec, prevRange, TF_ANCHOR_START, &resultStart) == S_OK &&
+			pCompositionRange->CompareEnd(ec, prevRange, TF_ANCHOR_END, &resultEnd) == S_OK))
 		{
 			MessageLogger::logMessage("Compare range start %d end %d\n", resultStart, resultEnd);
 			if (resultStart > 0 || resultEnd < 0)
@@ -110,7 +114,7 @@ STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 			pInsertAtSelection->Release();
 			return S_FALSE;
 		}
-	
+
 		LONG shift = 0;
 		if ((pContextComposition->StartComposition(ec, pRangeInsert, mpTextService, &pComposition) == S_OK) && (pComposition != NULL))
 		{
@@ -122,6 +126,7 @@ STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 				return S_FALSE;
 			}*/
 			mpTextService->setComposition(pComposition);
+			
 			pRangeInsert->Release();
 		}
 		else
@@ -164,6 +169,49 @@ STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 	// convert context back to UTF16
 	std::wstring convertedContext = UtfConversion::convertUtf32ToUtf16(context);
 
+	// temp hack
+	if (oldContextPos >= keyResult)
+	{
+		ITfDocumentMgr * docMgr;
+		mpContext->GetDocumentMgr(&docMgr);
+		ITfContext *baseContext;
+		docMgr->GetBase(&baseContext);
+		ITfContextView * contextView;
+		mpContext->GetActiveView(&contextView);
+		HWND hWindow;
+		contextView->GetWnd(&hWindow);
+
+		MSG msg;
+		msg.hwnd = hWindow;
+		msg.lParam = 0;
+		msg.wParam = VK_DELETE;
+		msg.time = 0;
+		msg.pt.x = 0;
+		msg.pt.y = 0;
+		msg.message = WM_KEYDOWN;
+		//DispatchMessageW(&msg);
+
+		INPUT delInput;
+		delInput.type = INPUT_KEYBOARD;
+		delInput.ki.wVk = VK_BACK;
+		delInput.ki.wScan = 0;
+		delInput.ki.dwExtraInfo = 0;
+		delInput.ki.dwFlags = 0;
+		delInput.ki.time = 0;
+		// SentInput really works
+		// SendInput(1, &delInput, sizeof(INPUT));
+
+		ITfRange * docStart;
+		ITfRange * docEnd;
+		baseContext->GetStart(ec, &docStart);
+		baseContext->GetEnd(ec, &docEnd);
+		LONG startDelta, endDelta;
+		pCompositionRange->CompareStart(ec, docStart, TF_ANCHOR_START, &startDelta);
+		pCompositionRange->CompareEnd(ec, docStart, TF_ANCHOR_END, &endDelta);
+		MessageLogger::logMessage("Compare start %d end %d\n", (int)startDelta, (int)endDelta);
+
+		
+	}
 	//tfSelection.range->ShiftStart
     // insert the text
     // use SetText here instead of InsertTextAtSelection because a composition has already been started
@@ -183,6 +231,11 @@ STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 		pComposition->EndComposition(ec);
 		mpTextService->setComposition(NULL);// includes Release
 		pComposition = NULL;
+	}
+	ITfRangeBackup * pRangeClone = NULL;
+	if (mpContext->CreateRangeBackup(ec, pCompositionRange, &pRangeClone) == S_OK)
+	{
+		mpTextService->setCompositionRange(pRangeClone);
 	}
 	// end the composition now or later?
 	//pComposition->EndComposition(ec);

@@ -68,6 +68,15 @@ EkayaLangBarButton::~EkayaLangBarButton()
 	    mpTextService->Release();
 		mpTextService = NULL;
 	}
+	if (mIcons.size())
+	{
+		std::vector<Gdiplus::Bitmap *>::iterator i = mIcons.begin();
+		while (i != mIcons.end())
+		{
+			delete *i;
+			++i;
+		}
+	}
 }
 
 //+---------------------------------------------------------------------------
@@ -227,6 +236,7 @@ STDAPI EkayaLangBarButton::InitMenu(ITfMenu *pMenu)
                        (ULONG)desc.length(), 
                        NULL);
 
+    bool loadIcons = (mIcons.size())? false : true;
 	for (size_t i = 0; i < mpTextService->getKeyboards().size(); i++)
 	{
 		dwFlags = 0;
@@ -239,9 +249,55 @@ STDAPI EkayaLangBarButton::InitMenu(ITfMenu *pMenu)
 		{
 			dwFlags |= TF_LBMENUF_CHECKED;
 		}
+		// try to load an icon
+        HBITMAP hIcon = NULL;
+		if (loadIcons)
+		{
+		    std::basic_string<Utf32> iconFileName = mpTextService->getKeyboards()[i]->getIconFileName();
+		    if (iconFileName.length() > 0)
+		    {
+		        std::wstring wName = UtfConversion::convertUtf32ToUtf16(iconFileName);
+				FILE * test = NULL;
+				fopen_s(&test, UtfConversion::convertUtf32ToUtf8(iconFileName).c_str(), "r");
+				bool exists = false;
+				if (test) 
+				{
+					fclose(test);
+					MessageLogger::logMessage("Icon exists");
+					exists = true;
+				}
+				//Gdiplus::Image * image = new Gdiplus::Image(L"myWin.bmp");
+				Gdiplus::Bitmap * bm = Gdiplus::Bitmap::FromFile(wName.c_str(), TRUE);//new Gdiplus::Bitmap(wName.c_str(), FALSE);//Gdiplus::Bitmap::FromFile(wName.c_str(), FALSE);
+		        if (bm)
+		        {
+		            if (bm->GetHBITMAP(Gdiplus::Color::Transparent, &hIcon) != S_OK)
+		            {
+		                hIcon = NULL;
+		            }
+		            // is it safe to delete the bitmap now?
+		            //delete bm;
+					mIcons.push_back(bm);
+		        }
+				else
+				{
+					mIcons.push_back(NULL);
+				}
+		    }
+			else mIcons.push_back(NULL);
+		    //mIcons.push_back(hIcon);
+		}
+		else
+		{
+			Gdiplus::Bitmap * bm = mIcons[i];
+			if (!bm || bm->GetHBITMAP(Gdiplus::Color::Transparent, &hIcon) != S_OK)
+            {
+                hIcon = NULL;
+            }
+		}
+		// add the menu item
 		pMenu->AddMenuItem((UINT)(i+1),
                        dwFlags, 
-                       NULL, 
+                       hIcon, 
                        NULL, 
 					   keyboardDesc16.c_str(), 
 					   (ULONG)keyboardDesc16.length(),
@@ -289,7 +345,17 @@ STDAPI EkayaLangBarButton::OnMenuSelect(UINT wID)
 
 STDAPI EkayaLangBarButton::GetIcon(HICON *phIcon)
 {
-    *phIcon = (HICON)LoadImage(g_hInst, TEXT("IDI_TEXTSERVICE"), IMAGE_ICON, 16, 16, 0);
+    *phIcon = NULL;
+    if (mpTextService && mpTextService->getActiveKeyboard() > -1 && mIcons.size() > 0)
+    {
+		if (mIcons[mpTextService->getActiveKeyboard()]->GetHICON(phIcon) != S_OK)
+			*phIcon = NULL;
+    }
+    // use default icon
+    if (*phIcon == NULL)
+    {
+        *phIcon = (HICON)LoadImage(g_hInst, TEXT("IDI_TEXTSERVICE"), IMAGE_ICON, 16, 16, 0);
+    }
 	// TODO get icon from keyboard
 
     return (*phIcon != NULL) ? S_OK : E_FAIL;

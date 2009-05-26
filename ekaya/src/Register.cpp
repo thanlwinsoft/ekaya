@@ -108,7 +108,7 @@ BOOL RegisterCategories()
         return FALSE;
 
     hr = pCategoryMgr->RegisterCategory(CLSID_EKAYA_SERVICE,
-                                        GUID_TFCAT_TIP_KEYBOARD, 
+                                        GUID_TFCAT_TIP_KEYBOARD,
                                         CLSID_EKAYA_SERVICE);
 
     pCategoryMgr->Release();

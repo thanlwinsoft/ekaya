@@ -81,6 +81,16 @@ public:
                          ULONG uQuadrant,
                          DWORD dwBtnStatus,
                          BOOL *pfEaten);
+	virtual HRESULT STDMETHODCALLTYPE OnStartComposition( 
+            /* [in] */ __RPC__in_opt ITfCompositionView *pComposition,
+            /* [out] */ __RPC__out BOOL *pfOk);
+        
+    virtual HRESULT STDMETHODCALLTYPE OnUpdateComposition( 
+            /* [in] */ __RPC__in_opt ITfCompositionView *pComposition,
+            /* [in] */ __RPC__in_opt ITfRange *pRangeNew);
+        
+    virtual HRESULT STDMETHODCALLTYPE OnEndComposition( 
+            /* [in] */ __RPC__in_opt ITfCompositionView *pComposition);
     // factory callback
     static HRESULT CreateInstance(IUnknown *pUnkOuter, REFIID riid, void **ppvObj);
 
@@ -97,8 +107,10 @@ public:
 
 	void setComposition(ITfComposition * composition);
 	ITfComposition * getComposition();
-
-	
+	void setCompositionRange(ITfRangeBackup * range) 
+	{ if (mpCompositionRange) mpCompositionRange->Release(); mpCompositionRange = range; };
+	ITfRangeBackup * getCompositionRange(void) { return mpCompositionRange; }
+	ITfThreadMgr * getThreadManager() { return mpThreadMgr; };
 	
 private:
 	HRESULT setTextEditSink(ITfDocumentMgr *pDocMgrFocus);
@@ -106,6 +118,7 @@ private:
 	void initKeyboards();
 	bool mOpen;
 	bool mDisabled;
+	bool mRawCodes;
 	long mRefCount;
 	int mActiveKeyboard;
 	std::bitset<4> mKeyState;
@@ -114,6 +127,8 @@ private:
 	DWORD mEditEventCookie;
 	DWORD mMouseCookie;
 	DWORD mTextLayoutCookie;
+	DWORD mContextOwnerCookie;
+	ULONG_PTR mGdiToken;
 	ITfThreadMgr * mpThreadMgr;
 	ITfContext * mpTextEditSinkContext;
 	EkayaLangBarButton * mpLangBarButton;
@@ -121,7 +136,7 @@ private:
 	std::vector <EkayaKeyboard*> mKeyboards;
 	std::wstring mContext;
 	ITfComposition * mpComposition;
-	ITfRange * mpCompositionRange;
+	ITfRangeBackup * mpCompositionRange;
 };
 
 #endif

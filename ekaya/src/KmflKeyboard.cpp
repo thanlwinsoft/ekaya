@@ -21,6 +21,7 @@
 #include <kmfl/kmfl_register_callbacks.h>
 #include <kmfl/kmflutfconv.h>
 
+#include "UtfConversion.h"
 #include "KmflKeyboard.h"
 #include "MessageLogger.h"
 
@@ -126,9 +127,9 @@ std::basic_string<Utf32> KmflKeyboard::getDescription()
 	return desc;
 }
 
-std::string KmflKeyboard::getIconFileName()
+std::basic_string<UTF32> KmflKeyboard::getIconFileName()
 {
-	return std::string(mBaseDir + kmfl_icon_file(mKmflId));
+	return UtfConversion::convertUtf8ToUtf32(std::string(mBaseDir + kmfl_icon_file(mKmflId)));
 }
 
 void KmflKeyboard::outputString(char *p)

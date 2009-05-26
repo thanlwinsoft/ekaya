@@ -88,3 +88,37 @@ std::string UtfConversion::convertUtf32ToUtf8(std::basic_string<UTF32> utf32)
 	return std::string("");
 }
 
+std::wstring UtfConversion::convertUtf8ToUtf16(std::string utf8)
+{
+	const UTF8 * input = reinterpret_cast<const UTF8*>(utf8.c_str());
+	size_t maxBuffer = utf8.length();
+	UTF16 * output = new UTF16[maxBuffer];
+	UTF16 * pBuffer = output;
+	size_t status = IConvertUTF8toUTF16(&input, input + utf8.length(), &pBuffer, pBuffer + maxBuffer);
+	if (!status)
+	{
+		std::wstring data(reinterpret_cast<const wchar_t*>(output), pBuffer - output);
+		delete [] output;
+		return data;
+	}
+    delete [] output;
+	return std::wstring();
+}
+
+std::string UtfConversion::convertUtf16ToUtf8(std::wstring utf16)
+{
+	const UTF16 * input =  reinterpret_cast<const UTF16*>(utf16.c_str());
+	size_t maxBuffer = utf16.length()*3;
+	char * output = new char[maxBuffer];
+	UTF8 * pBuffer = reinterpret_cast<UTF8*>(output);
+	size_t status = IConvertUTF16toUTF8(&input, input + utf16.length(), &pBuffer, pBuffer + maxBuffer);
+	if (!status)
+	{
+		std::string data(output, reinterpret_cast<char *>(pBuffer) - output);
+		delete [] output;
+		return data;
+	}
+	delete [] output;
+	return std::string("");
+}
+
