@@ -6,7 +6,7 @@
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
  *
- * The KMFL library is distributed in the hope that it will be useful,
+ * The Ekaya library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -29,11 +29,11 @@ enum { KMFL_MAX_CONTEXT = 32 };
 class KmflKeyboard : public EkayaKeyboard
 {
 public:
-	KmflKeyboard(int kmflId, std::string baseDir);
+	KmflKeyboard(int kmflId, std::string baseDir, std::string filename);
 	~KmflKeyboard();
 	virtual std::pair<size_t, size_t> processKey(long keyId, std::basic_string<Utf32> & context, size_t contextPos);
 	virtual std::basic_string<Utf32> getIconFileName();
-
+	virtual std::basic_string<Utf32> getHelpFileName();
 	virtual std::basic_string<Utf32> getDescription();
 	// KMFL call back methods
 	void outputString(char *p);
@@ -48,6 +48,7 @@ private:
 	size_t mContextPosition;
 	static std::basic_string<Utf32> sDummy;
 	std::string mBaseDir;
+	std::string mFilename;
 };
 
 

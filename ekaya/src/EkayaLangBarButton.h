@@ -55,12 +55,14 @@ public:
     STDMETHODIMP UnadviseSink(DWORD dwCookie);
 
 private:
+	enum { HELP_BASE_ID = 100 };
     ITfLangBarItemSink * mpLangBarItemSink;
     TF_LANGBARITEMINFO mtfLangBarItemInfo;
 
     EkayaInputProcessor *mpTextService;
     long mRefCount;
     std::vector<Gdiplus::Bitmap *> mIcons;
+	std::vector<std::wstring> mHelpHtml;
 };
 
 #endif

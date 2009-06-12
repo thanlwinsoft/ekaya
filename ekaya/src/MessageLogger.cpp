@@ -6,7 +6,7 @@
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
  *
- * The KMFL library is distributed in the hope that it will be useful,
+ * The Ekaya library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -22,7 +22,7 @@
 
 void MessageLogger::logMessage(const char * msg)
 {
-	OutputDebugString(msg);
+	OutputDebugStringA(msg);
 }
 
 void MessageLogger::logMessage(const wchar_t * msg)
@@ -34,26 +34,26 @@ void MessageLogger::logMessage(const char * msg, int param)
 {
 	char msgText[256];
 	sprintf_s(msgText, msg, param);
-	OutputDebugString(msgText);
+	OutputDebugStringA(msgText);
 }
 
 void MessageLogger::logMessage(const char * msg, int paramA, int paramB)
 {
 	char msgText[256];
 	sprintf_s(msgText, msg, paramA, paramB);
-	OutputDebugString(msgText);
+	OutputDebugStringA(msgText);
 }
 
 void MessageLogger::logMessage(const char * msg, int paramA, int paramB, int paramC)
 {
 	char msgText[256];
 	sprintf_s(msgText, msg, paramA, paramB, paramC);
-	OutputDebugString(msgText);
+	OutputDebugStringA(msgText);
 }
 
 void MessageLogger::logMessage(const char * msg, long param)
 {
 	char msgText[256];
 	sprintf_s(msgText, msg, param);
-	OutputDebugString(msgText);
+	OutputDebugStringA(msgText);
 }

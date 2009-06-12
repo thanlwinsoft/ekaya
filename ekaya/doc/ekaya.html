@@ -1,0 +1,38 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Ekaya Input Method</title>
+  <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+  <style type="text/css">
+  body { width: 500px !important; margin-left: 10%; margin-right: 10%; text-align: justify; }
+  </style>
+</head>
+<body>
+<h1><img src="../ekaya.ico" alt=""/> Ekaya Input Method</h1>
+<p>Ekaya Input Method currently supports Keyboard layouts written for Tavultesoft Keyman using the KMFL library. 
+This means that the keyboard can do context specific reordering as you type to make sure that the data is stored in the correct order.
+</p>
+<h2>Configuration</h2>
+<p>Ekaya uses Windows Advanced Text Services. 
+This can be configured in <em>Control Panel / Regional and Language Options</em> on the <em>Keyboards and Languages</em> tab. 
+Click <em>Change Keyboards</em> to open the dialog.
+Ekaya is configured to use the English-US locale, so you should find an <em>Ekaya Input Method</em> entry under English US on the <em>General</em> tab.
+On the <em>Advanced Key Settings</em> tab you can configure Shortcut keys for Ekaya.
+</p>
+<h2>Using Ekaya</h2>
+<img style="float:right; margin-left: 5px;" src="langbar.png" />
+<p>When Ekaya is installed you can switch to using it from the keyboard icon either on the Task Bar or the Language Bar.
+Click on the keyboard icon and select <em>Ekaya Input Method</em> from the menu.
+
+<img style="float:right; margin-left: 5px;" src="langbarEkaya.png" />
+There may be several KMFL keyboards installed, so you can switch between them on the Ekaya menu.
+Ctrl+Space toggles the Ekaya and normal keyboards.
+</p>
+<h2>Installing Keyboards</h2>
+<p>Keyboards need to be written in Keyman/KMFL format with the <tt>.kmn</tt> file extension. Copy the <tt>kmn</tt> file into either
+<tt>C:\Program Files\ThanLwinSoft.org\Ekaya\kmfl</tt> along with any bitmaps it references. 
+If you have documentation in HTML format, copy it into the same directory with the same filename as the <tt>kmn</tt> file, but with the <tt>.html</tt> extension.
+If you don't have administrator access, you can also install keyboards under <tt>AppData\Roaming\ThanLwinSoft.org\Ekaya\kmfl</tt> in your home directory (<tt>Application Data\ThanLwinSoft.org\Ekaya\kmfl</tt> on Windows XP).
+</p>
+</body>
+</html>

@@ -32,6 +32,7 @@ public:
 
 	virtual std::basic_string<Utf32> getDescription() = 0;
 	virtual std::basic_string<Utf32> getIconFileName() = 0;
+	virtual std::basic_string<Utf32> getHelpFileName() = 0;
 };
 
 #endif

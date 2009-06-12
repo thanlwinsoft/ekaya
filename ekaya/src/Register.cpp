@@ -185,19 +185,19 @@ BOOL CLSIDToStringA(REFGUID refGUID, char *pchA)
 // RecurseDeleteKey is necessary because on NT RegDeleteKey doesn't work if the
 // specified key has subkeys
 //----------------------------------------------------------------------------
-LONG RecurseDeleteKey(HKEY hParentKey, LPCTSTR lpszKey)
+LONG RecurseDeleteKey(HKEY hParentKey, char * lpszKey)
 {
     HKEY hKey;
     LONG lRes;
     FILETIME time;
-    TCHAR szBuffer[256];
+    char szBuffer[256];
     DWORD dwSize = ARRAYSIZE(szBuffer);
 
-    if (RegOpenKey(hParentKey, lpszKey, &hKey) != ERROR_SUCCESS)
+    if (RegOpenKeyA(hParentKey, lpszKey, &hKey) != ERROR_SUCCESS)
         return ERROR_SUCCESS; // let's assume we couldn't open it because it's not there
 
     lRes = ERROR_SUCCESS;
-    while (RegEnumKeyEx(hKey, 0, szBuffer, &dwSize, NULL, NULL, NULL, &time)==ERROR_SUCCESS)
+    while (RegEnumKeyExA(hKey, 0, szBuffer, &dwSize, NULL, NULL, NULL, &time)==ERROR_SUCCESS)
     {
         szBuffer[ARRAYSIZE(szBuffer)-1] = '\0';
         lRes = RecurseDeleteKey(hKey, szBuffer);
@@ -207,7 +207,7 @@ LONG RecurseDeleteKey(HKEY hParentKey, LPCTSTR lpszKey)
     }
     RegCloseKey(hKey);
 
-    return lRes == ERROR_SUCCESS ? RegDeleteKey(hParentKey, lpszKey) : lRes;
+    return lRes == ERROR_SUCCESS ? RegDeleteKeyA(hParentKey, lpszKey) : lRes;
 }
 
 //+---------------------------------------------------------------------------
@@ -222,17 +222,17 @@ BOOL RegisterServer()
     HKEY hKey;
     HKEY hSubKey;
     BOOL fRet;
-    TCHAR achIMEKey[ARRAYSIZE(c_szInfoKeyPrefix) + CLSID_STRLEN];
-    TCHAR achFileName[MAX_PATH];
+    char achIMEKey[ARRAYSIZE(c_szInfoKeyPrefix) + CLSID_STRLEN];
+    char achFileName[MAX_PATH];
 
     if (!CLSIDToStringA(CLSID_EKAYA_SERVICE, achIMEKey + ARRAYSIZE(c_szInfoKeyPrefix) - 1))
         return FALSE;
-    memcpy(achIMEKey, c_szInfoKeyPrefix, sizeof(c_szInfoKeyPrefix)-sizeof(TCHAR));
+    memcpy(achIMEKey, c_szInfoKeyPrefix, sizeof(c_szInfoKeyPrefix)-sizeof(char));
 
-    if (fRet = RegCreateKeyEx(HKEY_CLASSES_ROOT, achIMEKey, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, &dw)
+    if (fRet = RegCreateKeyExA(HKEY_CLASSES_ROOT, achIMEKey, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, &dw)
             == ERROR_SUCCESS)
     {
-        fRet &= RegSetValueEx(hKey, NULL, 0, REG_SZ, (BYTE *)TEXTSERVICE_DESC_A, (lstrlen(TEXTSERVICE_DESC_A)+1)*sizeof(TCHAR))
+        fRet &= RegSetValueExA(hKey, NULL, 0, REG_SZ, (BYTE *)TEXTSERVICE_DESC_A, (strlen(TEXTSERVICE_DESC_A)+1)*sizeof(char))
             == ERROR_SUCCESS;
 
         if (fRet &= RegCreateKeyEx(hKey, c_szInProcSvr32, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hSubKey, &dw)
@@ -240,8 +240,8 @@ BOOL RegisterServer()
         {
             dw = GetModuleFileNameA(g_hInst, achFileName, ARRAYSIZE(achFileName));
 
-            fRet &= RegSetValueEx(hSubKey, NULL, 0, REG_SZ, (BYTE *)achFileName, (lstrlen(achFileName)+1)*sizeof(TCHAR)) == ERROR_SUCCESS;
-            fRet &= RegSetValueEx(hSubKey, c_szModelName, 0, REG_SZ, (BYTE *)TEXTSERVICE_MODEL, (lstrlen(TEXTSERVICE_MODEL)+1)*sizeof(TCHAR)) == ERROR_SUCCESS;
+            fRet &= RegSetValueEx(hSubKey, NULL, 0, REG_SZ, (BYTE *)achFileName, (strlen(achFileName)+1)*sizeof(TCHAR)) == ERROR_SUCCESS;
+            fRet &= RegSetValueEx(hSubKey, c_szModelName, 0, REG_SZ, (BYTE *)TEXTSERVICE_MODEL, (strlen(TEXTSERVICE_MODEL)+1)*sizeof(char)) == ERROR_SUCCESS;
             RegCloseKey(hSubKey);
         }
         RegCloseKey(hKey);
@@ -258,11 +258,11 @@ BOOL RegisterServer()
 
 void UnregisterServer()
 {
-    TCHAR achIMEKey[ARRAYSIZE(c_szInfoKeyPrefix) + CLSID_STRLEN];
+    char achIMEKey[ARRAYSIZE(c_szInfoKeyPrefix) + CLSID_STRLEN];
 
     if (!CLSIDToStringA(CLSID_EKAYA_SERVICE, achIMEKey + ARRAYSIZE(c_szInfoKeyPrefix) - 1))
         return;
-    memcpy(achIMEKey, c_szInfoKeyPrefix, sizeof(c_szInfoKeyPrefix)-sizeof(TCHAR));
+    memcpy(achIMEKey, c_szInfoKeyPrefix, sizeof(c_szInfoKeyPrefix)-sizeof(char));
 
     RecurseDeleteKey(HKEY_CLASSES_ROOT, achIMEKey);
 }

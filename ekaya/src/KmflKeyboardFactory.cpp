@@ -53,7 +53,7 @@ KmflKeyboardFactory::loadKeyboards()
 		return keyboards;
 	}
 	HANDLE hFind = INVALID_HANDLE_VALUE;
-	WIN32_FIND_DATA ffd;
+	WIN32_FIND_DATAA ffd;
 
 	// read files in user's APPDATA dir
 	hFind = FindFirstFileA(pattern.c_str(), &ffd);
@@ -62,9 +62,9 @@ KmflKeyboardFactory::loadKeyboards()
 		int kmflId = kmfl_load_keyboard((basePath + ffd.cFileName).c_str());
 		if (kmflId > -1)
 		{
-			keyboards.push_back(new KmflKeyboard(kmflId, basePath));
+			keyboards.push_back(new KmflKeyboard(kmflId, basePath, ffd.cFileName));
 		}
-		if (FindNextFile(hFind, &ffd) == 0) break;
+		if (FindNextFileA(hFind, &ffd) == 0) break;
 	}
 	delete [] appDir;
 	// read files under Program Files
@@ -81,9 +81,9 @@ KmflKeyboardFactory::loadKeyboards()
 		int kmflId = kmfl_load_keyboard((basePath + ffd.cFileName).c_str());
 		if (kmflId > -1)
 		{
-			keyboards.push_back(new KmflKeyboard(kmflId, basePath));
+			keyboards.push_back(new KmflKeyboard(kmflId, basePath, ffd.cFileName));
 		}
-		if (FindNextFile(hFind, &ffd) == 0) break;
+		if (FindNextFileA(hFind, &ffd) == 0) break;
 	}
 	delete [] appDir;
 	return keyboards;

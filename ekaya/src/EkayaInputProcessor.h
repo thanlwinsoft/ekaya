@@ -6,7 +6,7 @@
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
  *
- * The KMFL library is distributed in the hope that it will be useful,
+ * The Ekaya library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -107,7 +107,7 @@ public:
     HRESULT setKeyboardOpen(bool fOpen);
 	void setActiveKeyboard(int keyboardIndex);
 	int getActiveKeyboard() { return mActiveKeyboard; }
-	const std::wstring getMessage(const wchar_t * defaultMessage);
+	const std::wstring getMessage(UINT uid, const wchar_t * defaultMessage);
 	const std::vector <EkayaKeyboard*> & getKeyboards() { return mKeyboards; }
 
 	void setComposition(ITfComposition * composition);
@@ -126,6 +126,10 @@ public:
 		mPendingData = data;
 		mPendingDelete = pendingDelete;
 	}
+	ITfContext * getTextEditSinkContext() { return mpTextEditSinkContext; }
+
+	static const std::string EKAYA_DIR;
+
 private:
 	HRESULT setTextEditSink(ITfDocumentMgr *pDocMgrFocus);
 	bool ignoreKey(WPARAM code);
@@ -153,6 +157,7 @@ private:
 	int mPendingDelete;
 	ITfComposition * mpComposition;
 	ITfRangeBackup * mpCompositionRange;
+
 };
 
 #endif

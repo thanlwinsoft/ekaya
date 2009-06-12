@@ -1,2 +1,16 @@
 
+#include "resource.h"
+
 IDI_TEXTSERVICE ICON ekaya.ico
+IDI_EKAYA_HELP ICON help.ico
+
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_APPTITLE "Ekaya Input Method"
+	IDS_APPDESC	"Ekaya Input Method"
+	IDS_KEYBOARDS "Keyboards"
+	IDS_KEYBOARDS_DESC "Choose a keyboard for your language"
+	IDS_HELP "Help"
+	IDS_EKAYA_HELP "About Ekaya"
+END

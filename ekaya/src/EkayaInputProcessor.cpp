@@ -6,7 +6,7 @@
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
  *
- * The KMFL library is distributed in the hope that it will be useful,
+ * The Ekaya library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
@@ -29,6 +29,7 @@
 #include "EkayaInputProcessor.h"
 #include "KmflKeyboardFactory.h"
 #include "MessageLogger.h"
+#include "resource.h"
 
 static const TF_PRESERVEDKEY KEY_ONOFF = { 0x20, TF_MOD_CONTROL };
 
@@ -38,12 +39,15 @@ static const WCHAR ONOFF_DESC[]    = L"OnOff";
 static const GUID GUID_PRESERVEDKEY_ONOFF = 
 { 0x7963550c, 0x192e, 0x41e0, { 0xa7, 0xb0, 0x89, 0x88, 0x81, 0x89, 0x9f, 0x1f } };
 
+const std::string EkayaInputProcessor::EKAYA_DIR = "\\ThanLwinSoft.org\\Ekaya";
 
 EkayaInputProcessor::EkayaInputProcessor()
-: mOpen(false), mDisabled(true), mRawCodes(true), mRefCount(1), mActiveKeyboard(-1),
+: mOpen(true), mDisabled(true), mRawCodes(true), mRefCount(1), mActiveKeyboard(-1),
   mClientId(TF_CLIENTID_NULL),
   mThreadEventCookie(TF_INVALID_COOKIE), mEditEventCookie(TF_INVALID_COOKIE),
-  mMouseCookie(TF_INVALID_COOKIE), mGdiToken(NULL),
+  mMouseCookie(TF_INVALID_COOKIE), mTextLayoutCookie(TF_INVALID_COOKIE),
+  mContextOwnerCookie(TF_INVALID_COOKIE),
+  mGdiToken(NULL),
   mpThreadMgr(NULL), mpLangBarButton(NULL), 
   mpComposition(NULL), mpCompositionRange(NULL)
 {
@@ -199,7 +203,7 @@ STDAPI EkayaInputProcessor::Activate(ITfThreadMgr *pThreadMgr, TfClientId tfClie
 	{
 	    if ((mpLangBarButton = new EkayaLangBarButton(this)) != NULL)
 		{
-		    if (pLangBarItemMgr->AddItem(mpLangBarButton) != S_OK)
+			if (pLangBarItemMgr->AddItem(mpLangBarButton) != S_OK)
 			{
 				mpLangBarButton->Release();
 				mpLangBarButton = NULL;
@@ -215,6 +219,7 @@ STDAPI EkayaInputProcessor::Activate(ITfThreadMgr *pThreadMgr, TfClientId tfClie
 	{
 		Deactivate(); // cleanup any half-finished init
 	}
+	mOpen = true;
     return status;
 }
 
@@ -416,10 +421,8 @@ STDAPI EkayaInputProcessor::OnEndEdit(ITfContext *pContext, TfEditCookie ecReadO
     {
         if (pEnumTextChanges->Next(1, &pRange, NULL) == S_OK)
         {
-            //
             // pRange is the updated range.
-            //
-
+			MessageLogger::logMessage("Range changed\n");
             pRange->Release();
         }
 
@@ -486,7 +489,7 @@ STDAPI EkayaInputProcessor::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, L
 {
 	MessageLogger::logMessage("OnTestKeyDown %x %x\n", (int)wParam, (int)lParam);
 	HRESULT hr = S_OK;
-	if (isKeyboardOpen() && !isKeyboardDisabled())
+	if (!isKeyboardOpen() || isKeyboardDisabled())
 	{
 		*pfEaten = FALSE;
 		MessageLogger::logMessage("keyboard disabled\n");
@@ -496,14 +499,6 @@ STDAPI EkayaInputProcessor::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, L
 		if (ignoreKey(wParam)) 
 		{
 			*pfEaten = FALSE;
-			// exit the context otherwise we get strange effects
-			//EkayaEndContextSession * pEditSession = NULL;
-			//if ((pEditSession = new EkayaEndContextSession(this, pContext, wParam)) == NULL)
-			//	return E_FAIL;
-
-			// A lock is required
-			// nb: this method is one of the few places where it is legal to use
-			// the TF_ES_SYNC flag
 		}
 		// ignore ctrl keys
 		else if (mKeyState.at(KEY_CTRL) && (wParam != VK_CONTROL))
@@ -525,9 +520,6 @@ STDAPI EkayaInputProcessor::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, L
 			{
 				// Request append
 				MessageLogger::logMessage("Pending Delete finished\n");
-				//EkayaEditSession * pEditSession = new EkayaEditSession(this, pContext, mPendingData);
-				//hr = pContext->RequestEditSession(mClientId, pEditSession, TF_ES_ASYNC | TF_ES_READWRITE, &hr);
-				//pEditSession->Release();
 				mPendingDelete = 0;
 			}
 		}
@@ -543,7 +535,7 @@ STDAPI EkayaInputProcessor::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, L
 
 STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pfEaten)
 {
-	if (isKeyboardOpen() && !isKeyboardDisabled())
+	if (!isKeyboardOpen() || isKeyboardDisabled())
 	{
 		*pfEaten = FALSE;
 	}
@@ -552,7 +544,7 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 		*pfEaten = TRUE;
 	}
 
-	EkayaEditSession *pEditSession;
+	EkayaEditSession *pEditSession = NULL;
     HRESULT hr = E_FAIL;
 	MessageLogger::logMessage("OnKeyDown %x %x\n", (int)wParam, (int)lParam);
 	// check for control keys
@@ -567,7 +559,6 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 			mKeyState.set(KEY_CTRL);
 			return S_OK;
 		case VK_ESCAPE:
-		//case VK_DELETE:
 		case VK_SPACE:
 			break;
 		case VK_BACK:
@@ -580,7 +571,7 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 		}
 		
 	}
-	
+
 	if (mRawCodes)
 	{
 		if (!mKeyState.at(KEY_SHIFT))
@@ -759,9 +750,7 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 	contextView->Release();
 	MessageLogger::logMessage("Window:%lx %lx\n", (long)hWindow, (long)GetActiveWindow());
 
-    // A lock is required
-    // nb: this method is one of the few places where it is legal to use
-    // the TF_ES_SYNC flag
+    // A lock is required, we want it to be synchronous so we know the exact order
     hr = pContext->RequestEditSession(mClientId, pEditSession, TF_ES_SYNC | TF_ES_READWRITE, &hr);
 
     pEditSession->Release();
@@ -771,7 +760,7 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 STDMETHODIMP EkayaInputProcessor::OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pfEaten)
 {
 	MessageLogger::logMessage("OnTestKeyUp %x %x\n", (int)wParam, (int)lParam);
-	if (isKeyboardOpen() && !isKeyboardDisabled())
+	if (!isKeyboardOpen() || isKeyboardDisabled())
 	{
 		*pfEaten = FALSE;
 	}
@@ -803,10 +792,10 @@ STDMETHODIMP EkayaInputProcessor::OnKeyUp(ITfContext *pContext, WPARAM wParam, L
 		switch (wParam)
 		{
 		case VK_SHIFT:
-			mKeyState.flip(KEY_SHIFT);
+			mKeyState.set(KEY_SHIFT, false);
 			break;
 		case VK_CONTROL:
-			mKeyState.flip(KEY_CTRL);
+			mKeyState.set(KEY_CTRL, false);
 			break;
 		case VK_SPACE:
 			break;
@@ -816,7 +805,7 @@ STDMETHODIMP EkayaInputProcessor::OnKeyUp(ITfContext *pContext, WPARAM wParam, L
 		}
 		
 	}
-	if (isKeyboardOpen() && !isKeyboardDisabled())
+	if (!isKeyboardOpen() || isKeyboardDisabled())
 	{
 		*pfEaten = FALSE;
 	}
@@ -992,13 +981,34 @@ bool EkayaInputProcessor::isKeyboardOpen()
 HRESULT EkayaInputProcessor::setKeyboardOpen(bool fOpen)
 {
 	mOpen = fOpen;
+	mKeyState.set(KEY_SHIFT, false);
+	mKeyState.set(KEY_CTRL, false);
+	// remove any old context, since it is likely to be invalid
+	mContext = L"";
+	mPendingDelete = 0;
+	mPendingData = L"";
+	MessageLogger::logMessage("setKeyboardOpen %d\n", fOpen);
 	return S_OK;
 }
 
-const std::wstring EkayaInputProcessor::getMessage(const wchar_t * defaultMessage)
+const std::wstring EkayaInputProcessor::getMessage(UINT uid, const wchar_t * defaultMessage)
 {
-	// TODO implement localization
-	return std::wstring(defaultMessage);
+	std::wstring message = defaultMessage;
+	try
+	{
+		const int MAX_MSG_BUFFER = 256;
+		wchar_t wBuffer[MAX_MSG_BUFFER];
+		int count = LoadStringW(g_hInst, uid, wBuffer, MAX_MSG_BUFFER);
+		if (count)
+		{
+			message = wBuffer;
+		}
+	}
+	catch(...)
+	{
+		MessageLogger::logMessage("Resource exception");
+	}
+	return message;
 }
 
 void EkayaInputProcessor::setComposition(ITfComposition * composition)
@@ -1061,4 +1071,21 @@ void EkayaInputProcessor::setActiveKeyboard(int keyboardIndex)
 {
 	MessageLogger::logMessage("setActiveKeyboard %d", keyboardIndex);
 	mActiveKeyboard = keyboardIndex;
+	mpLangBarButton->Show(true);
+	ITfLangBarItemMgr * pLangBarItemMgr = NULL;
+	if (mpThreadMgr->QueryInterface(IID_ITfLangBarItemMgr, (void **)&pLangBarItemMgr) == S_OK)
+	{
+		if (mpLangBarButton)
+		{
+			if (pLangBarItemMgr->RemoveItem(mpLangBarButton) == S_OK)
+			{
+				if (pLangBarItemMgr->AddItem(mpLangBarButton) != S_OK)
+				{
+					mpLangBarButton->Release();
+					mpLangBarButton = NULL;
+				}
+			}
+		}
+	    pLangBarItemMgr->Release();
+	}
 }

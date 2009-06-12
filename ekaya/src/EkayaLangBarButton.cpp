@@ -20,6 +20,7 @@
 #include <limits>
 #include <ole2.h>
 #include <olectl.h>
+#include <process.h>
 
 #include "UtfConversion.h"
 
@@ -27,6 +28,7 @@
 #include "EkayaKeyboard.h"
 #include "EkayaLangBarButton.h"
 #include "MessageLogger.h"
+#include "resource.h"
 
 const DWORD TEXTSERVICE_LANGBARITEMSINK_COOKIE = 0xae4e6c21;
 
@@ -34,15 +36,16 @@ EkayaLangBarButton::EkayaLangBarButton(EkayaInputProcessor *pTextService)
 : mpLangBarItemSink(NULL), mRefCount(0)
 {
     DllAddRef();
-
-    //
     // initialize TF_LANGBARITEMINFO structure.
-    //
-    mtfLangBarItemInfo.clsidService = CLSID_EKAYA_SERVICE;    // This LangBarItem belongs to this TextService.
-    mtfLangBarItemInfo.guidItem = GUID_LANGBAR_BUTTON;   // GUID of this LangBarItem.
-    mtfLangBarItemInfo.dwStyle = TF_LBI_STYLE_BTN_MENU;      // This LangBar is a button type with a menu.
-    mtfLangBarItemInfo.ulSort = 0;                           // The position of this LangBar Item is not specified.
-	std::wstring langBarDesc = pTextService->getMessage(L"EkayaDesc");
+	// This LangBarItem belongs to this TextService.
+    mtfLangBarItemInfo.clsidService = CLSID_EKAYA_SERVICE;
+	// GUID of this LangBarItem.
+    mtfLangBarItemInfo.guidItem = GUID_LANGBAR_BUTTON;
+	// This LangBar is a button type with a menu.
+    mtfLangBarItemInfo.dwStyle = TF_LBI_STYLE_BTN_MENU;
+	// The position of this LangBar Item is not specified.
+    mtfLangBarItemInfo.ulSort = 0;                           
+	std::wstring langBarDesc = pTextService->getMessage(IDS_KEYBOARDS, L"Keyboards");
 	size_t descLen = sizeof(mtfLangBarItemInfo.szDescription)/sizeof(mtfLangBarItemInfo.szDescription[0]);
 	size_t len = min(langBarDesc.length(), descLen);
 	wcsncpy_s(mtfLangBarItemInfo.szDescription, langBarDesc.c_str(), len);
@@ -51,6 +54,54 @@ EkayaLangBarButton::EkayaLangBarButton(EkayaInputProcessor *pTextService)
 	if (mpTextService)
 	{
 	    mpTextService->AddRef();
+	}
+	// load icons
+	for (size_t i = 0; i < mpTextService->getKeyboards().size(); i++)
+	{
+	    std::basic_string<Utf32> iconFileName = mpTextService->getKeyboards()[i]->getIconFileName();
+	    if (iconFileName.length() > 0)
+	    {
+	        std::wstring wName = UtfConversion::convertUtf32ToUtf16(iconFileName);
+			FILE * test = NULL;
+			fopen_s(&test, UtfConversion::convertUtf32ToUtf8(iconFileName).c_str(), "r");
+			bool exists = false;
+			if (test)
+			{
+				fclose(test);
+				MessageLogger::logMessage("Icon exists");
+				exists = true;
+			}
+			Gdiplus::Bitmap * bm = Gdiplus::Bitmap::FromFile(wName.c_str(), TRUE);
+	        if (bm)
+	        {
+	            mIcons.push_back(bm);
+	        }
+			else
+			{
+				mIcons.push_back(NULL);
+			}
+	    }
+		else mIcons.push_back(NULL);
+		std::basic_string<Utf32> helpFileName = mpTextService->getKeyboards()[i]->getHelpFileName();
+	    if (helpFileName.length() > 0)
+	    {
+	        std::wstring wName = UtfConversion::convertUtf32ToUtf16(helpFileName);
+			FILE * test = NULL;
+			fopen_s(&test, UtfConversion::convertUtf32ToUtf8(helpFileName).c_str(), "r");
+			bool exists = false;
+			if (test)
+			{
+				fclose(test);
+				MessageLogger::logMessage("HTML exists");
+				exists = true;
+				mHelpHtml.push_back(wName);
+			}
+			else
+			{
+				mHelpHtml.push_back(L"");
+			}
+		}
+		else mHelpHtml.push_back(L"");
 	}
 }
 
@@ -188,7 +239,7 @@ STDAPI EkayaLangBarButton::Show(BOOL fShow)
 
 STDAPI EkayaLangBarButton::GetTooltipString(BSTR *pbstrToolTip)
 {
-	std::wstring langbarDesc = mpTextService->getMessage(L"EkayaDesc");
+	std::wstring langbarDesc = mpTextService->getMessage(IDS_KEYBOARDS_DESC, L"EkayaDesc");
 	*pbstrToolTip = SysAllocString(langbarDesc.c_str());
 
     return (*pbstrToolTip == NULL) ? E_OUTOFMEMORY : S_OK;
@@ -221,20 +272,34 @@ STDAPI EkayaLangBarButton::InitMenu(ITfMenu *pMenu)
     // Add the keyboard open close item.
     // 
     DWORD dwFlags = 0;
-    if (mpTextService->isKeyboardDisabled())
-        dwFlags |= TF_LBMENUF_GRAYED;
-    else if (mpTextService->isKeyboardOpen())
-        dwFlags |= TF_LBMENUF_CHECKED;
 
-	std::wstring desc = mpTextService->getMessage(L"Disable");
-
+	std::wstring desc = mpTextService->getMessage(IDS_HELP, L"Help");
+	dwFlags |= TF_LBMENUF_SUBMENU;
+	ITfMenu * pHelpMenu = NULL;
     pMenu->AddMenuItem(0,
                        dwFlags, 
                        NULL, 
                        NULL, 
                        desc.c_str(), 
                        (ULONG)desc.length(), 
+                       &pHelpMenu);
+
+	HICON helpIcon = LoadIconW(g_hInst, MAKEINTRESOURCEW(IDI_EKAYA_HELP));
+	HBITMAP hHelpBitmap = NULL;
+	Gdiplus::Bitmap * pHelpBitmap = Gdiplus::Bitmap::FromHICON(helpIcon);
+	if (pHelpBitmap) pHelpBitmap->GetHBITMAP(Gdiplus::Color::Transparent, &hHelpBitmap);
+	if (pHelpMenu)
+	{
+		std::wstring desc = mpTextService->getMessage(IDS_EKAYA_HELP, L"EkayaHelp");
+		pHelpMenu->AddMenuItem(HELP_BASE_ID,
+                       0, 
+                       hHelpBitmap, 
+                       NULL, 
+                       desc.c_str(), 
+                       (ULONG)desc.length(), 
                        NULL);
+	}
+	delete pHelpBitmap;
 
     bool loadIcons = (mIcons.size())? false : true;
 	for (size_t i = 0; i < mpTextService->getKeyboards().size(); i++)
@@ -251,48 +316,10 @@ STDAPI EkayaLangBarButton::InitMenu(ITfMenu *pMenu)
 		}
 		// try to load an icon
         HBITMAP hIcon = NULL;
-		if (loadIcons)
-		{
-		    std::basic_string<Utf32> iconFileName = mpTextService->getKeyboards()[i]->getIconFileName();
-		    if (iconFileName.length() > 0)
-		    {
-		        std::wstring wName = UtfConversion::convertUtf32ToUtf16(iconFileName);
-				FILE * test = NULL;
-				fopen_s(&test, UtfConversion::convertUtf32ToUtf8(iconFileName).c_str(), "r");
-				bool exists = false;
-				if (test) 
-				{
-					fclose(test);
-					MessageLogger::logMessage("Icon exists");
-					exists = true;
-				}
-				//Gdiplus::Image * image = new Gdiplus::Image(L"myWin.bmp");
-				Gdiplus::Bitmap * bm = Gdiplus::Bitmap::FromFile(wName.c_str(), TRUE);//new Gdiplus::Bitmap(wName.c_str(), FALSE);//Gdiplus::Bitmap::FromFile(wName.c_str(), FALSE);
-		        if (bm)
-		        {
-		            if (bm->GetHBITMAP(Gdiplus::Color::Transparent, &hIcon) != S_OK)
-		            {
-		                hIcon = NULL;
-		            }
-		            // is it safe to delete the bitmap now?
-		            //delete bm;
-					mIcons.push_back(bm);
-		        }
-				else
-				{
-					mIcons.push_back(NULL);
-				}
-		    }
-			else mIcons.push_back(NULL);
-		    //mIcons.push_back(hIcon);
-		}
-		else
-		{
-			Gdiplus::Bitmap * bm = mIcons[i];
-			if (!bm || bm->GetHBITMAP(Gdiplus::Color::Transparent, &hIcon) != S_OK)
-            {
-                hIcon = NULL;
-            }
+		Gdiplus::Bitmap * bm = mIcons[i];
+		if (!bm || bm->GetHBITMAP(Gdiplus::Color::Transparent, &hIcon) != S_OK)
+        {
+            hIcon = NULL;
 		}
 		// add the menu item
 		pMenu->AddMenuItem((UINT)(i+1),
@@ -302,6 +329,21 @@ STDAPI EkayaLangBarButton::InitMenu(ITfMenu *pMenu)
 					   keyboardDesc16.c_str(), 
 					   (ULONG)keyboardDesc16.length(),
                        NULL);
+		if (pHelpMenu)
+		{
+			dwFlags = 0;
+			if (mHelpHtml[i].length() == 0)
+			{
+				dwFlags |= TF_LBMENUF_GRAYED;
+			}
+			pHelpMenu->AddMenuItem((UINT)(HELP_BASE_ID + i+1),
+                       dwFlags, 
+                       hIcon, 
+                       NULL, 
+					   keyboardDesc16.c_str(), 
+					   (ULONG)keyboardDesc16.length(),
+                       NULL);
+		}
 	}
 
     return S_OK;
@@ -318,22 +360,52 @@ STDAPI EkayaLangBarButton::OnMenuSelect(UINT wID)
     bool fOpen;
 	MessageLogger::logMessage("OnMenuSelect %d", (int)wID);
 	fOpen = mpTextService->isKeyboardOpen();
-    //
+	size_t requiredSize;
+    getenv_s( &requiredSize, NULL, 0, "APPDATA");
+	char * appDir = new char[requiredSize];
+	std::wstring docFile = L"";
     // This is callback when the menu item is selected.
     //
     switch (wID)
     {
         case 0:
-            mpTextService->setKeyboardOpen(fOpen ? false : true);
+            //mpTextService->setKeyboardOpen(fOpen ? false : true);
             break;
+		case HELP_BASE_ID:
+			if (appDir)
+			{
+				getenv_s( &requiredSize, appDir, requiredSize, "ProgramFiles" );
+				std::string doc = std::string("\"") + std::string(appDir) + EkayaInputProcessor::EKAYA_DIR + "\\doc\\ekaya.html\"";
+				docFile = UtfConversion::convertUtf8ToUtf16(doc);
+			}
+			break;
 		default:
 			if (!fOpen) mpTextService->setKeyboardOpen(true);
 			if (wID > 0 && wID <= mpTextService->getKeyboards().size())
 			{
 				mpTextService->setActiveKeyboard(wID - 1);
 			}
+			else if (wID > HELP_BASE_ID && wID <= HELP_BASE_ID + mpTextService->getKeyboards().size())
+			{
+				assert(mHelpHtml.size() == mpTextService->getKeyboards().size());
+				docFile = mHelpHtml[wID - HELP_BASE_ID - 1];
+			}
     }
+	
+	ITfContextView * pContextView = NULL;
+	if (docFile.length() > 0 && mpTextService->getTextEditSinkContext() &&
+		mpTextService->getTextEditSinkContext()->GetActiveView(&pContextView) == S_OK)
+	{
+		HWND hWnd = NULL;
+		pContextView->GetWnd(&hWnd);
+		int hi = reinterpret_cast<int>(ShellExecuteW(hWnd, L"open", docFile.c_str(), NULL, NULL, SW_SHOWNORMAL));
+		if (hi != 32)
+		{
+			MessageLogger::logMessage("ShellExecute failed %d\n", hi);
+		}
+	}
 
+	delete [] appDir;
     return S_OK;
 }
 
@@ -369,7 +441,7 @@ STDAPI EkayaLangBarButton::GetIcon(HICON *phIcon)
 
 STDAPI EkayaLangBarButton::GetText(BSTR *pbstrText)
 {
-	std::wstring desc = mpTextService->getMessage(L"EkayaDesc");
+	std::wstring desc = mpTextService->getMessage(IDS_KEYBOARDS, L"Keyboards");
 	*pbstrText = SysAllocString(desc.c_str());
 
     return (*pbstrText == NULL) ? E_OUTOFMEMORY : S_OK;
