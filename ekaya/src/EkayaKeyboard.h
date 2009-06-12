@@ -28,7 +28,7 @@ class EkayaKeyboard
 public:
 	virtual ~EkayaKeyboard(){};
 
-	virtual int processKey(long keyId, std::basic_string<Utf32> &context, size_t contextPos) = 0;
+	virtual std::pair<size_t, size_t> processKey(long keyId, std::basic_string<Utf32> &context, size_t contextPos) = 0;
 
 	virtual std::basic_string<Utf32> getDescription() = 0;
 	virtual std::basic_string<Utf32> getIconFileName() = 0;

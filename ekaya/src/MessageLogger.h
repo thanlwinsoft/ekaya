@@ -27,6 +27,7 @@ public:
 	static void logMessage(const char * msg, int paramA, int paramB);
 	static void logMessage(const char * msg, int paramA, int paramB, int paramC);
 	static void logMessage(const char * msg, long param);
+	static void logMessage(const wchar_t * msg);
 };
 
 #endif

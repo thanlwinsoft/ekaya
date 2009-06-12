@@ -88,7 +88,7 @@ KmflKeyboard::~KmflKeyboard()
 	kmfl_delete_keyboard_instance(mKmsi);
 }
 
-int KmflKeyboard::processKey(long keyId, std::basic_string<Utf32> & context, size_t contextPos)
+std::pair<size_t, size_t> KmflKeyboard::processKey(long keyId, std::basic_string<Utf32> & context, size_t contextPos)
 {
 	int status = kmfl_attach_keyboard(mKmsi, mKmflId);
 	mContextBuffer = context;
@@ -96,6 +96,7 @@ int KmflKeyboard::processKey(long keyId, std::basic_string<Utf32> & context, siz
 
 	UINT state = 0;
 	ITEM contextItems[KMFL_MAX_CONTEXT];
+	assert(contextPos <= KMFL_MAX_CONTEXT);
 	size_t contextLen = std::min(static_cast<size_t>(KMFL_MAX_CONTEXT), contextPos);
 	for (UINT i = 0; i < contextLen; i++)
 	{
@@ -105,11 +106,11 @@ int KmflKeyboard::processKey(long keyId, std::basic_string<Utf32> & context, siz
 	set_history(mKmsi, contextItems, static_cast<UINT>(contextLen));
 	status = kmfl_interpret(mKmsi, static_cast<UINT>(keyId), state);
 
-	int newLength = static_cast<int>(mContextBuffer.length());
+	size_t newLength = (mContextBuffer.length());
 	context = mContextBuffer;
 	status = kmfl_detach_keyboard(mKmsi);
 	mContextBuffer = sDummy;
-	return newLength;
+	return std::make_pair(mContextPosition, newLength);
 }
 
 std::basic_string<Utf32> KmflKeyboard::getDescription()
@@ -140,8 +141,8 @@ void KmflKeyboard::outputString(char *p)
 	UTF32 * p32 = utf32;
 	// this is UTF-8 so convert to UTF-32
 	size_t result = IConvertUTF8toUTF32((const UTF8 **)&p,(const UTF8 *)p+utf8Len,&p32,p32 + KMFL_MAX_CONTEXT);
-	mContextBuffer = mContextBuffer.insert(mContextPosition, utf32, p32 - utf32);
-	mContextPosition += (p32 - utf32);
+	mContextBuffer = mContextBuffer.insert(mContextBuffer.length(), utf32, p32 - utf32);
+	//mContextPosition += (p32 - utf32);
 }
 
 void KmflKeyboard::outputChar(BYTE q)

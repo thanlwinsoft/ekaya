@@ -36,6 +36,17 @@ public:
         mpTextService = pTextService;
         mpTextService->AddRef();
     }
+	EkayaEditSession(EkayaInputProcessor *pTextService, ITfContext *pContext, std::wstring data)
+    {
+		mwParam = 0;
+		mData = data;
+		mcRef = 1;
+        mpContext = pContext;
+        mpContext->AddRef();
+
+        mpTextService = pTextService;
+        mpTextService->AddRef();
+    }
 	virtual ~EkayaEditSession()
     {
         mpContext->Release();
@@ -86,6 +97,7 @@ private:
     WPARAM mwParam;
 	ITfContext * mpContext;
 	EkayaInputProcessor * mpTextService;
+	std::wstring mData;
 	long mcRef;
 };
 

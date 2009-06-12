@@ -25,6 +25,11 @@ void MessageLogger::logMessage(const char * msg)
 	OutputDebugString(msg);
 }
 
+void MessageLogger::logMessage(const wchar_t * msg)
+{
+	OutputDebugStringW(msg);
+}
+
 void MessageLogger::logMessage(const char * msg, int param)
 {
 	char msgText[256];

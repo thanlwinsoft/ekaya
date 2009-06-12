@@ -24,14 +24,14 @@
 #include <kmfl/kmfl.h>
 #include <libkmfl.h>
 
-enum { KMFL_MAX_CONTEXT = 16 };
+enum { KMFL_MAX_CONTEXT = 32 };
 
 class KmflKeyboard : public EkayaKeyboard
 {
 public:
 	KmflKeyboard(int kmflId, std::string baseDir);
 	~KmflKeyboard();
-	virtual int processKey(long keyId, std::basic_string<Utf32> & context, size_t contextPos);
+	virtual std::pair<size_t, size_t> processKey(long keyId, std::basic_string<Utf32> & context, size_t contextPos);
 	virtual std::basic_string<Utf32> getIconFileName();
 
 	virtual std::basic_string<Utf32> getDescription();

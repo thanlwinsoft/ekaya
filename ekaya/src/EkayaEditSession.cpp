@@ -46,11 +46,7 @@ STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 	ITfComposition *pComposition = mpTextService->getComposition();
 	ITfInsertAtSelection *pInsertAtSelection = NULL;
 
-	// first, test where a keystroke would go in the document if an insert is done
-    if (mpContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &cFetched) != S_OK || cFetched != 1)
-	{
-		return S_FALSE;
-	}
+#if 0
 	if (pComposition)
 	{
 		if (pComposition->GetRange(&pCompositionRange) != S_OK)
@@ -90,22 +86,10 @@ STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 	if (pComposition == NULL)
 	{
 		//ch = (WCHAR)(mwParam - 'A' + 0x1000);
-		// A special interface is required to insert text at the selection
-		if (mpContext->QueryInterface(IID_ITfInsertAtSelection, (void **)&pInsertAtSelection) != S_OK)
-		{
-			tfSelection.range->Release();
-			return S_FALSE;
-		}
+		
 
-		// insert the text
-		ITfRange *pRangeInsert = NULL;
 		ITfContextComposition *pContextComposition = NULL;
-		if (pInsertAtSelection->InsertTextAtSelection(ec, TF_IAS_QUERYONLY, NULL, 0, &pRangeInsert) != S_OK)
-		{
-			tfSelection.range->Release();
-			pInsertAtSelection->Release();
-			return S_FALSE;
-		}
+		
 
 		// get an interface on the context to deal with compositions
 		if (mpContext->QueryInterface(IID_ITfContextComposition, (void **)&pContextComposition) != S_OK)
@@ -118,15 +102,7 @@ STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 		LONG shift = 0;
 		if ((pContextComposition->StartComposition(ec, pRangeInsert, mpTextService, &pComposition) == S_OK) && (pComposition != NULL))
 		{
-			/*if (pRangeInsert->ShiftStart(ec, -1, &shift, NULL) != S_OK)
-			{
-				pInsertAtSelection->Release();
-				pRangeInsert->Release();
-				pContextComposition->Release();
-				return S_FALSE;
-			}*/
 			mpTextService->setComposition(pComposition);
-			
 			pRangeInsert->Release();
 		}
 		else
@@ -147,7 +123,6 @@ STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 	{
 		return S_FALSE;
 	}
-
     
 	ULONG contextLength = 0;
 	const size_t MAX_CONTEXT_LEN = 16;
@@ -160,88 +135,127 @@ STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 		return S_FALSE;
 	}
 	MessageLogger::logMessage("CompositionRange length %d\n", (int)contextLength);
+#endif
 
-	std::basic_string<Utf32>context = UtfConversion::convertUtf16ToUtf32(std::wstring(wBuffer, contextLength));
-	size_t oldContextPos = context.length();
-	int keyResult = keyboard->processKey(static_cast<long>(mwParam), context, static_cast<int>(context.length()));
-	MessageLogger::logMessage("processKey %d\n", keyResult);
-
-	// convert context back to UTF16
-	std::wstring convertedContext = UtfConversion::convertUtf32ToUtf16(context);
-
-	// temp hack
-	if (oldContextPos >= keyResult)
+	std::pair<size_t,size_t> keyResult;
+	std::wstring convertedContext;
+	size_t oldContextPos = 0;
+	if (mwParam == 0)
 	{
-		ITfDocumentMgr * docMgr;
-		mpContext->GetDocumentMgr(&docMgr);
-		ITfContext *baseContext;
-		docMgr->GetBase(&baseContext);
-		ITfContextView * contextView;
-		mpContext->GetActiveView(&contextView);
-		HWND hWindow;
-		contextView->GetWnd(&hWindow);
-
-		MSG msg;
-		msg.hwnd = hWindow;
-		msg.lParam = 0;
-		msg.wParam = VK_DELETE;
-		msg.time = 0;
-		msg.pt.x = 0;
-		msg.pt.y = 0;
-		msg.message = WM_KEYDOWN;
-		//DispatchMessageW(&msg);
-
-		INPUT delInput;
-		delInput.type = INPUT_KEYBOARD;
-		delInput.ki.wVk = VK_BACK;
-		delInput.ki.wScan = 0;
-		delInput.ki.dwExtraInfo = 0;
-		delInput.ki.dwFlags = 0;
-		delInput.ki.time = 0;
-		// SentInput really works
-		// SendInput(1, &delInput, sizeof(INPUT));
-
-		ITfRange * docStart;
-		ITfRange * docEnd;
-		baseContext->GetStart(ec, &docStart);
-		baseContext->GetEnd(ec, &docEnd);
-		LONG startDelta, endDelta;
-		pCompositionRange->CompareStart(ec, docStart, TF_ANCHOR_START, &startDelta);
-		pCompositionRange->CompareEnd(ec, docStart, TF_ANCHOR_END, &endDelta);
-		MessageLogger::logMessage("Compare start %d end %d\n", (int)startDelta, (int)endDelta);
-
-		
+		keyResult.first = mpTextService->getTextContext().length();
+		keyResult.second = keyResult.first + mData.length();
+		oldContextPos = keyResult.first;
+		convertedContext = mpTextService->getTextContext() + mData;
 	}
-	//tfSelection.range->ShiftStart
+	else
+	{
+		std::basic_string<Utf32>context = UtfConversion::convertUtf16ToUtf32(mpTextService->getTextContext());
+		oldContextPos = context.length();
+		keyResult = keyboard->processKey(static_cast<long>(mwParam), context, static_cast<int>(context.length()));
+		MessageLogger::logMessage("processKey %d %d orig %d\n", keyResult.first, keyResult.second, oldContextPos);
+
+		// convert context back to UTF16
+		convertedContext = UtfConversion::convertUtf32ToUtf16(context);
+	}
+	// first, test where a keystroke would go in the document if an insert is done
+    if (mpContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &cFetched) != S_OK || cFetched != 1)
+	{
+		return S_FALSE;
+	}
+	
+	// shift on selection doesn't work
+	if (oldContextPos > keyResult.first)
+	{
+			size_t delCount = static_cast<size_t>(oldContextPos - keyResult.first);
+			
+			const int MAX_DEL = 16;
+			assert(MAX_DEL > delCount);
+			
+			INPUT delInput[MAX_DEL];
+			delInput[0].type = INPUT_KEYBOARD;
+			delInput[0].ki.wVk = VK_BACK;
+			delInput[0].ki.wScan = 0;
+			delInput[0].ki.dwExtraInfo = 0;
+			delInput[0].ki.dwFlags = 0;
+			delInput[0].ki.time = 0;
+			// backspace key's can't be eaten by us or they won't work
+			// we need an event after the backspace has finished, so send a second, dummy key
+			// which we will eat and continue processing from there
+			delInput[1] = delInput[0];
+			delInput[1].ki.wVk = EkayaInputProcessor::DUMMY_KEY;
+
+			mpTextService->setTextContext(convertedContext.substr(0, keyResult.first));
+			mpTextService->setPendingData(delCount, convertedContext.substr(keyResult.first, keyResult.second - keyResult.first));
+			// SentInput really works, send deletes one at a time with dummy key so we get feedback
+			SendInput(2, delInput, sizeof(INPUT));
+			MessageLogger::logMessage("pending %d delete\n", (int)delCount);
+			tfSelection.range->Release();
+			return S_OK;
+
+	}
+
+	// ITfRangeACP just returns 0 :-(
+
+	// A special interface is required to insert text at the selection
+	if (mpContext->QueryInterface(IID_ITfInsertAtSelection, (void **)&pInsertAtSelection) != S_OK)
+	{
+		tfSelection.range->Release();
+		return S_FALSE;
+	}
+	// insert the text
+	ITfRange *pRangeInsert = NULL;
+	if (pInsertAtSelection->InsertTextAtSelection(ec, TF_IAS_QUERYONLY, NULL, 0, &pRangeInsert) != S_OK)
+	{
+		tfSelection.range->Release();
+		pInsertAtSelection->Release();
+		return S_FALSE;
+	}
+	
+
+	// setting backspace characters doesn't work
+
     // insert the text
     // use SetText here instead of InsertTextAtSelection because a composition has already been started
     // Don't allow to the app to adjust the insertion point inside the composition
-	if (fCovered && pCompositionRange->SetText(ec, 0, convertedContext.c_str(),
-		static_cast<LONG>(convertedContext.length())) == S_OK)
+	if (fCovered && pRangeInsert->SetText(ec, 0, convertedContext.c_str() + keyResult.first,
+		static_cast<LONG>(keyResult.second - keyResult.first)) == S_OK)
 	{
 		// update the selection, we'll make it an insertion point just past
 		// the inserted text.
 		tfSelection.range->ShiftEndToRange(ec, pCompositionRange, TF_ANCHOR_END);
 		tfSelection.range->Collapse(ec, TF_ANCHOR_END);
 		mpContext->SetSelection(ec, 1, &tfSelection);
+		if (convertedContext.length() < EkayaInputProcessor::MAX_CONTEXT)
+			mpTextService->setTextContext(convertedContext);
+		else
+		{
+			mpTextService->setTextContext(convertedContext.substr(convertedContext.length()
+				- EkayaInputProcessor::MAX_CONTEXT, EkayaInputProcessor::MAX_CONTEXT));
+		}
+		for (size_t i = 0; i < convertedContext.length(); i++)
+			MessageLogger::logMessage(" %x", (int)convertedContext[i]);
+		MessageLogger::logMessage("\n");
 	}
 	// hack to reset after space
-	if (convertedContext.length() && convertedContext[convertedContext.length()-1] == 0x20 && pComposition)
+	//if (convertedContext.length() && convertedContext[convertedContext.length()-1] == 0x20 && pComposition)
+	//{
+	//	pComposition->EndComposition(ec);
+	//	mpTextService->setComposition(NULL);// includes Release
+	//	pComposition = NULL;
+	//}
+	if (convertedContext.length() && convertedContext[convertedContext.length()-1] == 0x20)
 	{
-		pComposition->EndComposition(ec);
-		mpTextService->setComposition(NULL);// includes Release
-		pComposition = NULL;
+		mpTextService->setTextContext(std::wstring(L""));
 	}
-	ITfRangeBackup * pRangeClone = NULL;
-	if (mpContext->CreateRangeBackup(ec, pCompositionRange, &pRangeClone) == S_OK)
-	{
-		mpTextService->setCompositionRange(pRangeClone);
-	}
-	// end the composition now or later?
-	//pComposition->EndComposition(ec);
-	//pComposition->Release();
-	pCompositionRange->Release();
+	//ITfRangeBackup * pRangeClone = NULL;
+	//if (mpContext->CreateRangeBackup(ec, pCompositionRange, &pRangeClone) == S_OK)
+	//{
+	//	mpTextService->setCompositionRange(pRangeClone);
+	//}
+	
+	//pCompositionRange->Release();
 	tfSelection.range->Release();
+	pRangeInsert->Release();
     return S_OK;
 }
 
@@ -255,3 +269,35 @@ STDAPI EkayaEndContextSession::DoEditSession(TfEditCookie ec)
 	}
 	return hr;
 }
+
+
+/*
+ITfMouseTracker * pMouseTracker = NULL;
+	DWORD mouseCookie;
+	if (mpContext->QueryInterface(IID_ITfMouseTracker, (LPVOID*)&pMouseTracker) == S_OK)
+	{
+		if (mpTextService->getMouseCookie() != TF_INVALID_COOKIE)
+		{
+			pMouseTracker->UnadviseMouseSink(mpTextService->getMouseCookie());
+		}
+		if (pMouseTracker->AdviseMouseSink(pCompositionRange, mpTextService, &mouseCookie) == S_OK)
+		{
+			mpTextService->setMouseCookie(mouseCookie);
+		}
+		else
+		{
+			mpTextService->setMouseCookie(TF_INVALID_COOKIE);
+		}
+	}
+
+	ITfRange * docStart;
+		ITfRange * docEnd;
+		baseContext->GetStart(ec, &docStart);
+		baseContext->GetEnd(ec, &docEnd);
+		LONG startDelta, endDelta;
+		pCompositionRange->CompareStart(ec, docStart, TF_ANCHOR_START, &startDelta);
+		pCompositionRange->CompareEnd(ec, docStart, TF_ANCHOR_END, &endDelta);
+		MessageLogger::logMessage("Compare start %d end %d\n", (int)startDelta, (int)endDelta);
+
+
+*/

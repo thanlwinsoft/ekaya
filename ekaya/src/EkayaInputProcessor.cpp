@@ -96,6 +96,10 @@ STDAPI EkayaInputProcessor::QueryInterface(REFIID riid, void **ppvObj)
 	{
 		*ppvObj = (ITfContextOwnerCompositionSink*)this;
 	}
+	else if (IsEqualIID(riid, IID_ITfTextLayoutSink))
+	{
+		*ppvObj = (ITfTextLayoutSink*)this;
+	}
 	else if (IsEqualIID(riid, IID_ITfMouseSink))
     {
         *ppvObj = (ITfMouseSink *)this;
@@ -143,7 +147,12 @@ STDAPI EkayaInputProcessor::Activate(ITfThreadMgr *pThreadMgr, TfClientId tfClie
 			mThreadEventCookie = TF_INVALID_COOKIE;
 			status = E_FAIL;
 		}
-		
+		//if (pSource->AdviseSink(IID_ITfTextLayoutSink, (ITfTextLayoutSink *)this, &mTextLayoutCookie) != S_OK)
+		//{
+		//	//Don't try to Unadvise cookie later
+		//	mTextLayoutCookie = TF_INVALID_COOKIE;
+		//	status = E_FAIL;
+		//}
 	}
 	else status = E_FAIL;
     pSource->Release();
@@ -318,7 +327,8 @@ HRESULT EkayaInputProcessor::setTextEditSink(ITfDocumentMgr *pDocMgrFocus)
 			{
 				mEditEventCookie = TF_INVALID_COOKIE;
 			}
-			if (pSource->AdviseSink(IID_ITfTextLayoutSink, (ITfTextLayoutSink *)this, &mTextLayoutCookie) == S_OK)
+			if (mTextLayoutCookie != TF_INVALID_COOKIE ||
+				pSource->AdviseSink(IID_ITfTextLayoutSink, (ITfTextLayoutSink *)this, &mTextLayoutCookie) == S_OK)
 			{
 				fRet = S_OK;
 			}
@@ -457,7 +467,7 @@ bool EkayaInputProcessor::ignoreKey(WPARAM wParam)
 {
 	if (wParam < 0x30)
 	{
-		if (wParam != VK_SHIFT && wParam != VK_CONTROL && wParam != VK_SPACE && wParam != VK_ESCAPE)
+		if (wParam != VK_SHIFT && wParam != VK_CONTROL && wParam != VK_SPACE)
 			return true;
 		return false;
 	}
@@ -479,6 +489,7 @@ STDAPI EkayaInputProcessor::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, L
 	if (isKeyboardOpen() && !isKeyboardDisabled())
 	{
 		*pfEaten = FALSE;
+		MessageLogger::logMessage("keyboard disabled\n");
 	}
 	else
 	{
@@ -486,16 +497,13 @@ STDAPI EkayaInputProcessor::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, L
 		{
 			*pfEaten = FALSE;
 			// exit the context otherwise we get strange effects
-			EkayaEndContextSession * pEditSession = NULL;
-			if ((pEditSession = new EkayaEndContextSession(this, pContext, wParam)) == NULL)
-				return E_FAIL;
+			//EkayaEndContextSession * pEditSession = NULL;
+			//if ((pEditSession = new EkayaEndContextSession(this, pContext, wParam)) == NULL)
+			//	return E_FAIL;
 
 			// A lock is required
 			// nb: this method is one of the few places where it is legal to use
 			// the TF_ES_SYNC flag
-			hr = pContext->RequestEditSession(mClientId, pEditSession, TF_ES_SYNC | TF_ES_READWRITE, &hr);
-
-			pEditSession->Release();
 		}
 		// ignore ctrl keys
 		else if (mKeyState.at(KEY_CTRL) && (wParam != VK_CONTROL))
@@ -506,6 +514,29 @@ STDAPI EkayaInputProcessor::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, L
 		{
 			*pfEaten = TRUE;
 		}
+	}
+	if (wParam == VK_BACK)
+	{
+		int bkspCount = (lParam & 0xff);
+		if (mPendingDelete > 0)
+		{
+			mPendingDelete -= bkspCount;
+			if (mPendingDelete <= 0)
+			{
+				// Request append
+				MessageLogger::logMessage("Pending Delete finished\n");
+				//EkayaEditSession * pEditSession = new EkayaEditSession(this, pContext, mPendingData);
+				//hr = pContext->RequestEditSession(mClientId, pEditSession, TF_ES_ASYNC | TF_ES_READWRITE, &hr);
+				//pEditSession->Release();
+				mPendingDelete = 0;
+			}
+		}
+		else
+		{
+			bkspCount = min(bkspCount, static_cast<int>(mContext.length()) );
+			mContext.erase(mContext.length() - bkspCount, bkspCount);
+		}
+		MessageLogger::logMessage("Pending %d\n", mPendingDelete);
 	}
 	return hr;
 }
@@ -539,6 +570,9 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 		//case VK_DELETE:
 		case VK_SPACE:
 			break;
+		case VK_BACK:
+			*pfEaten = FALSE;
+			return S_OK;
 		default:
 			// ignore
 			*pfEaten = FALSE;
@@ -666,9 +700,39 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 				break;
 			}
 		}
-		// we'll insert a char ourselves in place of this keystroke
-		if ((pEditSession = new EkayaEditSession(this, pContext, wParam)) == NULL)
-			return E_FAIL;
+		// the dummy key is sent by us during a delete to keep track of progress
+		if (wParam == DUMMY_KEY)
+		{
+			if (mPendingDelete > 0)
+			{
+				INPUT delInput[2];
+				delInput[0].type = INPUT_KEYBOARD;
+				delInput[0].ki.wVk = VK_BACK;
+				delInput[0].ki.wScan = 0;
+				delInput[0].ki.dwExtraInfo = 0;
+				delInput[0].ki.dwFlags = 0;
+				delInput[0].ki.time = 0;
+				delInput[1].type = INPUT_KEYBOARD;
+				delInput[1].ki.wVk = DUMMY_KEY;
+				delInput[1].ki.wScan = 0;
+				delInput[1].ki.dwExtraInfo = 0;
+				delInput[1].ki.dwFlags = 0;
+				delInput[1].ki.time = 0;
+				SendInput(2, delInput, sizeof(INPUT));
+				return S_OK;
+			}
+			else if (mPendingData.length() > 0)
+			{
+				pEditSession = new EkayaEditSession(this, pContext, mPendingData);
+				mPendingData = L"";
+			}
+		}
+		else
+		{
+			// we'll insert a char ourselves in place of this keystroke
+			if ((pEditSession = new EkayaEditSession(this, pContext, wParam)) == NULL)
+				return E_FAIL;
+		}
 	}
 	else
 	{

@@ -44,6 +44,11 @@ public:
 		KEY_SHIFT,
 		KEY_CTRL
 	};
+	enum
+	{
+		MAX_CONTEXT = 16,
+		DUMMY_KEY = VK_OEM_8
+	};
     EkayaInputProcessor();
     ~EkayaInputProcessor();
 
@@ -111,7 +116,16 @@ public:
 	{ if (mpCompositionRange) mpCompositionRange->Release(); mpCompositionRange = range; };
 	ITfRangeBackup * getCompositionRange(void) { return mpCompositionRange; }
 	ITfThreadMgr * getThreadManager() { return mpThreadMgr; };
-	
+	void setMouseCookie(DWORD cookie) { mMouseCookie = cookie; };
+	DWORD getMouseCookie(void) { return mMouseCookie; }
+
+	std::wstring getTextContext() { return mContext; }
+	void setTextContext(std::wstring & context) { mContext = context; }
+	void setPendingData(int pendingDelete, std::wstring data)
+	{ 
+		mPendingData = data;
+		mPendingDelete = pendingDelete;
+	}
 private:
 	HRESULT setTextEditSink(ITfDocumentMgr *pDocMgrFocus);
 	bool ignoreKey(WPARAM code);
@@ -135,6 +149,8 @@ private:
 	std::vector <EkayaKeyboardFactory*> mKeyboardFactories;
 	std::vector <EkayaKeyboard*> mKeyboards;
 	std::wstring mContext;
+	std::wstring mPendingData;
+	int mPendingDelete;
 	ITfComposition * mpComposition;
 	ITfRangeBackup * mpCompositionRange;
 };
