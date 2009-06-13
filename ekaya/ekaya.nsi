@@ -123,16 +123,17 @@ NoOverwrite:
 SectionEnd
 
 ;Optional source - as a compressed archive
+; hg archive -t tbz2 ekaya-0.1.0.tar.bz2
 Section /o "Source" SecSource
 	SetOutPath "$INSTDIR\${APP_NAME}"
-	File ekaya-*.tar.bz2
+	File ..\ekaya-${VERSION}.tar.bz2
 SectionEnd
 
 ; Add more keyboard sections here as needed
 Section "MyWin Burmese Unicode 5.1 keyboard" SecMyWin
 	SetOutPath "$INSTDIR\${APP_NAME}\kmfl"
 	File "kmfl\myWin.png"
-	File "kmfl\myWin.bmp"
+	File "kmfl\myWin.jpg"
 	File "kmfl\myWin2.2.kmn"
 	File "kmfl\myWin2.2.html"
 SectionEnd
@@ -173,13 +174,13 @@ AppFound:
 
   RMDir /r "$INSTDIR\docs"
   RMDir /r "$INSTDIR\kmfl"
-  Delete /REBOOTOK /r "$INSTDIR\ekaya.dll"
-  Delete /REBOOTOK /r "$INSTDIR\iconv.dll"
+  Delete /REBOOTOK "$INSTDIR\ekaya.dll"
+  Delete /REBOOTOK "$INSTDIR\iconv.dll"
   Delete /REBOOTOK "$INSTDIR\libkmfl.dll"
   Delete /REBOOTOK "$INSTDIR\license.txt"
   Delete /REBOOTOK "$INSTDIR\ekaya.ico"
   
-  Delete "$INSTDIR\${SRC_ARCHIVE}"
+  Delete "$INSTDIR\ekaya-${VERSION}.tar.bz2"
 
   Delete /REBOOTOK "$INSTDIR\Uninstall.exe"
 
