@@ -57,3 +57,17 @@ void MessageLogger::logMessage(const char * msg, long param)
 	sprintf_s(msgText, msg, param);
 	OutputDebugStringA(msgText);
 }
+
+void MessageLogger::logMessage(const char * msg, long long param)
+{
+	char msgText[256];
+	sprintf_s(msgText, msg, param);
+	OutputDebugStringA(msgText);
+}
+
+void MessageLogger::logMessage(const char * msg, long long param, long long paramB)
+{
+	char msgText[256];
+	sprintf_s(msgText, msg, param, paramB);
+	OutputDebugStringA(msgText);
+}

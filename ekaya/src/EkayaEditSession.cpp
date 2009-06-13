@@ -152,7 +152,7 @@ STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 		std::basic_string<Utf32>context = UtfConversion::convertUtf16ToUtf32(mpTextService->getTextContext());
 		oldContextPos = context.length();
 		keyResult = keyboard->processKey(static_cast<long>(mwParam), context, static_cast<int>(context.length()));
-		MessageLogger::logMessage("processKey %d %d orig %d\n", keyResult.first, keyResult.second, oldContextPos);
+		MessageLogger::logMessage("processKey %d %d orig %d\n", (int)keyResult.first, (int)keyResult.second, (int)oldContextPos);
 
 		// convert context back to UTF16
 		convertedContext = UtfConversion::convertUtf32ToUtf16(context);
@@ -166,7 +166,7 @@ STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 	// shift on selection doesn't work
 	if (oldContextPos > keyResult.first)
 	{
-			size_t delCount = static_cast<size_t>(oldContextPos - keyResult.first);
+			int delCount = static_cast<int>(oldContextPos - keyResult.first);
 			
 			const int MAX_DEL = 16;
 			assert(MAX_DEL > delCount);
@@ -188,7 +188,7 @@ STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 			mpTextService->setPendingData(delCount, convertedContext.substr(keyResult.first, keyResult.second - keyResult.first));
 			// SentInput really works, send deletes one at a time with dummy key so we get feedback
 			SendInput(2, delInput, sizeof(INPUT));
-			MessageLogger::logMessage("pending %d delete\n", (int)delCount);
+			MessageLogger::logMessage("pending %d delete\n", delCount);
 			tfSelection.range->Release();
 			return S_OK;
 

@@ -364,32 +364,32 @@ HRESULT EkayaInputProcessor::setTextEditSink(ITfDocumentMgr *pDocMgrFocus)
 // ITfThreadMgrEventSink
 STDAPI EkayaInputProcessor::OnInitDocumentMgr(ITfDocumentMgr *pDocMgr)
 {
-	MessageLogger::logMessage("InitDocumentMgr %lx\n", (long)pDocMgr);
+	MessageLogger::logMessage("InitDocumentMgr %lx\n", (long long)pDocMgr);
 	return S_OK;
 }
 
 STDAPI EkayaInputProcessor::OnUninitDocumentMgr(ITfDocumentMgr *pDocMgr)
 {
-	MessageLogger::logMessage("UninitDocumentMgr %lx\n", (long)pDocMgr);
+	MessageLogger::logMessage("UninitDocumentMgr %lx\n", (long long)pDocMgr);
 	return S_OK;
 }
 
 STDAPI EkayaInputProcessor::OnSetFocus(ITfDocumentMgr *pDocMgrFocus, ITfDocumentMgr *pDocMgrPrevFocus)
 {
-	MessageLogger::logMessage("SetFocus %lx\n", (long)pDocMgrFocus);
+	MessageLogger::logMessage("SetFocus %lx\n", (long long)pDocMgrFocus);
 	return setTextEditSink(pDocMgrFocus);
 }
 
 STDAPI EkayaInputProcessor::OnPushContext(ITfContext *pContext)		
 {
-	MessageLogger::logMessage("PushContext %lx\n", (long)pContext);
+	MessageLogger::logMessage("PushContext %lx\n", (long long)pContext);
 
 	return S_OK;
 }
 
 STDAPI EkayaInputProcessor::OnPopContext(ITfContext *pContext)
 {
-	MessageLogger::logMessage("PopContext %lx\n", (long)pContext);
+	MessageLogger::logMessage("PopContext %lx\n", (long long)pContext);
 	return S_OK;
 }
 
@@ -732,7 +732,7 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 		const int BUFFER_LEN = 4;
 		wchar_t uniBuffer[BUFFER_LEN];
 		// currently doesn't work, perhaps because the keystate is wrong
-		int uCount = ToUnicode(wParam, lParam, &keyState, uniBuffer, BUFFER_LEN, 0);
+		int uCount = ToUnicode(static_cast<UINT>(wParam), static_cast<UINT>(lParam), &keyState, uniBuffer, BUFFER_LEN, 0);
 		if (uCount <= 0)
 		{
 			*pfEaten = FALSE;
@@ -748,7 +748,7 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 	HWND hWindow;
 	contextView->GetWnd(&hWindow);
 	contextView->Release();
-	MessageLogger::logMessage("Window:%lx %lx\n", (long)hWindow, (long)GetActiveWindow());
+	MessageLogger::logMessage("Window:%lx %lx\n", (long long)hWindow, (long long)GetActiveWindow());
 
     // A lock is required, we want it to be synchronous so we know the exact order
     hr = pContext->RequestEditSession(mClientId, pEditSession, TF_ES_SYNC | TF_ES_READWRITE, &hr);

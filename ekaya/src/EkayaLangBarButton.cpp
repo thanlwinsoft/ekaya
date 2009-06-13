@@ -369,7 +369,6 @@ STDAPI EkayaLangBarButton::OnMenuSelect(UINT wID)
     switch (wID)
     {
         case 0:
-            //mpTextService->setKeyboardOpen(fOpen ? false : true);
             break;
 		case HELP_BASE_ID:
 			if (appDir)
@@ -398,10 +397,10 @@ STDAPI EkayaLangBarButton::OnMenuSelect(UINT wID)
 	{
 		HWND hWnd = NULL;
 		pContextView->GetWnd(&hWnd);
-		int hi = reinterpret_cast<int>(ShellExecuteW(hWnd, L"open", docFile.c_str(), NULL, NULL, SW_SHOWNORMAL));
+		long long hi = reinterpret_cast<long long>(ShellExecuteW(hWnd, L"open", docFile.c_str(), NULL, NULL, SW_SHOWNORMAL));
 		if (hi != 32)
 		{
-			MessageLogger::logMessage("ShellExecute failed %d\n", hi);
+			MessageLogger::logMessage("ShellExecute failed %ld\n", (long)hi);
 		}
 	}
 

@@ -1,17 +1,6 @@
-//////////////////////////////////////////////////////////////////////
-//
-//  THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
-//  ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED
-//  TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
-//  PARTICULAR PURPOSE.
-//
-//  Copyright (C) 2003  Microsoft Corporation.  All rights reserved.
-//
-//  Register.cpp
-//
-//          Server registration code.
-//
-//////////////////////////////////////////////////////////////////////
+/*
+* Server registration code based on code samples
+*/
 
 #include <windows.h>
 #include <ole2.h>
@@ -25,9 +14,7 @@ static const TCHAR c_szInProcSvr32[] = TEXT("InProcServer32");
 static const TCHAR c_szModelName[] = TEXT("ThreadingModel");
 
 //+---------------------------------------------------------------------------
-//
 //  RegisterProfiles
-//
 //----------------------------------------------------------------------------
 
 BOOL RegisterProfiles()
@@ -70,9 +57,7 @@ Exit:
 }
 
 //+---------------------------------------------------------------------------
-//
 //  UnregisterProfiles
-//
 //----------------------------------------------------------------------------
 
 void UnregisterProfiles()
@@ -91,9 +76,7 @@ void UnregisterProfiles()
 }
 
 //+---------------------------------------------------------------------------
-//
 //  RegisterCategories
-//
 //----------------------------------------------------------------------------
 
 BOOL RegisterCategories()
@@ -116,9 +99,7 @@ BOOL RegisterCategories()
 }
 
 //+---------------------------------------------------------------------------
-//
 //  UnregisterCategories
-//
 //----------------------------------------------------------------------------
 
 void UnregisterCategories()
@@ -211,9 +192,7 @@ LONG RecurseDeleteKey(HKEY hParentKey, char * lpszKey)
 }
 
 //+---------------------------------------------------------------------------
-//
 //  RegisterServer
-//
 //----------------------------------------------------------------------------
 
 BOOL RegisterServer()
@@ -232,7 +211,7 @@ BOOL RegisterServer()
     if (fRet = RegCreateKeyExA(HKEY_CLASSES_ROOT, achIMEKey, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, &dw)
             == ERROR_SUCCESS)
     {
-        fRet &= RegSetValueExA(hKey, NULL, 0, REG_SZ, (BYTE *)TEXTSERVICE_DESC_A, (strlen(TEXTSERVICE_DESC_A)+1)*sizeof(char))
+        fRet &= RegSetValueExA(hKey, NULL, 0, REG_SZ, (BYTE *)TEXTSERVICE_DESC_A, static_cast<DWORD>((strlen(TEXTSERVICE_DESC_A)+1)*sizeof(char)))
             == ERROR_SUCCESS;
 
         if (fRet &= RegCreateKeyEx(hKey, c_szInProcSvr32, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hSubKey, &dw)
@@ -240,8 +219,8 @@ BOOL RegisterServer()
         {
             dw = GetModuleFileNameA(g_hInst, achFileName, ARRAYSIZE(achFileName));
 
-            fRet &= RegSetValueEx(hSubKey, NULL, 0, REG_SZ, (BYTE *)achFileName, (strlen(achFileName)+1)*sizeof(TCHAR)) == ERROR_SUCCESS;
-            fRet &= RegSetValueEx(hSubKey, c_szModelName, 0, REG_SZ, (BYTE *)TEXTSERVICE_MODEL, (strlen(TEXTSERVICE_MODEL)+1)*sizeof(char)) == ERROR_SUCCESS;
+            fRet &= RegSetValueEx(hSubKey, NULL, 0, REG_SZ, (BYTE *)achFileName, static_cast<DWORD>((strlen(achFileName)+1)*sizeof(TCHAR))) == ERROR_SUCCESS;
+            fRet &= RegSetValueEx(hSubKey, c_szModelName, 0, REG_SZ, (BYTE *)TEXTSERVICE_MODEL, static_cast<DWORD>((strlen(TEXTSERVICE_MODEL)+1)*sizeof(char))) == ERROR_SUCCESS;
             RegCloseKey(hSubKey);
         }
         RegCloseKey(hKey);
@@ -251,9 +230,7 @@ BOOL RegisterServer()
 }
 
 //+---------------------------------------------------------------------------
-//
 //  UnregisterServer
-//
 //----------------------------------------------------------------------------
 
 void UnregisterServer()

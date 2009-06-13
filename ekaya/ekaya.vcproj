@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;C:\Users\keith\projects\ekaya\libkmfl-0.9.8\include&quot;"
+				AdditionalIncludeDirectories="&quot;..\libkmfl-0.9.8\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;EKAYA_EXPORTS;"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -64,7 +64,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="libkmfl.lib gdiplus.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;C:\Users\keith\projects\ekaya\libkmfl-0.9.8\Debug&quot;"
+				AdditionalLibraryDirectories="&quot;..\libkmfl-0.9.8\Debug&quot;"
 				ModuleDefinitionFile="src\ekaya.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -115,6 +115,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="&quot;..\libkmfl-0.9.8\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;EKAYA_EXPORTS;"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -133,7 +134,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				LinkIncremental="2"
+				AdditionalDependencies="libkmfl.lib gdiplus.lib"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;..\libkmfl-0.9.8\Release&quot;"
+				ModuleDefinitionFile="src\ekaya.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
