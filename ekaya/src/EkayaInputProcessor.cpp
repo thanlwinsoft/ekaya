@@ -32,7 +32,7 @@
 #include "resource.h"
 
 static const TF_PRESERVEDKEY KEY_ONOFF = { 0x20, TF_MOD_CONTROL };
-static const TF_PRESERVEDKEY KEY_NEXT = { VK_RIGHT, TF_MOD_CONTROL };
+static const TF_PRESERVEDKEY KEY_NEXT = { 0x20, TF_MOD_CONTROL | TF_MOD_SHIFT };
 
 
 static const WCHAR ONOFF_DESC[]    = L"OnOff";
@@ -197,11 +197,11 @@ STDAPI EkayaInputProcessor::Activate(ITfThreadMgr *pThreadMgr, TfClientId tfClie
                                 &KEY_ONOFF,
                                 ONOFF_DESC,
                                 (ULONG)wcslen(ONOFF_DESC));
-		//status = pKeystrokeMgr->PreserveKey(mClientId, 
-  //                              GUID_PRESERVEDKEY_NEXT,
-  //                              &KEY_NEXT,
-  //                              NEXT_DESC,
-  //                              (ULONG)wcslen(NEXT_DESC));
+		status = pKeystrokeMgr->PreserveKey(mClientId, 
+                                GUID_PRESERVEDKEY_NEXT,
+                                &KEY_NEXT,
+                                NEXT_DESC,
+                                (ULONG)wcslen(NEXT_DESC));
 
 		pKeystrokeMgr->Release();
 	}
@@ -859,6 +859,7 @@ STDMETHODIMP EkayaInputProcessor::OnPreservedKey(ITfContext *pContext, REFGUID r
     {
         BOOL fOpen = isKeyboardOpen();
         setKeyboardOpen(fOpen ? FALSE : TRUE);
+		setActiveKeyboard(mActiveKeyboard);
         *pfEaten = TRUE;
     }
 	else if (IsEqualGUID(rguid, GUID_PRESERVEDKEY_NEXT))
@@ -866,6 +867,7 @@ STDMETHODIMP EkayaInputProcessor::OnPreservedKey(ITfContext *pContext, REFGUID r
 		int next = mActiveKeyboard + 1;
 		if (next >= static_cast<int>(mKeyboards.size()))
 			next = 0;
+		setKeyboardOpen(true);
 		setActiveKeyboard(next);
 		*pfEaten = TRUE;
     }

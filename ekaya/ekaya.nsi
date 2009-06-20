@@ -76,20 +76,30 @@ NoOverwrite:
 
   
   SetOutPath "$INSTDIR"
-  File /oname=license.txt "COPYING"
 
   CreateDirectory "$INSTDIR\${APP_NAME}"
   SetOutPath "$INSTDIR\${APP_NAME}"
   File "ekaya.ico"
+  File /oname=license.txt "COPYING"
+
   ;File "Uninstall.ico"
   
   File "Release\ekaya.dll"
   File "Release\ekaya.dll*.manifest*"
   File "..\libkmfl-0.9.8\Release\libkmfl.dll"
+  File "..\libkmfl-0.9.8\Release\libkmfl.dll*.manifest*"
   File "..\..\iconv-1.9.2.win32\bin\iconv.dll"
   File /r "doc"
   
-  ExecWait 'regsvr32 "$INSTDIR\${APP_NAME}\ekaya.dll"' $0
+  ; Redist dlls
+  File "C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\msvcp90.dll"
+  File "C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\msvcr90.dll"
+  File "C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\msvcm90.dll"
+  File "C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest"
+
+  ClearErrors
+  RegDLL "$INSTDIR\${APP_NAME}\ekaya.dll"
+  ; ExecWait 'regsvr32 "$INSTDIR\${APP_NAME}\ekaya.dll"' $0
   IfErrors 0 +2
 	MessageBox MB_OK|MB_ICONEXCLAMATION "Warning: Regsvr32 failed to register Ekaya Text Service DLL"
   
@@ -115,8 +125,14 @@ NoOverwrite:
   WriteUninstaller "$INSTDIR\${APP_NAME}\Uninstall.exe"
   
   ; Enable Advanced Text Services for all programs on XP
+  ClearErrors
+  ReadRegDWORD $0 HKLM "SOFTWARE\Microsoft\CTF\SystemShared" "CUAS"
+  IfErrors SkipCUAS 0
+  IntCmp $0 1 SkipCUAS 0 0
   WriteRegDWORD HKLM "SOFTWARE\Microsoft\CTF\SystemShared" "CUAS" 0x1
+  SetRebootFlag true
 
+SkipCUAS:
   ; add keys for Add/Remove Programs entry
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" \
                  "DisplayName" "${APP_NAME} ${VERSION}"
@@ -173,7 +189,8 @@ Section "Uninstall"
     MessageBox MB_OK|MB_ICONEXCLAMATION "$INSTDIR\${APP_NAME} was not found! You may need to uninstall manually." 
 
 AppFound:
-  ExecWait 'regsvr32 /u /s "$INSTDIR\${APP_NAME}\ekaya.dll"' $0
+  ; ExecWait 'regsvr32 /u /s "$INSTDIR\${APP_NAME}\ekaya.dll"' $0
+  UnRegDLL "$INSTDIR\ekaya.dll"
 
   RMDir /r "$INSTDIR\docs"
   RMDir /r "$INSTDIR\kmfl"

@@ -417,7 +417,8 @@ STDAPI EkayaLangBarButton::OnMenuSelect(UINT wID)
 STDAPI EkayaLangBarButton::GetIcon(HICON *phIcon)
 {
     *phIcon = NULL;
-    if (mpTextService && mpTextService->getActiveKeyboard() > -1 && mIcons.size() > 0)
+    if (mpTextService && mpTextService->isKeyboardOpen() &&
+	   mpTextService->getActiveKeyboard() > -1 && mIcons.size() > 0)
     {
 		if (mIcons[mpTextService->getActiveKeyboard()]->GetHICON(phIcon) != S_OK)
 			*phIcon = NULL;
@@ -427,7 +428,6 @@ STDAPI EkayaLangBarButton::GetIcon(HICON *phIcon)
     {
         *phIcon = (HICON)LoadImage(g_hInst, TEXT("IDI_TEXTSERVICE"), IMAGE_ICON, 16, 16, 0);
     }
-	// TODO get icon from keyboard
 
     return (*phIcon != NULL) ? S_OK : E_FAIL;
 }
