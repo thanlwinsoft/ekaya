@@ -1,17 +1,4 @@
-//////////////////////////////////////////////////////////////////////
-//
-//  THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
-//  ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED
-//  TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
-//  PARTICULAR PURPOSE.
-//
-//  Copyright (C) 2003  Microsoft Corporation.  All rights reserved.
-//
-//  Server.cpp
-//
-//          COM server exports.
-//
-//////////////////////////////////////////////////////////////////////
+// Server registration code based on code samples
 
 #include <assert.h>
 
@@ -28,13 +15,11 @@ void UnregisterServer();
 
 void FreeGlobalObjects(void);
 
-class CClassFactory;
-static CClassFactory *g_ObjectInfo[1] = { NULL };
+class EkayaClassFactory;
+static EkayaClassFactory *g_ObjectInfo[1] = { NULL };
 
 //+---------------------------------------------------------------------------
-//
 //  DllAddRef
-//
 //----------------------------------------------------------------------------
 
 void DllAddRef(void)
@@ -43,9 +28,7 @@ void DllAddRef(void)
 }
 
 //+---------------------------------------------------------------------------
-//
 //  DllRelease
-//
 //----------------------------------------------------------------------------
 
 void DllRelease(void)
@@ -66,12 +49,10 @@ void DllRelease(void)
 }
 
 //+---------------------------------------------------------------------------
-//
-//  CClassFactory declaration with IClassFactory Interface
-//
+//  EkayaClassFactory declaration with IClassFactory Interface
 //----------------------------------------------------------------------------
 
-class CClassFactory : public IClassFactory
+class EkayaClassFactory : public IClassFactory
 {
 public:
     // IUnknown methods
@@ -84,24 +65,24 @@ public:
     STDMETHODIMP LockServer(BOOL fLock);
 
     // Constructor
-    CClassFactory(REFCLSID rclsid, HRESULT (*pfnCreateInstance)(IUnknown *pUnkOuter, REFIID riid, void **ppvObj))
-        : _rclsid(rclsid)
+    EkayaClassFactory(REFCLSID rclsid, HRESULT (*pfnCreateInstance)(IUnknown *pUnkOuter, REFIID riid, void **ppvObj))
+        : mRclsId(rclsid)
     {
-        _pfnCreateInstance = pfnCreateInstance;
+        mpfnCreateInstance = pfnCreateInstance;
     }
 
 public:
-    REFCLSID _rclsid;
-    HRESULT (*_pfnCreateInstance)(IUnknown *pUnkOuter, REFIID riid, void **ppvObj);
+    REFCLSID mRclsId;
+    HRESULT (*mpfnCreateInstance)(IUnknown *pUnkOuter, REFIID riid, void **ppvObj);
 };
 
 //+---------------------------------------------------------------------------
 //
-//  CClassFactory::QueryInterface
+//  EkayaClassFactory::QueryInterface
 //
 //----------------------------------------------------------------------------
 
-STDAPI CClassFactory::QueryInterface(REFIID riid, void **ppvObj)
+STDAPI EkayaClassFactory::QueryInterface(REFIID riid, void **ppvObj)
 {
     if (IsEqualIID(riid, IID_IClassFactory) || IsEqualIID(riid, IID_IUnknown))
     {
@@ -114,47 +95,39 @@ STDAPI CClassFactory::QueryInterface(REFIID riid, void **ppvObj)
 }
 
 //+---------------------------------------------------------------------------
-//
-//  CClassFactory::AddRef
-//
+//  EkayaClassFactory::AddRef
 //----------------------------------------------------------------------------
 
-STDAPI_(ULONG) CClassFactory::AddRef()
+STDAPI_(ULONG) EkayaClassFactory::AddRef()
 {
     DllAddRef();
     return g_cRefDll+1; // -1 w/ no refs
 }
 
 //+---------------------------------------------------------------------------
-//
-//  CClassFactory::Release
-//
+//  EkayaClassFactory::Release
 //----------------------------------------------------------------------------
 
-STDAPI_(ULONG) CClassFactory::Release()
+STDAPI_(ULONG) EkayaClassFactory::Release()
 {
     DllRelease();
     return g_cRefDll+1; // -1 w/ no refs
 }
 
 //+---------------------------------------------------------------------------
-//
-//  CClassFactory::CreateInstance
-//
+//  EkayaClassFactory::CreateInstance
 //----------------------------------------------------------------------------
 
-STDAPI CClassFactory::CreateInstance(IUnknown *pUnkOuter, REFIID riid, void **ppvObj)
+STDAPI EkayaClassFactory::CreateInstance(IUnknown *pUnkOuter, REFIID riid, void **ppvObj)
 {
-    return _pfnCreateInstance(pUnkOuter, riid, ppvObj);
+    return mpfnCreateInstance(pUnkOuter, riid, ppvObj);
 }
 
 //+---------------------------------------------------------------------------
-//
-//  CClassFactory::LockServer
-//
+//  EkayaClassFactory::LockServer
 //----------------------------------------------------------------------------
 
-STDAPI CClassFactory::LockServer(BOOL fLock)
+STDAPI EkayaClassFactory::LockServer(BOOL fLock)
 {
     if (fLock)
     {
@@ -169,25 +142,20 @@ STDAPI CClassFactory::LockServer(BOOL fLock)
 }
 
 //+---------------------------------------------------------------------------
-//
 //  BuildGlobalObjects
-//
 //----------------------------------------------------------------------------
 
 void BuildGlobalObjects(void)
 {
     // Build CClassFactory Objects
-
-    g_ObjectInfo[0] = new CClassFactory(CLSID_EKAYA_SERVICE, EkayaInputProcessor::CreateInstance);
+    g_ObjectInfo[0] = new EkayaClassFactory(CLSID_EKAYA_SERVICE, EkayaInputProcessor::CreateInstance);
 
     // You can add more object info here.
     // Don't forget to increase number of item for g_ObjectInfo[],
 }
 
 //+---------------------------------------------------------------------------
-//
 //  FreeGlobalObjects
-//
 //----------------------------------------------------------------------------
 
 void FreeGlobalObjects(void)
@@ -204,9 +172,7 @@ void FreeGlobalObjects(void)
 }
 
 //+---------------------------------------------------------------------------
-//
 //  DllGetClassObject
-//
 //----------------------------------------------------------------------------
 
 STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, void **ppvObj)
@@ -230,7 +196,7 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, void **ppvObj)
         for (int i = 0; i < ARRAYSIZE(g_ObjectInfo); i++)
         {
             if (NULL != g_ObjectInfo[i] &&
-                IsEqualGUID(rclsid, g_ObjectInfo[i]->_rclsid))
+                IsEqualGUID(rclsid, g_ObjectInfo[i]->mRclsId))
             {
                 *ppvObj = (void *)g_ObjectInfo[i];
                 DllAddRef();    // class factory holds DLL ref count
@@ -245,9 +211,7 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, void **ppvObj)
 }
 
 //+---------------------------------------------------------------------------
-//
 //  DllCanUnloadNow
-//
 //----------------------------------------------------------------------------
 
 STDAPI DllCanUnloadNow(void)
@@ -259,9 +223,7 @@ STDAPI DllCanUnloadNow(void)
 }
 
 //+---------------------------------------------------------------------------
-//
 //  DllUnregisterServer
-//
 //----------------------------------------------------------------------------
 
 STDAPI DllUnregisterServer(void)
@@ -274,9 +236,7 @@ STDAPI DllUnregisterServer(void)
 }
 
 //+---------------------------------------------------------------------------
-//
 //  DllRegisterServer
-//
 //----------------------------------------------------------------------------
 
 STDAPI DllRegisterServer(void)

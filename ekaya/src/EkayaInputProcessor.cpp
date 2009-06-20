@@ -32,12 +32,20 @@
 #include "resource.h"
 
 static const TF_PRESERVEDKEY KEY_ONOFF = { 0x20, TF_MOD_CONTROL };
+static const TF_PRESERVEDKEY KEY_NEXT = { VK_RIGHT, TF_MOD_CONTROL };
+
 
 static const WCHAR ONOFF_DESC[]    = L"OnOff";
+static const WCHAR NEXT_DESC[]    = L"Next Keyboard";
 
 // {7963550C-192E-41e0-A7B0-898881899F1F}
 static const GUID GUID_PRESERVEDKEY_ONOFF = 
 { 0x7963550c, 0x192e, 0x41e0, { 0xa7, 0xb0, 0x89, 0x88, 0x81, 0x89, 0x9f, 0x1f } };
+
+// {21E71720-C4F5-4e4b-9DA7-E5A9E3D514DC}
+static const GUID GUID_PRESERVEDKEY_NEXT = 
+{ 0x21e71720, 0xc4f5, 0x4e4b, { 0x9d, 0xa7, 0xe5, 0xa9, 0xe3, 0xd5, 0x14, 0xdc } };
+
 
 const std::string EkayaInputProcessor::EKAYA_DIR = "\\ThanLwinSoft.org\\Ekaya";
 
@@ -189,6 +197,11 @@ STDAPI EkayaInputProcessor::Activate(ITfThreadMgr *pThreadMgr, TfClientId tfClie
                                 &KEY_ONOFF,
                                 ONOFF_DESC,
                                 (ULONG)wcslen(ONOFF_DESC));
+		//status = pKeystrokeMgr->PreserveKey(mClientId, 
+  //                              GUID_PRESERVEDKEY_NEXT,
+  //                              &KEY_NEXT,
+  //                              NEXT_DESC,
+  //                              (ULONG)wcslen(NEXT_DESC));
 
 		pKeystrokeMgr->Release();
 	}
@@ -266,6 +279,7 @@ STDAPI EkayaInputProcessor::Deactivate()
 	{
 		pKeystrokeMgr->UnadviseKeyEventSink(mClientId);
 		pKeystrokeMgr->UnpreserveKey(GUID_PRESERVEDKEY_ONOFF, &KEY_ONOFF);
+		pKeystrokeMgr->UnpreserveKey(GUID_PRESERVEDKEY_NEXT, &KEY_NEXT);
 		pKeystrokeMgr->Release();
 	}
 
@@ -383,13 +397,20 @@ STDAPI EkayaInputProcessor::OnSetFocus(ITfDocumentMgr *pDocMgrFocus, ITfDocument
 STDAPI EkayaInputProcessor::OnPushContext(ITfContext *pContext)		
 {
 	MessageLogger::logMessage("PushContext %lx\n", (long long)pContext);
-
+	// reset context
+	mContext = L"";
+	mPendingData = L"";
+	mPendingDelete = 0;
 	return S_OK;
 }
 
 STDAPI EkayaInputProcessor::OnPopContext(ITfContext *pContext)
 {
 	MessageLogger::logMessage("PopContext %lx\n", (long long)pContext);
+	// reset context
+	mContext = L"";
+	mPendingData = L"";
+	mPendingDelete = 0;
 	return S_OK;
 }
 
@@ -403,7 +424,7 @@ STDAPI EkayaInputProcessor::OnEndEdit(ITfContext *pContext, TfEditCookie ecReadO
     //
     // did the selection change?
     // The selection change includes the movement of caret as well. 
-    // The caret position is represent as the empty selection range when
+    // The caret position is represented as an empty selection range when
     // there is no selection.
     //
     if (pEditRecord->GetSelectionStatus(&fSelectionChanged) == S_OK &&
@@ -432,7 +453,7 @@ STDAPI EkayaInputProcessor::OnEndEdit(ITfContext *pContext, TfEditCookie ecReadO
 	return S_OK;
 }
 
-    // ITfKeyEventSink
+// ITfKeyEventSink
 STDAPI EkayaInputProcessor::OnSetFocus(BOOL fForeground)
 {
 	MessageLogger::logMessage("SetFocus %d\n", fForeground);
@@ -509,6 +530,21 @@ STDAPI EkayaInputProcessor::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, L
 		{
 			*pfEaten = TRUE;
 		}
+	}
+	switch (wParam)
+	{
+	case VK_HOME:
+	case VK_END:
+	case VK_LEFT:
+	case VK_UP:
+	case VK_RIGHT:
+	case VK_DOWN:
+	case VK_RETURN:
+		// reset context
+		mContext = L"";
+		mPendingData = L"";
+		mPendingDelete = 0;
+		break;
 	}
 	if (wParam == VK_BACK)
 	{
@@ -824,6 +860,14 @@ STDMETHODIMP EkayaInputProcessor::OnPreservedKey(ITfContext *pContext, REFGUID r
         BOOL fOpen = isKeyboardOpen();
         setKeyboardOpen(fOpen ? FALSE : TRUE);
         *pfEaten = TRUE;
+    }
+	else if (IsEqualGUID(rguid, GUID_PRESERVEDKEY_NEXT))
+    {
+		int next = mActiveKeyboard + 1;
+		if (next >= static_cast<int>(mKeyboards.size()))
+			next = 0;
+		setActiveKeyboard(next);
+		*pfEaten = TRUE;
     }
     else
     {

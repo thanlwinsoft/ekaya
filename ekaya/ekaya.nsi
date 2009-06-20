@@ -89,7 +89,7 @@ NoOverwrite:
   File "..\..\iconv-1.9.2.win32\bin\iconv.dll"
   File /r "doc"
   
-  ExecWait 'regsvr32 /i /s "$INSTDIR\${APP_NAME}\ekaya.dll"' $0
+  ExecWait 'regsvr32 "$INSTDIR\${APP_NAME}\ekaya.dll"' $0
   IfErrors 0 +2
 	MessageBox MB_OK|MB_ICONEXCLAMATION "Warning: Regsvr32 failed to register Ekaya Text Service DLL"
   
@@ -104,7 +104,7 @@ NoOverwrite:
 	"" "${APP_NAME}"
   CreateShortCut "$SMPROGRAMS\${APP_NAME}\${APP_NAME}Uninstall.lnk" \
 	"$INSTDIR\${APP_NAME}\Uninstall.exe" "" \
-	"$INSTDIR\${APP_NAME}\ekayaUninstall.ico" 0 SW_SHOWNORMAL \
+	"$INSTDIR\${APP_NAME}\Uninstall.exe" 0 SW_SHOWNORMAL \
 	"" "Uninstall ${APP_NAME}"
 	
   ;Store installation folder
@@ -113,6 +113,9 @@ NoOverwrite:
   
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\${APP_NAME}\Uninstall.exe"
+  
+  ; Enable Advanced Text Services for all programs on XP
+  WriteRegDWORD HKLM "SOFTWARE\Microsoft\CTF\SystemShared" "CUAS" 0x1
 
   ; add keys for Add/Remove Programs entry
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}" \
