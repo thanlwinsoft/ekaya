@@ -190,6 +190,7 @@ Section "Uninstall"
 
 AppFound:
   ; ExecWait 'regsvr32 /u /s "$INSTDIR\${APP_NAME}\ekaya.dll"' $0
+  SetOutPath "$INSTDIR"
   UnRegDLL "$INSTDIR\ekaya.dll"
 
   RMDir /r "$INSTDIR\docs"

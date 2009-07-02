@@ -24,14 +24,22 @@ static const GUID GUID_PROFILE =
 static const GUID GUID_LANGBAR_BUTTON = 
 { 0x6b9cf85a, 0x3f9b, 0x4317, { 0xad, 0x69, 0x50, 0xdb, 0xd, 0x40, 0xb7, 0xdd } };
 
+#ifdef _DEBUG
+// {0ED1B095-A469-4a68-B7F9-84E2611C813A}
+static const CLSID CLSID_EKAYA_SERVICE = 
+{ 0xed1b095, 0xa469, 0x4a68, { 0xb7, 0xf9, 0x84, 0xe2, 0x61, 0x1c, 0x81, 0x3a } };
+const char * TEXTSERVICE_DESC_A = "Ekaya Input Method (debug)";
+const wchar_t * TEXTSERVICE_DESC = L"Ekaya Input Method (debug)";
+#else
 // {ACC98569-4415-4303-8FDC-3DB142656E77}
 static const CLSID CLSID_EKAYA_SERVICE = 
 { 0xacc98569, 0x4415, 0x4303, { 0x8f, 0xdc, 0x3d, 0xb1, 0x42, 0x65, 0x6e, 0x77 } };
-
 const char * TEXTSERVICE_DESC_A = "Ekaya Input Method";
+const wchar_t * TEXTSERVICE_DESC = L"Ekaya Input Method";
+#endif
+
 
 const ULONG TEXTSERVICE_ICON_INDEX = 0;
-const wchar_t * TEXTSERVICE_DESC = L"Ekaya Input Method";
 
 //#define TEXTSERVICE_LANGID    MAKELANGID(LANG_MYANMAR, SUBLANG_DEFAULT)
 static const LANGID TEXTSERVICE_LANGID = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US);
