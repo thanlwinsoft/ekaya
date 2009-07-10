@@ -1,0 +1,15 @@
+Source: scim-kmfl-imengine
+Priority: optional
+Section: utils
+Maintainer: Doug Rintoul <doug_rintoul@sil.org>
+Uploaders: Daniel Glassey <wdg@debian.org>
+Build-Depends: debhelper (>= 4.0.0), libkmfl-dev, libscim-dev (>=1.4.4), libxkbfile-dev, libpstreams-dev
+Standards-Version: 3.6.2
+
+Package: scim-kmfl-imengine
+Section: utils
+Architecture: any
+Depends: libkmflcomp0, libkmfl0, scim (>=1.4.4), scim-qtimm, im-switch
+Description: KMFL imengine for SCIM
+ KMFL imengine for SCIM
+
