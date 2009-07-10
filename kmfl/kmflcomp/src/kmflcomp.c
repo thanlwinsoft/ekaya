@@ -268,7 +268,7 @@ void * append_to_buffer(void * buffer, long * bufsize, void * chunk, int chunk_s
     buffer=realloc(buffer, (*bufsize)+chunk_size);
     if (buffer)
     {
-        memcpy(buffer+(*bufsize), chunk, chunk_size);
+        memcpy((char*)buffer+(*bufsize), chunk, chunk_size);
         *bufsize+=chunk_size;
     } else {
         fail(4, "Out of memory\n");

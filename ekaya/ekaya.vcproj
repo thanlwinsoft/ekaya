@@ -63,8 +63,9 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libkmfl.lib gdiplus.lib"
+				OutputFile="$(OutDir)\$(ProjectName)Debug.dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;..\libkmfl-0.9.8\Debug&quot;"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)\..\winkmfl\Debug&quot;"
 				ModuleDefinitionFile="src\ekaya.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"

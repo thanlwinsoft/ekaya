@@ -2,9 +2,9 @@
 ;Ekaya NSIS Installer script
 ;Written by Keith Stribley
 
-; Some useful definitions that may need changing for different font versions
+; Some useful definitions that may need changing for different versions
 !ifndef VERSION
-  !define VERSION '0.1.0'
+  !define VERSION '0.1.1'
 !endif
 
 !define APP_NAME 'Ekaya'
@@ -86,8 +86,8 @@ NoOverwrite:
   
   File "Release\ekaya.dll"
   File "Release\ekaya.dll*.manifest*"
-  File "..\libkmfl-0.9.8\Release\libkmfl.dll"
-  File "..\libkmfl-0.9.8\Release\libkmfl.dll*.manifest*"
+  File "..\winkmfl\Release\libkmfl.dll"
+  File "..\winkmfl\Release\libkmfl.dll*.manifest*"
   File "..\..\iconv-1.9.2.win32\bin\iconv.dll"
   File /r "doc"
   
@@ -112,7 +112,7 @@ NoOverwrite:
 	"$INSTDIR\${APP_NAME}\doc\ekaya.html" '' \
 	"$INSTDIR\${APP_NAME}\ekaya.ico" 0 SW_SHOWNORMAL \
 	"" "${APP_NAME}"
-  CreateShortCut "$SMPROGRAMS\${APP_NAME}\${APP_NAME}Uninstall.lnk" \
+  CreateShortCut "$SMPROGRAMS\${APP_NAME}\Uninstall ${APP_NAME}.lnk" \
 	"$INSTDIR\${APP_NAME}\Uninstall.exe" "" \
 	"$INSTDIR\${APP_NAME}\Uninstall.exe" 0 SW_SHOWNORMAL \
 	"" "Uninstall ${APP_NAME}"
@@ -155,6 +155,10 @@ Section "MyWin Burmese Unicode 5.1 keyboard" SecMyWin
 	File "kmfl\myWin.jpg"
 	File "kmfl\myWin2.2.kmn"
 	File "kmfl\myWin2.2.html"
+	CreateShortCut "$SMPROGRAMS\${APP_NAME}\myWin2.2 Keyboard.lnk" \
+		"$INSTDIR\${APP_NAME}\kmfl\myWin2.2.html" '' \
+		"" 0 SW_SHOWNORMAL \
+		"" "myWin2.2 Keyboard"
 SectionEnd
 
 ;--------------------------------

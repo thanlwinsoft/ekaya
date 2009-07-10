@@ -35,8 +35,8 @@ size_t UTFConvert (
 	size_t result = 0;
 	char * source = *(char**)sourceStart;
 	char * target = *(char**)targetStart;
-	size_t inbytesleft = sourceEnd - *sourceStart;
-	size_t outbytesleft = targetEnd - *targetStart;
+	size_t inbytesleft = (char*)sourceEnd - *(char**)sourceStart;
+	size_t outbytesleft = (char*)targetEnd - *(char**)targetStart;
 	
 	iconv_t ic;
 

@@ -32,6 +32,16 @@ libkmfl-0.9.8/Debug/*.dep
 *.idb
 *.pdb
 *.obj
+*.dll
+*.exp
+*.lib
+*.ilk
+*.dep
+*.suo
+Debug/*.res
+Release/*.res
+*.manifest
+BuildLog.htm
 ekaya/Debug/*.idb
 ekaya/Debug/*.dep
 ekaya/Debug/*.pdb
