@@ -42,7 +42,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories=".;&quot;..\..\iconv-1.9.2.win32\include&quot;;..\kmfl\libkmfl\include;..\kmfl\kmflcomp\include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;WINKMFL_EXPORTS;YY_NO_UNISTD_H"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;WINKMFL_EXPORTS;_STDLIB_H;YY_NO_UNISTD_H"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -62,7 +62,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="iconv.lib"
-				OutputFile="$(OutDir)\libkmfl.dll"
+				OutputFile="Debug\libkmfl.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;..\..\iconv-1.9.2.win32\lib&quot;"
 				ModuleDefinitionFile="libkmfl.def"
@@ -90,7 +90,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine=""
+				CommandLine="copy $(TargetPath) $(OutDir)"
 			/>
 		</Configuration>
 		<Configuration
@@ -121,7 +121,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories=".;..\kmfl\kmflcomp\include;..\kmfl\libkmfl\include;&quot;..\..\iconv-1.9.2.win32\include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;WINKMFL_EXPORTS;YY_NO_UNISTD_H"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;WINKMFL_EXPORTS;YY_NO_UNISTD_H;_STDLIB_H"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -140,7 +140,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="iconv.lib"
-				OutputFile="$(OutDir)\libkmfl.dll"
+				OutputFile="Release\libkmfl.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;..\..\iconv-1.9.2.win32\lib&quot;"
 				ModuleDefinitionFile="libkmfl.def"
@@ -170,7 +170,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine=""
+				CommandLine="copy $(TargetPath) $(OutDir)"
 			/>
 		</Configuration>
 	</Configurations>

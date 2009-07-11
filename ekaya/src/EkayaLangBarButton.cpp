@@ -284,7 +284,7 @@ STDAPI EkayaLangBarButton::InitMenu(ITfMenu *pMenu)
                        (ULONG)desc.length(), 
                        &pHelpMenu);
 
-	HICON helpIcon = LoadIconW(g_hInst, MAKEINTRESOURCEW(IDI_EKAYA_HELP));
+	HICON helpIcon = (HICON)LoadImageW(g_hInst, MAKEINTRESOURCEW(IDI_EKAYA_HELP), IMAGE_ICON, 16, 16, 0);
 	HBITMAP hHelpBitmap = NULL;
 	Gdiplus::Bitmap * pHelpBitmap = Gdiplus::Bitmap::FromHICON(helpIcon);
 	if (pHelpBitmap) pHelpBitmap->GetHBITMAP(Gdiplus::Color::Transparent, &hHelpBitmap);
@@ -426,7 +426,8 @@ STDAPI EkayaLangBarButton::GetIcon(HICON *phIcon)
     // use default icon
     if (*phIcon == NULL)
     {
-        *phIcon = (HICON)LoadImage(g_hInst, TEXT("IDI_TEXTSERVICE"), IMAGE_ICON, 16, 16, 0);
+        *phIcon = (HICON)LoadImageW(g_hInst, MAKEINTRESOURCEW(IDI_TEXTSERVICE), IMAGE_ICON, 16, 16, 0);
+		//*phIcon = LoadIconW(g_hInst, MAKEINTRESOURCEW(IDI_TEXTSERVICE));
     }
 
     return (*phIcon != NULL) ? S_OK : E_FAIL;

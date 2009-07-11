@@ -1117,7 +1117,7 @@ void EkayaInputProcessor::setActiveKeyboard(int keyboardIndex)
 {
 	MessageLogger::logMessage("setActiveKeyboard %d", keyboardIndex);
 	mActiveKeyboard = keyboardIndex;
-	mpLangBarButton->Show(true);
+	mpLangBarButton->Show(false);
 	ITfLangBarItemMgr * pLangBarItemMgr = NULL;
 	if (mpThreadMgr->QueryInterface(IID_ITfLangBarItemMgr, (void **)&pLangBarItemMgr) == S_OK)
 	{
@@ -1131,6 +1131,7 @@ void EkayaInputProcessor::setActiveKeyboard(int keyboardIndex)
 					mpLangBarButton = NULL;
 				}
 			}
+			mpLangBarButton->Show(true);
 		}
 	    pLangBarItemMgr->Release();
 	}

@@ -147,6 +147,7 @@ unsigned long compile_keyboard_to_buffer(const char * infile, void ** keyboard_b
 	BYTE BOM[4]={0};
 	unsigned
     long size;
+	char * pTempName;
 
 	fname = infile;
 	// Open input file
@@ -170,6 +171,7 @@ unsigned long compile_keyboard_to_buffer(const char * infile, void ** keyboard_b
 	last_store=NULL;
 	kbp->deadkeys = NULL;
 	kbp->mode = KF_ANSI;		// Must be ANSI if not specified
+	pTempName = NULL;
 
 	// Check for BOM at start of file 
 	if (fread(BOM,3,1,yyin) != 1)
@@ -187,7 +189,9 @@ unsigned long compile_keyboard_to_buffer(const char * infile, void ** keyboard_b
 
 	if(BOM[0] == 0xFF && BOM[1] == 0xFE)	// Is it UTF-16?
 	{
-		yyin = UTF16toUTF8(yyin);	// Make a temporary UTF-8 copy of the file
+		yyin = UTF16toUTF8(yyin, &pTempName);	// Make a temporary UTF-8 copy of the file
+		if (yyin == NULL)
+			return 0;
 		file_format = KF_UNICODE;	// And set file format to Unicode 
 	}
 
@@ -204,7 +208,13 @@ unsigned long compile_keyboard_to_buffer(const char * infile, void ** keyboard_b
     yycleanup();
  
 	fflush(stdout);	
-	fclose(yyin); 
+	fclose(yyin);
+	if (pTempName)
+	{
+		remove(pTempName);
+		free(pTempName);
+		pTempName = NULL;
+	}
 
 	// Complete keyboard header and and check it for validity
 	check_keyboard(kbp);
@@ -1499,7 +1509,7 @@ int check_bitmap_file(STORE *sp, int line)
 }
 
 // Create a temporary file with a UTF-8 copy of a UTF-16 input file
-FILE *UTF16toUTF8(FILE *fp)
+FILE *UTF16toUTF8(FILE *fp, char ** pName)
 {
 	FILE *fp8;
 	unsigned short t16[512];
@@ -1507,7 +1517,11 @@ FILE *UTF16toUTF8(FILE *fp)
 	const UTF16 *p16,*p16a;
 	UTF8 *p8;
 
-	if((fp8=tmpfile()) == NULL) return NULL;
+	char * tempName = tempnam("/tmp", "kmfl");
+	if (tempName == NULL) return NULL;
+	fp8 = fopen(tempName, "wb+");
+	*pName = tempName;
+	if((fp8) == NULL) return NULL;
 
 #ifdef _WIN32
 	 _setmode(_fileno(fp),_O_BINARY);
@@ -1527,7 +1541,6 @@ FILE *UTF16toUTF8(FILE *fp)
 	}
 
 	fseek(fp8,0,SEEK_SET);
-	
 	return fp8;
 }
 
