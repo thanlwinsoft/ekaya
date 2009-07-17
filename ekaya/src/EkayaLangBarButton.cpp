@@ -106,9 +106,7 @@ EkayaLangBarButton::EkayaLangBarButton(EkayaInputProcessor *pTextService)
 }
 
 //+---------------------------------------------------------------------------
-//
 // dtor
-//
 //----------------------------------------------------------------------------
 
 EkayaLangBarButton::~EkayaLangBarButton()
@@ -131,9 +129,7 @@ EkayaLangBarButton::~EkayaLangBarButton()
 }
 
 //+---------------------------------------------------------------------------
-//
 // QueryInterface
-//
 //----------------------------------------------------------------------------
 
 STDAPI EkayaLangBarButton::QueryInterface(REFIID riid, void **ppvObj)
@@ -165,9 +161,7 @@ STDAPI EkayaLangBarButton::QueryInterface(REFIID riid, void **ppvObj)
 
 
 //+---------------------------------------------------------------------------
-//
 // AddRef
-//
 //----------------------------------------------------------------------------
 
 STDAPI_(ULONG) EkayaLangBarButton::AddRef()
@@ -176,9 +170,7 @@ STDAPI_(ULONG) EkayaLangBarButton::AddRef()
 }
 
 //+---------------------------------------------------------------------------
-//
 // Release
-//
 //----------------------------------------------------------------------------
 
 STDAPI_(ULONG) EkayaLangBarButton::Release()
@@ -196,9 +188,7 @@ STDAPI_(ULONG) EkayaLangBarButton::Release()
 }
 
 //+---------------------------------------------------------------------------
-//
 // GetInfo
-//
 //----------------------------------------------------------------------------
 
 STDAPI EkayaLangBarButton::GetInfo(TF_LANGBARITEMINFO *pInfo)
@@ -208,9 +198,7 @@ STDAPI EkayaLangBarButton::GetInfo(TF_LANGBARITEMINFO *pInfo)
 }
 
 //+---------------------------------------------------------------------------
-//
 // GetStatus
-//
 //----------------------------------------------------------------------------
 
 STDAPI EkayaLangBarButton::GetStatus(DWORD *pdwStatus)
@@ -220,9 +208,7 @@ STDAPI EkayaLangBarButton::GetStatus(DWORD *pdwStatus)
 }
 
 //+---------------------------------------------------------------------------
-//
 // Show
-//
 //----------------------------------------------------------------------------
 
 STDAPI EkayaLangBarButton::Show(BOOL fShow)
@@ -232,9 +218,7 @@ STDAPI EkayaLangBarButton::Show(BOOL fShow)
 }
 
 //+---------------------------------------------------------------------------
-//
 // GetTooltipString
-//
 //----------------------------------------------------------------------------
 
 STDAPI EkayaLangBarButton::GetTooltipString(BSTR *pbstrToolTip)
@@ -246,9 +230,7 @@ STDAPI EkayaLangBarButton::GetTooltipString(BSTR *pbstrToolTip)
 }
 
 //+---------------------------------------------------------------------------
-//
 // OnClick
-//
 //----------------------------------------------------------------------------
 
 STDAPI EkayaLangBarButton::OnClick(TfLBIClick click, POINT pt, const RECT *prcArea)
@@ -257,9 +239,7 @@ STDAPI EkayaLangBarButton::OnClick(TfLBIClick click, POINT pt, const RECT *prcAr
 }
 
 //+---------------------------------------------------------------------------
-//
 // InitMenu
-//
 //----------------------------------------------------------------------------
 
 STDAPI EkayaLangBarButton::InitMenu(ITfMenu *pMenu)
@@ -268,9 +248,6 @@ STDAPI EkayaLangBarButton::InitMenu(ITfMenu *pMenu)
 	{
 		return E_FAIL;
 	}
-    // 
-    // Add the keyboard open close item.
-    // 
     DWORD dwFlags = 0;
 
 	std::wstring desc = mpTextService->getMessage(IDS_HELP, L"Help");
