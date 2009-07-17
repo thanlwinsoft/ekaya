@@ -102,7 +102,7 @@ struct _keyboard {
 typedef struct _keyboard KEYBOARD;
 
 // Routine prototypes
-FILE *UTF16toUTF8(FILE *fp);
+FILE *UTF16toUTF8(FILE *fp, char ** pName);
 
 RULE *new_rule(GROUP *gp, ITEM *lhs, ITEM *rhs, int line);
 RULE *add_rule(RULE *rp, RULE *rules);
