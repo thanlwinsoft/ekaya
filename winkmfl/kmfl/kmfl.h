@@ -78,6 +78,7 @@ extern "C" {
 // Variable types and structures
 #ifdef _WIN32
 	typedef unsigned int UINT; 	// 32-bit unsigned integer (general purpose)
+	typedef int INT;	// 32-bit signed integer (general purpose)
 #else
 #include <stdint.h>
 #ifdef __uint32_t_defined
@@ -85,12 +86,12 @@ extern "C" {
 #else
 	typedef unsigned long UINT;	// 32-bit unsigned integer (general purpose)
 #endif
-#endif
 
 #ifdef __int32_t_defined
 	typedef int32_t INT;
 #else
 	typedef long INT;	// 32-bit unsigned integer (general purpose)
+#endif
 #endif
 
 #ifdef __uint8_t_defined

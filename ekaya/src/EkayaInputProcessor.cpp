@@ -514,6 +514,7 @@ STDAPI EkayaInputProcessor::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, L
 	{
 		*pfEaten = FALSE;
 		MessageLogger::logMessage("keyboard disabled\n");
+		return hr;
 	}
 	else
 	{
@@ -574,6 +575,7 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 	if (!isKeyboardOpen() || isKeyboardDisabled())
 	{
 		*pfEaten = FALSE;
+		return S_OK;
 	}
 	else
 	{

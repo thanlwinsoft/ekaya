@@ -1549,7 +1549,7 @@ FILE *UTF16toUTF8(FILE *fp, char ** pName)
 
 #include <windows.h>
 
-#define OFN_DONTADDTORECENT	0x2000000 
+//#define OFN_DONTADDTORECENT	0x2000000 
 
 char *GetInputFile(void)
 {
