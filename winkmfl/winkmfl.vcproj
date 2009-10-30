@@ -225,6 +225,22 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\kmfl\kmfl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\kmfl\kmfl_register_callbacks.h"
+				>
+			</File>
+			<File
+				RelativePath=".\kmfl\kmflcomp.h"
+				>
+			</File>
+			<File
+				RelativePath=".\kmfl\kmflutfconv.h"
+				>
+			</File>
+			<File
 				RelativePath="..\kmfl\kmflcomp\src\memman.h"
 				>
 			</File>

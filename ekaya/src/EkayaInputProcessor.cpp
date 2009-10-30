@@ -489,20 +489,24 @@ STDAPI EkayaInputProcessor::OnEndComposition(
 */
 bool EkayaInputProcessor::ignoreKey(WPARAM wParam)
 {
-	if (wParam < 0x30)
+	if (wParam < 0x30) // < '0'
 	{
+		// need to process delete when we didn't send it, since it may need special context handling
+		if (wParam == VK_BACK && mPendingDelete == 0)
+			return false;
 		if (wParam != VK_SHIFT && wParam != VK_CONTROL && wParam != VK_SPACE)
 			return true;
 		return false;
 	}
-	else if (wParam < 0x5B)
+	else if (wParam < 0x5B) // 0x41 - 0x5A A-Z
 	{
 		return false;
 	}
-	else if (wParam >= 0xBA && wParam < 0xE0)
+	else if (wParam >= 0xBA && wParam < 0xE0) // OEM keys
 	{
 		return false;
 	}
+	// ignore others
 	return true;
 }
 
@@ -547,7 +551,7 @@ STDAPI EkayaInputProcessor::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, L
 		mPendingDelete = 0;
 		break;
 	}
-	if (wParam == VK_BACK)
+	if (wParam == VK_BACK)// 0x08
 	{
 		int bkspCount = (lParam & 0xff);
 		if (mPendingDelete > 0)
@@ -562,8 +566,8 @@ STDAPI EkayaInputProcessor::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, L
 		}
 		else
 		{
-			bkspCount = min(bkspCount, static_cast<int>(mContext.length()) );
-			mContext.erase(mContext.length() - bkspCount, bkspCount);
+			//bkspCount = min(bkspCount, static_cast<int>(mContext.length()) );
+			//mContext.erase(mContext.length() - bkspCount, bkspCount);
 		}
 		MessageLogger::logMessage("Pending %d\n", mPendingDelete);
 	}
@@ -600,8 +604,7 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 		case VK_SPACE:
 			break;
 		case VK_BACK:
-			*pfEaten = FALSE;
-			return S_OK;
+			break;
 		default:
 			// ignore
 			*pfEaten = FALSE;
@@ -623,6 +626,9 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 			{
 				switch (wParam)
 				{
+				case VK_BACK:
+					wParam = 0xFF08;// backspace code used by kmfl
+					break;
 				case VK_OEM_1:// 0xBA ';:' for US
 					wParam = 0x3B;
 					break;
@@ -664,6 +670,9 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 			// shifted
 			switch (wParam)
 			{
+			case VK_BACK:// treat shift backspace same as normal backspace
+					wParam = 0xFF08;// backspace code used by kmfl
+					break;
 			case 0x30:
 				wParam = 0x29;//)
 				break;
@@ -763,7 +772,7 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 				return E_FAIL;
 		}
 	}
-	else
+	else // !mRawCodes
 	{
 		// should we use ToUnicodeEx?
 		BYTE keyState = 0;
@@ -788,10 +797,16 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 	contextView->Release();
 	MessageLogger::logMessage("Window:%lx %lx\n", (long long)hWindow, (long long)GetActiveWindow());
 
-    // A lock is required, we want it to be synchronous so we know the exact order
-    hr = pContext->RequestEditSession(mClientId, pEditSession, TF_ES_SYNC | TF_ES_READWRITE, &hr);
-
-    pEditSession->Release();
+	if (pEditSession)
+	{
+		// A lock is required, we want it to be synchronous so we know the exact order
+		hr = pContext->RequestEditSession(mClientId, pEditSession, TF_ES_SYNC | TF_ES_READWRITE, &hr);
+		pEditSession->Release();
+	}
+	else
+	{
+		MessageLogger::logMessage("No EditSession!\n");
+	}
 	return hr;
 }
 

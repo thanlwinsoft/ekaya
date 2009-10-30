@@ -43,12 +43,12 @@ public:
 	{
 		KEY_SHIFT,
 		KEY_CTRL
-	};
+	} Keys;
 	enum
 	{
 		MAX_CONTEXT = 16,
 		DUMMY_KEY = VK_OEM_8
-	};
+	} Constants;
     EkayaInputProcessor();
     ~EkayaInputProcessor();
 

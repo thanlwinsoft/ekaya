@@ -4,7 +4,7 @@
 
 ; Some useful definitions that may need changing for different versions
 !ifndef VERSION
-  !define VERSION '0.1.1'
+  !define VERSION '0.1.2'
 !endif
 
 !define APP_NAME 'Ekaya'
@@ -145,20 +145,23 @@ SectionEnd
 ; hg archive -t tbz2 ekaya-0.1.0.tar.bz2
 Section /o "Source" SecSource
 	SetOutPath "$INSTDIR\${APP_NAME}"
+	; generate the archive using mercurial
+	!system "hg archive -t tbz2 ..\ekaya-${VERSION}.tar.bz2"
 	File ..\ekaya-${VERSION}.tar.bz2
 SectionEnd
 
 ; Add more keyboard sections here as needed
-Section "MyWin Burmese Unicode 5.1 keyboard" SecMyWin
+Section "MyWin Burmese Unicode 5.2 keyboard" SecMyWin
 	SetOutPath "$INSTDIR\${APP_NAME}\kmfl"
 	File "kmfl\myWin.png"
+	File "kmfl\myWin.bmp"
 	File "kmfl\myWin.jpg"
-	File "kmfl\myWin2.2.kmn"
-	File "kmfl\myWin2.2.html"
-	CreateShortCut "$SMPROGRAMS\${APP_NAME}\myWin2.2 Keyboard.lnk" \
-		"$INSTDIR\${APP_NAME}\kmfl\myWin2.2.html" '' \
+	File "kmfl\myWin.kmn"
+	File "kmfl\myWin.html"
+	CreateShortCut "$SMPROGRAMS\${APP_NAME}\myWin Keyboard.lnk" \
+		"$INSTDIR\${APP_NAME}\kmfl\myWin.html" '' \
 		"" 0 SW_SHOWNORMAL \
-		"" "myWin2.2 Keyboard"
+		"" "myWin Keyboard"
 SectionEnd
 
 ;--------------------------------
