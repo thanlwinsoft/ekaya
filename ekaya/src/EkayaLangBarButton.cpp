@@ -341,6 +341,7 @@ STDAPI EkayaLangBarButton::OnMenuSelect(UINT wID)
     getenv_s( &requiredSize, NULL, 0, "APPDATA");
 	char * appDir = new char[requiredSize];
 	std::wstring docFile = L"";
+	std::string doc;
     // This is callback when the menu item is selected.
     //
     switch (wID)
@@ -351,7 +352,7 @@ STDAPI EkayaLangBarButton::OnMenuSelect(UINT wID)
 			if (appDir)
 			{
 				getenv_s( &requiredSize, appDir, requiredSize, "ProgramFiles" );
-				std::string doc = std::string("\"") + std::string(appDir) + EkayaInputProcessor::EKAYA_DIR + "\\doc\\ekaya.html\"";
+				doc = std::string("\"") + std::string(appDir) + EkayaInputProcessor::EKAYA_DIR + "\\doc\\ekaya.html\"";
 				docFile = UtfConversion::convertUtf8ToUtf16(doc);
 			}
 			break;
@@ -377,7 +378,7 @@ STDAPI EkayaLangBarButton::OnMenuSelect(UINT wID)
 		long long hi = reinterpret_cast<long long>(ShellExecuteW(hWnd, L"open", docFile.c_str(), NULL, NULL, SW_SHOWNORMAL));
 		if (hi != 32)
 		{
-			MessageLogger::logMessage("ShellExecute failed %ld\n", (long)hi);
+			MessageLogger::logMessage(L"ShellExecute failed %ld %ls\n", (long)hi, docFile.c_str());
 		}
 	}
 

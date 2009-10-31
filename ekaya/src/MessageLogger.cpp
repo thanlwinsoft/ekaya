@@ -37,6 +37,13 @@ void MessageLogger::logMessage(const char * msg, int param)
 	OutputDebugStringA(msgText);
 }
 
+void MessageLogger::logMessage(const char * msg, const char * param)
+{
+	char msgText[256];
+	sprintf_s(msgText, msg, param);
+	OutputDebugStringA(msgText);
+}
+
 void MessageLogger::logMessage(const char * msg, int paramA, int paramB)
 {
 	char msgText[256];
@@ -44,6 +51,47 @@ void MessageLogger::logMessage(const char * msg, int paramA, int paramB)
 	OutputDebugStringA(msgText);
 }
 
+void MessageLogger::logMessage(const char * msg, int paramA, const char * paramB)
+{
+	char msgText[256];
+	sprintf_s(msgText, msg, paramA, paramB);
+	OutputDebugStringA(msgText);
+}
+
+void MessageLogger::logMessage(const char * msg, const char * paramA, int paramB)
+{
+	char msgText[256];
+	sprintf_s(msgText, msg, paramA, paramB);
+	OutputDebugStringA(msgText);
+}
+
+void MessageLogger::logMessage(const char * msg, long paramA, const char * paramB)
+{
+	char msgText[256];
+	sprintf_s(msgText, msg, paramA, paramB);
+	OutputDebugStringA(msgText);
+}
+
+void MessageLogger::logMessage(const wchar_t * msg, long paramA, const wchar_t * paramB)
+{
+	wchar_t msgText[256];
+	swprintf_s(msgText, msg, paramA, paramB);
+	OutputDebugStringW(msgText);
+}
+
+void MessageLogger::logMessage(const char * msg, const char * paramA, long paramB)
+{
+	char msgText[256];
+	sprintf_s(msgText, msg, paramA, paramB);
+	OutputDebugStringA(msgText);
+}
+
+void MessageLogger::logMessage(const char * msg, const char * paramA, const char * paramB)
+{
+	char msgText[256];
+	sprintf_s(msgText, msg, paramA, paramB);
+	OutputDebugStringA(msgText);
+}
 void MessageLogger::logMessage(const char * msg, int paramA, int paramB, int paramC)
 {
 	char msgText[256];

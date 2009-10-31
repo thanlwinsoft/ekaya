@@ -34,7 +34,6 @@
 static const TF_PRESERVEDKEY KEY_ONOFF = { 0x20, TF_MOD_CONTROL };
 static const TF_PRESERVEDKEY KEY_NEXT = { 0x20, TF_MOD_CONTROL | TF_MOD_SHIFT };
 
-
 static const WCHAR ONOFF_DESC[]    = L"OnOff";
 static const WCHAR NEXT_DESC[]    = L"Next Keyboard";
 
@@ -46,8 +45,11 @@ static const GUID GUID_PRESERVEDKEY_ONOFF =
 static const GUID GUID_PRESERVEDKEY_NEXT = 
 { 0x21e71720, 0xc4f5, 0x4e4b, { 0x9d, 0xa7, 0xe5, 0xa9, 0xe3, 0xd5, 0x14, 0xdc } };
 
-
 const std::string EkayaInputProcessor::EKAYA_DIR = "\\ThanLwinSoft.org\\Ekaya";
+
+const std::wstring EkayaInputProcessor::LIB_NAME = std::wstring(L"Ekaya");
+const std::wstring EkayaInputProcessor::ORGANISATION = std::wstring(L"ThanLwinSoft.org");
+const std::wstring EkayaInputProcessor::CONFIG_ACTIVE_KEYBOARD = std::wstring(L"activeKeyboard");
 
 EkayaInputProcessor::EkayaInputProcessor()
 : mOpen(true), mDisabled(true), mRawCodes(true), mRefCount(1), mActiveKeyboard(-1),
@@ -492,8 +494,12 @@ bool EkayaInputProcessor::ignoreKey(WPARAM wParam)
 	if (wParam < 0x30) // < '0'
 	{
 		// need to process delete when we didn't send it, since it may need special context handling
-		if (wParam == VK_BACK && mPendingDelete == 0)
-			return false;
+		if (wParam == VK_BACK)
+		{
+			if (mPendingDelete == 0 && mContext.length() > 0)
+				return false;
+			return true;
+		}
 		if (wParam != VK_SHIFT && wParam != VK_CONTROL && wParam != VK_SPACE)
 			return true;
 		return false;
@@ -566,6 +572,8 @@ STDAPI EkayaInputProcessor::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, L
 		}
 		else
 		{
+			// backspace is now past through in case it needs context specific handling,
+			// so don't need to adjust context here
 			//bkspCount = min(bkspCount, static_cast<int>(mContext.length()) );
 			//mContext.erase(mContext.length() - bkspCount, bkspCount);
 		}
@@ -671,8 +679,8 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 			switch (wParam)
 			{
 			case VK_BACK:// treat shift backspace same as normal backspace
-					wParam = 0xFF08;// backspace code used by kmfl
-					break;
+				wParam = 0xFF08;// backspace code used by kmfl
+				break;
 			case 0x30:
 				wParam = 0x29;//)
 				break;
@@ -763,6 +771,11 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 			{
 				pEditSession = new EkayaEditSession(this, pContext, mPendingData);
 				mPendingData = L"";
+			}
+			else
+			{
+				// nothing to do
+				return S_OK;
 			}
 		}
 		else
@@ -1125,7 +1138,9 @@ void EkayaInputProcessor::initKeyboards()
 	// TODO remember last active keyboard
 	if (mKeyboards.size())
 	{
-		mActiveKeyboard = 0;
+		mActiveKeyboard = getConfigValue(CONFIG_ACTIVE_KEYBOARD, 0);
+		if (mActiveKeyboard > static_cast<int>(mKeyboards.size()))
+			mActiveKeyboard = 0;
 	}
 	MessageLogger::logMessage("initKeyboards %d", (int)mKeyboards.size());
 }
@@ -1151,5 +1166,89 @@ void EkayaInputProcessor::setActiveKeyboard(int keyboardIndex)
 			mpLangBarButton->Show(true);
 		}
 	    pLangBarItemMgr->Release();
+	}
+	setConfigValue(CONFIG_ACTIVE_KEYBOARD, keyboardIndex);
+}
+
+/**
+* Gets a configuration parameter from the registry
+* @param configName name of key
+* @param defaultValue value to return if the key isn't found
+* @return value of the configuration parameter
+*/
+int EkayaInputProcessor::getConfigValue(std::wstring configName, int defaultValue)
+{
+	HKEY hKeySoftware;
+	HKEY hKeyOrg;
+	HKEY hKeyProgram;
+	if (RegOpenKeyW(HKEY_CURRENT_USER, L"Software", &hKeySoftware) == ERROR_SUCCESS)
+	{
+		if (RegOpenKeyW(hKeySoftware, (ORGANISATION).c_str(), &hKeyOrg) == ERROR_SUCCESS)
+		{
+			if (RegOpenKeyW(hKeyOrg, (LIB_NAME).c_str(), &hKeyProgram) == ERROR_SUCCESS)
+			{
+				DWORD dValue = 0;
+				DWORD type;
+				DWORD bytes = sizeof(dValue);
+				LSTATUS ret;
+				if ((ret = RegGetValueW(hKeyProgram, NULL, configName.c_str(), RRF_RT_REG_DWORD, &type, reinterpret_cast<BYTE*>(&dValue), &bytes) == ERROR_SUCCESS) &&
+					(type == REG_DWORD))
+				{
+					int value = static_cast<int>(dValue);
+					MessageLogger::logMessage(L"Read value %d from %s\n", dValue, configName.c_str());
+					return value;
+				}
+				else
+				{
+					MessageLogger::logMessage(L"Falied to read value (error %d) from %s\n", ret, configName.c_str());
+				}
+			}
+		}
+	}
+	return defaultValue;
+}
+
+/**
+* Sets a configuration parameter in the registry
+* @param configName name of key
+* @param value to store
+*/
+void EkayaInputProcessor::setConfigValue(std::wstring configName, int value)
+{
+	HKEY hKeySoftware;
+	HKEY hKeyOrg;
+	HKEY hKeyProgram;
+	DWORD dw;
+	std::wstring keyPath = std::wstring(L"Software");
+	if (RegOpenKeyW(HKEY_CURRENT_USER, keyPath.c_str(), &hKeySoftware) == ERROR_SUCCESS)
+	{
+		if (RegOpenKeyW(hKeySoftware, (ORGANISATION).c_str(), &hKeyOrg) != ERROR_SUCCESS)
+		{
+			if (RegCreateKeyExW(hKeySoftware, (ORGANISATION).c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKeyOrg, &dw)
+				!= ERROR_SUCCESS)
+			{
+				MessageLogger::logMessage("Failed to set organisation key\n");
+				return;
+			}
+		}
+		if (RegOpenKeyW(hKeyOrg, (LIB_NAME).c_str(), &hKeyProgram) != ERROR_SUCCESS)
+		{
+			if (RegCreateKeyExW(hKeyOrg, (LIB_NAME).c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKeyProgram, &dw)
+				!= ERROR_SUCCESS)
+			{
+				MessageLogger::logMessage("Failed to set program key\n");
+				return;
+			}
+		}
+		DWORD dValue = value;
+		if (RegSetValueExW(hKeyProgram, configName.c_str(), 0, REG_DWORD, reinterpret_cast<BYTE*>(&dValue), sizeof(DWORD))
+            != ERROR_SUCCESS)
+		{
+			MessageLogger::logMessage("Failed to set key value\n");
+		}
+		else
+		{
+			RegFlushKey(hKeyProgram);
+		}
 	}
 }
