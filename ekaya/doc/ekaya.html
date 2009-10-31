@@ -4,37 +4,40 @@
   <title>Ekaya Input Method</title>
   <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
   <style type="text/css">
-  body { width: 500px !important; margin-left: 5%; margin-right: 5%; 
+  body { width: 550px !important; margin-left: 5%; margin-right: 5%; 
+	margin-top: 10px; margin-bottom: 10px;
     -moz-border-radius: 10px; border-radius: 10px; border-width: 3px; padding: 5px; 
     border-color: #c07000;
   border-top-style: solid;
   border-bottom-style: solid;
   border-left-style: dotted;
   border-right-style: dotted;
-  background: #ffffd0;
+  background-color: #ffffd0;
     }
-  div.body { text-align: justify; }
+  div.body { text-align: justify; background-color: #fffff0; padding: 5px;}
   h1 { text-align: left; font-size: 18pt; text-align: center;}
   div.footnote { border-top-style: solid; border-top-width: 1px; text-align: right; font-size: 0.8em; }
   </style>
   <script type="text/javascript">
-  var center = function() {
+  var center = function() {;
+    var border = 40;
+	var mainWidth = 550;
     if (window.innerWidth)
     {
-		if (window.innerWidth > 550)
+		if (window.innerWidth > mainWidth+ border)
 		{
-			document.body.style.marginLeft = 0.5 * (window.innerWidth - 520);
-			document.body.style.marginRight = 0.5 * (window.innerWidth - 520);
+			document.body.style.marginLeft = 0.5 * (window.innerWidth - mainWidth - border);
+			document.body.style.marginRight = 0.5 * (window.innerWidth - mainWidth - border);
 		}
 		else
 		{
-			document.body.style.marginLeft = 50;
+			document.body.style.marginLeft = 10;
 		}
     }
-    else if (document.body.clientWidth > 550)
+    else if (document.body.clientWidth > mainWidth+ border)
     {
-        document.body.style.marginLeft = 0.5 * (document.body.clientWidth - 520);
-        document.body.style.marginRight = 0.5 * (document.body.clientWidth - 520);
+        document.body.style.marginLeft = 0.5 * (document.body.clientWidth - mainWidth - border);
+        document.body.style.marginRight = 0.5 * (document.body.clientWidth - mainWidth - border);
     }
 	else
 	{
@@ -46,13 +49,13 @@
   <link href="ekaya.png" rel="shortcut icon"/>
 </head>
 <body onload="center();">
+<div id="body" class="body">
 <div style="float: left;">
 <a href="http://thanlwinsoft.org/" title="ThanLwinSoft"><img src="ThanLwin.jpg" alt="ThanLwinSoft.org" /></a> 
 </div>
 <div style="float: right;">
 <a href="http://thanlwinsoft.org/ThanLwinSoft/Ekaya/"><img src="ekaya.png" alt=""/></a>
 </div>
-<div id="body" class="body">
 <h1>Ekaya Input Method</h1>
 <p style="clear: both;">Ekaya Input Method currently supports Keyboard layouts written for Tavultesoft Keyman by using the Open Source KMFL library. 
 This means that the keyboard can do context specific reordering as you type to make sure that the data is stored in the correct order. This is often required for the complex scripts found in SE Asia.
