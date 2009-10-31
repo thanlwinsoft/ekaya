@@ -164,6 +164,17 @@ Section "MyWin Burmese Unicode 5.2 keyboard" SecMyWin
 		"" "myWin Keyboard"
 SectionEnd
 
+Section /o "Sgaw Karen Unicode 5.2 keyboard" SecSgawKaren
+	SetOutPath "$INSTDIR\${APP_NAME}\kmfl"
+	File "kmfl\kswKeyboard.bmp"
+	File "kmfl\kswKeyboard.png"
+	File "kmfl\SgawKaren.kmn"
+	File "kmfl\SgawKaren.html"
+	CreateShortCut "$SMPROGRAMS\${APP_NAME}\myWin Keyboard.lnk" \
+		"$INSTDIR\${APP_NAME}\kmfl\SgawKaren.html" '' \
+		"" 0 SW_SHOWNORMAL \
+		"" "Sgaw Karen Keyboard"
+SectionEnd
 ;--------------------------------
 ;Descriptions
 
