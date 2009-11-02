@@ -1,0 +1,122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Ekaya Input Method</title>
+  <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+  <style type="text/css">
+  body { width: 550px !important; margin-left: 5%; margin-right: 5%; 
+	margin-top: 10px; margin-bottom: 10px;
+    -moz-border-radius: 10px; border-radius: 10px; border-width: 3px; padding: 5px; 
+    border-color: #c07000;
+  border-top-style: solid;
+  border-bottom-style: solid;
+  border-left-style: dotted;
+  border-right-style: dotted;
+  background-color: #ffffd0;
+    }
+  div.body { text-align: justify; background-color: #fffff0; padding: 5px;}
+  h1 { text-align: left; font-size: 18pt; text-align: center;}
+  div.footnote { border-top-style: solid; border-top-width: 1px; text-align: right; font-size: 0.8em; }
+  .my { font-family: Padauk, Myanmar3; }
+  </style>
+  <script type="text/javascript">
+  var center = function() {;
+    var border = 40;
+	var mainWidth = 550;
+    if (window.innerWidth)
+    {
+		if (window.innerWidth > mainWidth+ border)
+		{
+			document.body.style.marginLeft = 0.5 * (window.innerWidth - mainWidth - border);
+			document.body.style.marginRight = 0.5 * (window.innerWidth - mainWidth - border);
+		}
+		else
+		{
+			document.body.style.marginLeft = 10;
+		}
+    }
+    else if (document.body.clientWidth > mainWidth+ border)
+    {
+        document.body.style.marginLeft = 0.5 * (document.body.clientWidth - mainWidth - border);
+        document.body.style.marginRight = 0.5 * (document.body.clientWidth - mainWidth - border);
+    }
+	else
+	{
+		document.body.style.marginLeft = 50;
+	}
+  };
+  window.onresize=center;
+  </script>
+  <link href="ekaya.png" rel="shortcut icon"/>
+</head>
+<body onload="center();">
+<div id="body" class="body">
+<div style="float: left;">
+<a href="http://thanlwinsoft.org/" title="ThanLwinSoft"><img src="ThanLwin.jpg" alt="ThanLwinSoft.org" /></a> 
+</div>
+<div style="float: right;">
+<a href="http://thanlwinsoft.org/ThanLwinSoft/Ekaya/"><img src="ekaypng" alt=""/></a>
+</div>
+<h1>အက္ခရာထည့်သွင်းခြင်းနည်းလမ်း</h1>
+<p style="clear: both;">အက္ခရာထည့်သွင်းခြင်းနည်းလမ်းသည် လွတ်လပ်စွာဝင်ရောက်ပြင်ဆင်နိုင်သောရင်းမြစ်လိုင်ဘရီကိုသုံးခြင်းဖြင့် Tavultsoft Keyman အတွက် ကီးဘုတ် အဆင်အပြင်ကို လက်ရှိထောက်ပံ့သည်။ ဆိုလိုသည်မှာ အချက်အလက်များမှန်ကန်အစီစဉ်ကျစွာ ထားသိုနိုင်ရန်အတွက် ရိုက်နှိပ်သောကြောင့် ကီးဘုတ်သည် စာသားအခြေအနေဆက်စပ်မှုကို တိကျစွာပြန်လည်စီစဉ်ပေးခြင်းကို လုပ်နိုင်သည်။ အရှေ့တောင်အာရှရှိ ရှုပ်ထွေးသော စာရေးသားခြင်းအတွက် ၎င်းကို မကြာခဏလိုအပ်မည်။
+</p>
+<ul>
+<li><a href="#config">Configuration</a></li>
+<li><a href="#usage">Using Ekaya</a></li>
+<li><a href="#keyboards">Installing Keyboards</a></li>
+</ul>
+<h2 id="config">ဖွဲစည်းထားပုံ</h2>
+<p>အက္ခရာသည် Windows Advanced Text Services ကို အသုံးပြုသည်။ ၎င်းကို <em>Keyboards and Languages</em> တက်ဘ် ရှိ <em>Control Panel / Regional and Language Options</em> တွင် အခြားအရာများနှင့်တွဲသုံးနိုင်ရန် စီစဉ်ထားသည်။ 
+ဒိုင်ယာလော့ဘောက်ဖွင့်ရန်<em>Change Keyboards</em>ကိုနှိပ်ပါ။ 
+(XP ပေါ်တွင်<em>Details</em> ကိုနှိပ်ပါ။) English-US ဒေသအတွက် သုံးရန် အက္ခရာကို ဖွဲ့စည်းထားသည်။ ဒါကြောင့် ထည့်သွင်းခြင်းပြီးနောက်<em>Ekaya Input Method</em> ကို <em>General</em> တက်ဘ်ပေါ်ရှိ English-US အောက်တွင်တွေ့မည်။ <em>Advanced Key Settings</em> တက်ဘ်ပေါ်တွင် အက္ခရာအတွက် အတိုကောက် သော့ချက်ကို ပြုလုပ်နိုင်သည်။ 
+p style="text-align: center;">
+<img style="display:inline; margin-left: 5px;" src="KeyboardsAndLanguages.png" />
+</p>
+<h3>XP ပေါ်တွင်ဖွဲ့စည်းပုံ</h3>
+<p>Windows XP ပေါ်တွင် မြန်မာယူနီကုတ် ၅.၁ ဖောင့်အတွက် မှန်ကန်စွာဖော်ပြနိုင်ရန် <em>Install files for complex script and right to left languages</em>အမှတ်ခြစ်ပါ။
+</p>
+<p style="text-align: center;">
+<img style="display:inline; margin-left: 5px;" src="ComplexScriptSupport.png" />
+</p>
+<p>အဆိုပါစာမျက်နှာပေါ်တွင် နောက်ထပ်ဖွဲ့စည်းပုံ ရွေးနိုင်မှုအတွက် Details ကိုနှိပ်ပါ။အက္ခရာထည့်သွင်းမှုကို ပြုလုပ်သော်လည်း ပရိုဂရမ်အားလုံးတွင် Advanced Text Services ကိုလည်း သုံးနိုင်ရန် လိုအပ်လိမ့်မည်။ အကျိုးသက်ရောက်ရရန်အတွက် ကွန်ပျူတာ ပိတ်ပြီပြန်ဖွင့်ရန် လိုအပ်သည်။
+</p>
+<p style="text-align: center;">
+<img style="display:inline; margin-left: 5px;" src="AdvancedTextServices.png" />
+</p>
+
+<h2 id="usage">Using Ekaya</h2>
+<img style="float:right; margin-left: 5px;" src="langbar.png" />
+<p>အက္ခရာကို ထည့်သွင်းသောအခါ Task Bar (သို့) Language Bar တစ်ခုခုပေါ်ရှိ ကီးဘုတ်အိုင်ကွန်မှ အက္ခရာကို ပြောင်းသုံးနိုင်သည်။ 
+ကီးဘုတ်အိုင်ကွန်ကို နှိပ်ပါ။ ပြီးနောက် မီနူးမှ <em>Ekaya Input Method</em> ကို ရွေးချယ်ပါ။ 
+
+<img style="float:right; margin-left: 5px;" src="langbarEkaya.png" />ထည့်သွင်းပြီးသော KMFL ကီးဘုတ်မြောက်မြားစွာရှိနိုင်သည်။ ထို့ကြောင့် အက္ခရာအိုင်ကွန်နှင့်ကပ်လျက်ရှိသော အက္ခရာမီနူးပေါ်မှာ ကီးဘုတ်များကို ပြောင်းနိုင်သည်။  <img src="../ekaya.ico" alt=""/>.
+အက္ခရာမီနူးကို မမြင်ရင် Language Bar ကို သွားပါ။ <em>Additional icons in taskbar</em> ကို အမှတ်ခြစ်ပါ။ 
+</p>
+<img style="float:right; margin-left: 5px;" src="langbarMenu.png"/>
+<p>
+Ctrl+Space  အက္ခရာနှင့် ရိုးရိုးကီးဘုတ်ပြောင်းသည်။
+</p>
+<p>
+Ctrl+Shift+Space နောက်ထပ်အက္ခရာကီးဘုတ်ပြောင်းသည်။
+</p>
+<h2 id="keyboards">Installing Keyboards</h2>
+<p>ကီးဘုတ်ကို Keyman/KMFL စီစဉ်ဖွဲ့စည်းမှုတွင် <tt>.kmn</tt>နောက်ဆက်တွဲဖိုင်နှင့်အတူ ရေးရန်လိုအပ်သည်။ <tt>kmn</tt> ဖိုင်ကို 
+<tt>C:\Program Files\ThanLwinSoft.org\Ekaya\kmfl</tt>သို့ အစက်များပုံ ရည်ညွှန်းချက်တစ်ခုခုနှင့်အတူ ကူးပါ။ 
+HTML စီစဉ်ဖွဲ့စည်းမှုတွင် မှတ်တမ်းမှတ်ရာပြုလုပ်ခြင်းရှိရင် <tt>kmn</tt> ဖိုင်အဖြစ် တူညီသောဖိုင်အမည်နှင့်အတူ သို့မဟုတ် .html နောက်ဆက်တွဲဖိုင်အဖြစ် တူသောဒရိုက်ထရီသို့ ၎င်းကို ကူးယူပါ။
+ကွန်ပျူတာ အုပ်ချုပ်သူ၏ ဝင်ရောက်ကြည့်နိုင်ရန် ခွင့်မရှိလျှင် သင့်ကွန်ပျူတာ ဒရိုက်ထရီတွင် <tt>AppData\Roaming\ThanLwinSoft.org\Ekaya\kmfl</tt> အောက်မှာ ကီးဘုတ်ကို ထည့်သွင်းနိုင်သည်။ (Window XP ပေါ်တွင် <tt>Application Data\ThanLwinSoft.org\Ekaya\kmfl</tt>) ၎င်းမရှိလျှင် ဒရိုက်ထရီ တစ်ခု ဖန်တီးပါ။
+</p>
+</div>
+<div class="footnote">
+<p>သတင်းအချက်အလက်ပိုများအတွက်ကြည့်ရန် <a href="http://www.thanlwinsoft.org/">ThanLwinSoft.org</a>.<br />
+ဆော့ဝဲပြဿနာအတွက် အီးမေးလ်ပိုရန်
+<a id="devtls" href="">thanlwinsoft</a>.
+</p>
+<script type="text/javascript">
+document.getElementById("devtls").href = "mai" + "lto:" + "devel" +
+    "\u0040thanlw" + "insoft." + "org";
+document.getElementById("devtls").innerHTML = "devel" +
+    "\u0040thanlw" + "insoft." + "org";
+</script>
+</div>
+</body>
+</html>
