@@ -158,6 +158,7 @@ Section "MyWin Burmese Unicode 5.2 keyboard" SecMyWin
 	File "kmfl\myWin.jpg"
 	File "kmfl\myWin.kmn"
 	File "kmfl\myWin.html"
+	File "kmfl\myWin_my.html"
 	CreateShortCut "$SMPROGRAMS\${APP_NAME}\myWin Keyboard.lnk" \
 		"$INSTDIR\${APP_NAME}\kmfl\myWin.html" '' \
 		"" 0 SW_SHOWNORMAL \
