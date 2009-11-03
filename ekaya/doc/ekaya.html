@@ -15,8 +15,10 @@
   background-color: #ffffd0;
     }
   div.body { text-align: justify; background-color: #fffff0; padding: 5px;}
-  h1 { text-align: left; font-size: 18pt; text-align: center;}
+  h1 { text-align: left; font-size: 18pt; text-align: center; clear: both; }
   div.footnote { border-top-style: solid; border-top-width: 1px; text-align: right; font-size: 0.8em; }
+  .my { font-family: Padauk, Myanmar3; }
+.chooseLang { float: right; margin-right: 0.5em; }
   </style>
   <script type="text/javascript">
   var center = function() {;
@@ -50,11 +52,16 @@
 </head>
 <body onload="center();">
 <div id="body" class="body">
+
 <div style="float: left;">
 <a href="http://thanlwinsoft.org/" title="ThanLwinSoft"><img src="ThanLwin.jpg" alt="ThanLwinSoft.org" /></a> 
 </div>
 <div style="float: right;">
 <a href="http://thanlwinsoft.org/ThanLwinSoft/Ekaya/"><img src="ekaya.png" alt=""/></a>
+</div>
+<div class="chooseLang">
+<a href="ekaya.html">English</a> |
+<a href="ekaya_my.html" class="my">မြန်မာလို</a>
 </div>
 <h1>Ekaya Input Method</h1>
 <p style="clear: both;">Ekaya Input Method currently supports Keyboard layouts written for Tavultesoft Keyman by using the Open Source KMFL library. 
