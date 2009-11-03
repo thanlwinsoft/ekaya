@@ -49,7 +49,7 @@ const std::string EkayaInputProcessor::EKAYA_DIR = "\\ThanLwinSoft.org\\Ekaya";
 
 const std::wstring EkayaInputProcessor::LIB_NAME = std::wstring(L"Ekaya");
 const std::wstring EkayaInputProcessor::ORGANISATION = std::wstring(L"ThanLwinSoft.org");
-const std::wstring EkayaInputProcessor::CONFIG_ACTIVE_KEYBOARD = std::wstring(L"activeKeyboard");
+const std::string EkayaInputProcessor::CONFIG_ACTIVE_KEYBOARD = std::string("activeKeyboard");
 
 EkayaInputProcessor::EkayaInputProcessor()
 : mOpen(true), mDisabled(true), mRawCodes(true), mRefCount(1), mActiveKeyboard(-1),
@@ -1176,7 +1176,7 @@ void EkayaInputProcessor::setActiveKeyboard(int keyboardIndex)
 * @param defaultValue value to return if the key isn't found
 * @return value of the configuration parameter
 */
-int EkayaInputProcessor::getConfigValue(std::wstring configName, int defaultValue)
+int EkayaInputProcessor::getConfigValue(std::string configName, int defaultValue)
 {
 	HKEY hKeySoftware;
 	HKEY hKeyOrg;
@@ -1191,16 +1191,17 @@ int EkayaInputProcessor::getConfigValue(std::wstring configName, int defaultValu
 				DWORD type;
 				DWORD bytes = sizeof(dValue);
 				LSTATUS ret;
-				if ((ret = RegGetValueW(hKeyProgram, NULL, configName.c_str(), RRF_RT_REG_DWORD, &type, reinterpret_cast<BYTE*>(&dValue), &bytes) == ERROR_SUCCESS) &&
+				// RegGetValueW doesn't seem to work on Windows XP
+				if ((ret = RegGetValueA(hKeyProgram, NULL, configName.c_str(), RRF_RT_REG_DWORD, &type, reinterpret_cast<BYTE*>(&dValue), &bytes) == ERROR_SUCCESS) &&
 					(type == REG_DWORD))
 				{
 					int value = static_cast<int>(dValue);
-					MessageLogger::logMessage(L"Read value %d from %s\n", dValue, configName.c_str());
+					MessageLogger::logMessage("Read value %d from %s\n", value, configName.c_str());
 					return value;
 				}
 				else
 				{
-					MessageLogger::logMessage(L"Falied to read value (error %d) from %s\n", ret, configName.c_str());
+					MessageLogger::logMessage("Falied to read value (error %d) from %s\n", ret, configName.c_str());
 				}
 			}
 		}
@@ -1213,7 +1214,7 @@ int EkayaInputProcessor::getConfigValue(std::wstring configName, int defaultValu
 * @param configName name of key
 * @param value to store
 */
-void EkayaInputProcessor::setConfigValue(std::wstring configName, int value)
+void EkayaInputProcessor::setConfigValue(std::string configName, int value)
 {
 	HKEY hKeySoftware;
 	HKEY hKeyOrg;
@@ -1241,7 +1242,7 @@ void EkayaInputProcessor::setConfigValue(std::wstring configName, int value)
 			}
 		}
 		DWORD dValue = value;
-		if (RegSetValueExW(hKeyProgram, configName.c_str(), 0, REG_DWORD, reinterpret_cast<BYTE*>(&dValue), sizeof(DWORD))
+		if (RegSetValueExA(hKeyProgram, configName.c_str(), 0, REG_DWORD, reinterpret_cast<BYTE*>(&dValue), sizeof(DWORD))
             != ERROR_SUCCESS)
 		{
 			MessageLogger::logMessage("Failed to set key value\n");

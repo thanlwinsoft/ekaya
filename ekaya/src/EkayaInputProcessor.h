@@ -127,12 +127,12 @@ public:
 		mPendingDelete = pendingDelete;
 	}
 	ITfContext * getTextEditSinkContext() { return mpTextEditSinkContext; }
-	int getConfigValue(std::wstring configName, int defaultValue);
-	void setConfigValue(std::wstring configName, int value);
+	int getConfigValue(std::string configName, int defaultValue);
+	void setConfigValue(std::string configName, int value);
 	static const std::string EKAYA_DIR;
 	static const std::wstring ORGANISATION;
 	static const std::wstring LIB_NAME;
-	static const std::wstring CONFIG_ACTIVE_KEYBOARD;
+	static const std::string CONFIG_ACTIVE_KEYBOARD;
 private:
 	HRESULT setTextEditSink(ITfDocumentMgr *pDocMgrFocus);
 	bool ignoreKey(WPARAM code);
