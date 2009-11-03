@@ -8,7 +8,7 @@
 * { font-family: Padauk, Myanmar3, Parabaik, 'MyMyanmar Unicode'; }
 .warning { color: red; }
 body { margin: 0px; padding: 0px; background-color: #ffffd0;}
-h1 { text-align: center; line-height: 1.2em; }
+h1 { text-align: center; line-height: 1.2em; clear: both; }
 
 div.main { margin: 10px; padding: 5px; 
 	text-align:justify; 
@@ -49,6 +49,7 @@ td span.my { float: right; color: #f0f0ff;  }
 @media print {
     div.main { margin-left: 10px !important; }
 }
+.chooseLang { float: right; }
   </style>
   <script type="text/javascript">
   var center = function() {
@@ -83,6 +84,10 @@ td span.my { float: right; color: #f0f0ff;  }
 <body onload="center();">
 
 <div class="main" id="main">
+<div class="chooseLang">
+<a href="myWin.html">English</a> |
+<a href="myWin_my.html">မြန်မာလို</a>
+</div>
 <h1>myWin</h1>
 
 <h2>Myanmar Keyboard Layout for Unicode 5.2</h2>
