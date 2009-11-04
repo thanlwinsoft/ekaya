@@ -64,7 +64,7 @@
 
 Section "-!${APP_NAME}" SecApp
   
-  IfFileExists "$INSTDIR" 0 BranchNoExist
+  IfFileExists "$INSTDIR\${APP_NAME}" 0 BranchNoExist
     
     MessageBox MB_YESNO|MB_ICONQUESTION "Would you like to overwrite existing ${APP_NAME} directory?" IDNO  NoOverwrite ; skipped if file doesn't exist
 
@@ -212,32 +212,27 @@ AppFound:
   SetOutPath "$INSTDIR"
   UnRegDLL "$INSTDIR\ekaya.dll"
 
-  RMDir /r "$INSTDIR\docs"
-  RMDir /r "$INSTDIR\kmfl"
+  RMDir /r /REBOOTOK "$INSTDIR\doc"
+  RMDir /r /REBOOTOK "$INSTDIR\kmfl"
   Delete /REBOOTOK "$INSTDIR\ekaya.dll"
   Delete /REBOOTOK "$INSTDIR\iconv.dll"
   Delete /REBOOTOK "$INSTDIR\libkmfl.dll"
   Delete /REBOOTOK "$INSTDIR\license.txt"
   Delete /REBOOTOK "$INSTDIR\ekaya.ico"
+  Delete /REBOOTOK "$INSTDIR\*.manifest"
+  Delete /REBOOTOK "$INSTDIR\msvc*90.dll"
   
   Delete "$INSTDIR\ekaya-${VERSION}.tar.bz2"
 
   Delete /REBOOTOK "$INSTDIR\Uninstall.exe"
 
-  RMDir "$INSTDIR"
-  
   Delete  "$DESKTOP\${APP_NAME}.lnk"
   RMDir /r "$SMPROGRAMS\${APP_NAME}"
 
   DeleteRegKey /ifempty HKLM "Software\${INSTALL_SUFFIX}"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}"
   
-  IfFileExists "$INSTDIR\workspace" 0 end
-    MessageBox MB_YESNO|MB_ICONEXCLAMATION "$INSTDIR\workspace exists. This may contain some of your own files. Do you want to remove it as well?" IDYES 0 IDNO end
-  
   RMDir /REBOOTOK /r "$INSTDIR"
-
-end:
 
 SectionEnd
 
