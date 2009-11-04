@@ -1191,9 +1191,11 @@ int EkayaInputProcessor::getConfigValue(std::string configName, int defaultValue
 				DWORD type;
 				DWORD bytes = sizeof(dValue);
 				LSTATUS ret;
-				// RegGetValueW doesn't seem to work on Windows XP
-				if ((ret = RegGetValueA(hKeyProgram, NULL, configName.c_str(), RRF_RT_REG_DWORD, &type, reinterpret_cast<BYTE*>(&dValue), &bytes) == ERROR_SUCCESS) &&
-					(type == REG_DWORD))
+				// RegGetValue doesn't seem to work on Windows XP
+//				if ((ret = RegGetValueA(hKeyProgram, NULL, configName.c_str(), RRF_RT_REG_DWORD, &type, reinterpret_cast<BYTE*>(&dValue), &bytes) == ERROR_SUCCESS) &&
+                if ((ret = RegQueryValueExA(hKeyProgram, configName.c_str(), NULL,
+                    &type, reinterpret_cast<BYTE*>(&dValue), &bytes) == ERROR_SUCCESS)
+					&& (type == REG_DWORD))
 				{
 					int value = static_cast<int>(dValue);
 					MessageLogger::logMessage("Read value %d from %s\n", value, configName.c_str());
@@ -1203,8 +1205,11 @@ int EkayaInputProcessor::getConfigValue(std::string configName, int defaultValue
 				{
 					MessageLogger::logMessage("Falied to read value (error %d) from %s\n", ret, configName.c_str());
 				}
+        		RegCloseKey(hKeyProgram);
 			}
+    		RegCloseKey(hKeyOrg);
 		}
+		RegCloseKey(hKeySoftware);
 	}
 	return defaultValue;
 }
@@ -1228,6 +1233,7 @@ void EkayaInputProcessor::setConfigValue(std::string configName, int value)
 			if (RegCreateKeyExW(hKeySoftware, (ORGANISATION).c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKeyOrg, &dw)
 				!= ERROR_SUCCESS)
 			{
+			    RegCloseKey(hKeySoftware);
 				MessageLogger::logMessage("Failed to set organisation key\n");
 				return;
 			}
@@ -1237,6 +1243,7 @@ void EkayaInputProcessor::setConfigValue(std::string configName, int value)
 			if (RegCreateKeyExW(hKeyOrg, (LIB_NAME).c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKeyProgram, &dw)
 				!= ERROR_SUCCESS)
 			{
+        		RegCloseKey(hKeyOrg);
 				MessageLogger::logMessage("Failed to set program key\n");
 				return;
 			}
@@ -1249,7 +1256,11 @@ void EkayaInputProcessor::setConfigValue(std::string configName, int value)
 		}
 		else
 		{
-			RegFlushKey(hKeyProgram);
+		    // Shouldn't need to flush
+			// RegFlushKey(hKeyProgram);
 		}
+		RegCloseKey(hKeyProgram);
+		RegCloseKey(hKeyOrg);
+		RegCloseKey(hKeySoftware);
 	}
 }
