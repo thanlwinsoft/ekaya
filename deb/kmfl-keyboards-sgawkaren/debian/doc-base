@@ -1,0 +1,10 @@
+Document: kmfl-keyboards-sgawkaren
+Title: Keyboard layout for Sgaw Karen
+Author: Keith Stribley
+Abstract: Describes the keyboard layout used by the Sgaw Karen Unicode keyboard for use with SCIM/KMFL.
+Section: System/Language Environment
+
+Format: HTML
+Index: /usr/share/doc/kmfl-keyboards-sgawkaren/SgawKaren.html
+Files: /usr/share/doc/kmfl-keyboards-sgawkaren/*.html
+

@@ -1,0 +1,18 @@
+Source: kmfl-keyboards-sgawkaren
+Section: utils
+Priority: extra
+Maintainer: Keith Stribley <devel@thanlwinsoft.org>
+Build-Depends: debhelper (>= 5)
+Standards-Version: 3.8.3
+Homepage: http://www.thanlwinsoft.org/
+
+Package: kmfl-keyboards-sgawkaren
+Architecture: all
+Depends: scim-kmfl-imengine
+Recommends: ttf-sil-padauk
+Description: Sgaw Karen Unicode Keyboard
+ This implements a smart keyboard for Sgaw Karen using SCIM and KMFL. 
+ It performs sequence checking and reordering to ensure that
+ the text is conformant to Unicode Technical Note 11.
+ This keyboard supports the changes in Unicode 5.1.0.
+

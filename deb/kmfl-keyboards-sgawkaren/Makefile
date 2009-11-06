@@ -6,10 +6,11 @@
 # the GNU Lesser General Public License  either version 2.1 of the
 # License, or (at your option) any later version.
 
-kmnBase=myWin
+kmnBase=SgawKaren
 kmnFile=$(kmnBase).kmn
+iconStem=SgawKaren
 keyboardDir=../../ekaya/kmfl
-packageName=kmfl-keyboards-mywin
+packageName=kmfl-keyboards-sgawkaren
 keyboardVersion=
 
 include version.mk
@@ -32,14 +33,13 @@ tar: $(keyboardDir)/$(kmnFile) $(keyboardDir)/$(kmnBase)*
 	cp changelog $(packageName)-$(keyboardVersion)
 	cp $(keyboardDir)/$(kmnFile) $(packageName)-$(keyboardVersion)
 	cp $(keyboardDir)/$(kmnBase)*.html $(packageName)-$(keyboardVersion)
-	cp $(keyboardDir)/$(kmnBase)*.png $(packageName)-$(keyboardVersion)
-	cp $(keyboardDir)/$(kmnBase)*.jpg $(packageName)-$(keyboardVersion)
-	cp $(keyboardDir)/$(kmnBase)*.bmp $(packageName)-$(keyboardVersion)
+	cp $(keyboardDir)/$(iconStem)*.png $(packageName)-$(keyboardVersion)
+	cp $(keyboardDir)/$(iconStem)*.bmp $(packageName)-$(keyboardVersion)
 	tar -zcf $(packageName)_$(keyboardVersion).tar.gz $(packageName)-$(keyboardVersion)
 	rm -rf $(packageName)-$(keyboardVersion)
 
 version.mk : $(keyboardDir)/$(kmnFile) debian/changelog
-	grep NAME $(keyboardDir)/$(kmnFile) | sed "s/.*my-Win \(.*\) Unicode.*/keyboardVersion=\\1/" >version.mk
+	iconv -f UTF16 -t UTF8 $(keyboardDir)/$(kmnFile) | grep NAME | sed 's/[\ a-zA-Z\"]*\([0-9.]*\)[^0-9]*/keyboardVersion=\1/' >version.mk
 	echo pkgVersion=`head -n 1 debian/changelog | sed 's/[^\(]*(\(.*\)).*/\1/'` >> $@
 
 clean:
