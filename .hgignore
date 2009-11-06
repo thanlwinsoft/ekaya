@@ -53,3 +53,9 @@ ekaya/Debug/*.dll
 ekaya/Debug/*.res
 ekaya/Debug/*.obj
 ekaya/Debug/*.htm
+*.dsc
+*.deb
+*.gz
+*.changes
+*.log
+

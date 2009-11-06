@@ -1,0 +1,23 @@
+KRS   2.3.0   21-Oct-2009     Change to use normalized order. Improve Kinzi handling.
+KRS   2.2.7   26-Sep-2009     Fix backspace with medial + 1031
+KRS   2.2.6   28-Aug-2009     Fix typing U+100B U+1039 U+100C U+1031
+KRS   2.2.5   15-Nov-2008     Kinzi with 104e
+KRS   2.2.4   30-Jul-2008     Fixed 078 cons cons bug                            
+KRS   2.2.3   19-Jul-2008     More corrections for when numbers are used
+                              and out of sequence upper/lower dot
+KRS   2.2.2                   Fix medial regressions
+KRS   2.2.1   21-May-2008     Add full syllable context for medial substitutions
+KRS   2.2     23-Apr-2008     Add extra rules to correct 0478 when used as consonants
+                              Additional rules to correct common typos
+                              Change hot key to Ctrl+Alt+M for Windows
+KRS	2.1.1	12-Dec-2007	    Change references to Unicode 5.1
+                              Change filler to 200C, since 200B causes problems in OOo
+KRS   2.1     22-Jul-2006     Correct handling of u102A when types as composite
+MJPH  1.1     21-APR-2006     Convert to proposed new Unicode 5.1 model n3043
+KRS   1.03    04-Sep-2004     Now uses U+200D with YRWH medials following U+1004
+KRS   1.02    01-Jul-2004     Improved behaviour when deleting 1031
+                              Added option to type 1031 + stack key for Kinzi
+                              Shift+Space = ZNSP and ~ = WJ
+KRS   1.01    31-May-2004     Added 25CC to consU   
+KRS   1.00    28-May-2004     Initial version
+

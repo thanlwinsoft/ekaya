@@ -1,0 +1,10 @@
+Document: kmfl-keyboards-mywin
+Title: Myanmar Keyboard layout for myWin
+Author: Keith Stribley
+Abstract: Describes the keyboard layout used by the myWin Myanmar Unicode keyboard for use with SCIM/KMFL.
+Section: System/Language Environment
+
+Format: HTML
+Index: /usr/share/doc/kmfl-keyboards-mywin/myWin.html
+Files: /usr/share/doc/kmfl-keyboards-mywin/*.html
+

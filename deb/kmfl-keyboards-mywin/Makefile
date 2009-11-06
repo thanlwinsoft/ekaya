@@ -1,0 +1,48 @@
+# Copyright: (C) 2009, Keith Stribley <devel@thanlwinsoft.org>
+#
+# License:
+#
+# You are free to distribute this software under the terms of
+# the GNU Lesser General Public License  either version 2.1 of the
+# License, or (at your option) any later version.
+
+kmnBase=myWin
+kmnFile=$(kmnBase).kmn
+keyboardDir=../../ekaya/kmfl
+packageName=kmfl-keyboards-mywin
+keyboardVersion=
+
+include version.mk
+
+all: lint
+
+lint: deb
+	lintian -i -I --display-experimental --pedantic --show-overrides --checksums --color auto $(packageName)_$(pkgVersion)_`dpkg-architecture -qDEB_BUILD_ARCH`.changes
+
+deb: tar debian/changelog debian/rules
+	cp $(packageName)_$(keyboardVersion).tar.gz $(packageName)_$(keyboardVersion).orig.tar.gz
+	mkdir $(packageName)-$(keyboardVersion)
+	tar -zxf $(packageName)_$(keyboardVersion).orig.tar.gz
+	cp -rf debian $(packageName)-$(keyboardVersion)
+	cd $(packageName)-$(keyboardVersion) && dpkg-buildpackage
+	rm -rf $(packageName)-$(keyboardVersion)
+
+tar: $(keyboardDir)/$(kmnFile) $(keyboardDir)/$(kmnBase)*
+	mkdir $(packageName)-$(keyboardVersion)
+	cp changelog $(packageName)-$(keyboardVersion)
+	cp $(keyboardDir)/$(kmnFile) $(packageName)-$(keyboardVersion)
+	cp $(keyboardDir)/$(kmnBase)*.html $(packageName)-$(keyboardVersion)
+	cp $(keyboardDir)/$(kmnBase)*.png $(packageName)-$(keyboardVersion)
+	cp $(keyboardDir)/$(kmnBase)*.jpg $(packageName)-$(keyboardVersion)
+	cp $(keyboardDir)/$(kmnBase)*.bmp $(packageName)-$(keyboardVersion)
+	tar -zcf $(packageName)_$(keyboardVersion).tar.gz $(packageName)-$(keyboardVersion)
+	rm -rf $(packageName)-$(keyboardVersion)
+
+version.mk : ../../
+	grep NAME $(keyboardDir)/$(kmnFile) | sed "s/.*my-Win \(.*\) Unicode.*/keyboardVersion=\\1/" >version.mk
+	echo pkgVersion=`head -n 1 debian/changelog | sed 's/[^\(]*(\(.*\)).*/\1/'` >> $@
+
+clean:
+	rm -rf $(packageName)-$(keyboardVersion)
+	rm -f $(packageName)_$(pkgVersion)*
+

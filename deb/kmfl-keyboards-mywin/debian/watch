@@ -1,0 +1,5 @@
+# Watch file format version
+version=3
+# Download location
+http://www.thanlwinsoft.org/ThanLwinSoft/Downloads/Keyboards/kmfl-keyboards-mywin_([\d\.]*).tar.gz
+
