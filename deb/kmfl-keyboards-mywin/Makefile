@@ -16,10 +16,14 @@ include version.mk
 
 all: lint
 
-lint: deb
+
+
+lint: $(packageName)_$(pkgVersion)_all.deb
 	lintian -i -I --display-experimental --pedantic --show-overrides --checksums --color auto $(packageName)_$(pkgVersion)_`dpkg-architecture -qDEB_BUILD_ARCH`.changes
 
-deb: tar debian/changelog debian/rules
+deb: $(packageName)_$(pkgVersion)_all.deb
+
+$(packageName)_$(pkgVersion)_all.deb : debian/* $(packageName)_$(keyboardVersion).tar.gz
 	cp $(packageName)_$(keyboardVersion).tar.gz $(packageName)_$(keyboardVersion).orig.tar.gz
 	mkdir $(packageName)-$(keyboardVersion)
 	tar -zxf $(packageName)_$(keyboardVersion).orig.tar.gz
@@ -27,7 +31,9 @@ deb: tar debian/changelog debian/rules
 	cd $(packageName)-$(keyboardVersion) && dpkg-buildpackage
 	rm -rf $(packageName)-$(keyboardVersion)
 
-tar: $(keyboardDir)/$(kmnFile) $(keyboardDir)/$(kmnBase)*
+tar : test $(packageName)_$(keyboardVersion).tar.gz
+
+$(packageName)_$(keyboardVersion).tar.gz: $(keyboardDir)/$(kmnFile) $(keyboardDir)/$(kmnBase)*
 	mkdir $(packageName)-$(keyboardVersion)
 	cp changelog $(packageName)-$(keyboardVersion)
 	cp $(keyboardDir)/$(kmnFile) $(packageName)-$(keyboardVersion)
@@ -45,4 +51,13 @@ version.mk : $(keyboardDir)/$(kmnFile) debian/changelog
 clean:
 	rm -rf $(packageName)-$(keyboardVersion)
 	rm -f $(packageName)_$(pkgVersion)*
+
+install:
+	dpkg -i $(packageName)_$(pkgVersion)_all.deb
+
+uninstall:
+	dpkg -r $(packageName)
+
+test:
+	kmfltest	$(keyboardDir)/$(kmnFile) $(kmnBase)Test.txt
 

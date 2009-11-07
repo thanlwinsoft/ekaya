@@ -1,2 +1,2 @@
-keyboardVersion=1.0.0
+keyboardVersion=
 pkgVersion=1.0.0-1
