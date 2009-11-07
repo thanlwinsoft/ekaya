@@ -35,7 +35,7 @@ $(packageName)_$(pkgVersion)_all.deb : debian/* $(packageName)_$(keyboardVersion
 tar : test $(packageName)_$(keyboardVersion).tar.gz
 
 $(packageName)_$(keyboardVersion).tar.gz: $(keyboardDir)/$(kmnFile) $(keyboardDir)/$(kmnBase)*
-	mkdir $(packageName)-$(keyboardVersion)
+	mkdir -p $(packageName)-$(keyboardVersion)
 	cp changelog $(packageName)-$(keyboardVersion)
 	cp $(keyboardDir)/$(kmnFile) $(packageName)-$(keyboardVersion)
 	cp $(keyboardDir)/$(kmnBase)*.html $(packageName)-$(keyboardVersion)
@@ -51,6 +51,9 @@ version.mk : $(keyboardDir)/$(kmnFile) debian/changelog
 clean:
 	rm -rf $(packageName)-$(keyboardVersion)
 	rm -f $(packageName)_$(pkgVersion)*
+	
+cleanall: clean
+	rm -rf $(packageName)_$(keyboardVersion)*tar.gz
 
 install:
 	dpkg -i $(packageName)_$(pkgVersion)_all.deb
