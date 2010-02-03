@@ -1,0 +1,258 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Keyboard layout for A Nu / Hkongsu</title>
+  <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+  <style type="text/css">
+
+* { font-family: 'Doulos SIL'; }
+.warning { color: red; }
+body { margin: 0px; padding: 0px; background-color: #ffffd0;}
+h1 { text-align: center; line-height: 1.2em; clear: both; }
+
+div.main { margin: 10px; padding: 5px; 
+	text-align:justify; 
+	width: 550px !important; margin-left: 5%; margin-right: 5%; 
+    -moz-border-radius: 10px; border-radius: 10px; border-width: 3px;    
+	background-color: #fffff0;
+	border-color: #c07000;
+  border-top-style: solid;
+  border-bottom-style: solid;
+  border-left-style: dotted;
+  border-right-style: dotted;
+}
+
+th, td { width: 50%; height: auto; padding: 0.2em; background-color: #a0a0ff; height: 1.5em; text-align: left;}
+th.keys { width: 50%;}
+td.keys { width: 50%; font-family: "Courier New", "Courier", fixed; }
+table { width: 20em; text-align: center; padding: 2px; background-color: #c0c0ff; vertical-align: bottom; border-collapse: separate; }
+div.table { text-align: center; display: inline; }
+p.layout {text-align: center; }
+.center {text-align: center; margin-left: 20%; padding: 0px; margin-right: 20%;}
+ul { display: inline; }
+ul ul { display: block;}
+li { display: block;}
+li li { text-align: right; display: inline; width: 60em; background-color: #a0a0ff; }
+li li.keys { text-align: left;display: inline; }
+table.keyboard { width: auto; padding: 1px; margin: 0px; border-width: 0px; }
+table.keyboard tr { padding: 0px; margin: 0px; }
+table.keyboard td { background-color: #707070; width: 2em; height: 2em; padding: 0em; 
+	border-style: solid; border-width: 0.1em; 
+	border-top-color: #808080; border-left-color: #808080; 
+	border-bottom-color: #606060; border-right-color: #606060; 
+	}
+table.keyboard td.special { background-color: #505050; text-align: center; font-weight: bold; }
+span.en {  }
+span.vowel { font-style: italic; font-weight: bold; }
+span.my { font-family: 'Doulos SIL';}
+span.shift { color: #00f000; }
+td span.my { float: right; color: #f0f0ff;  }
+.footer {text-align: right; border-top-style: solid; border-top-color: black; border-top-width: 1px; margin: 0px; margin-top: 5px;}
+@media print {
+    div.main { margin-left: 10px !important; }
+}
+.chooseLang { float: right; }
+  </style>
+  <script type="text/javascript">
+  var center = function() {
+    var mainWidth = 550;
+    var border = 40;
+    var main = document.getElementById("main");
+    if (window.innerWidth)
+    {
+		if (window.innerWidth > mainWidth + 20 + border)
+		{
+			main.style.marginLeft = 0.5 * (window.innerWidth - mainWidth - border);
+			main.style.marginRight = 0.5 * (window.innerWidth - mainWidth - border);
+		}
+		else
+		{
+			main.style.marginLeft = 10;
+		}
+    }
+    else if (document.body.clientWidth > mainWidth + 20 + border)
+    {
+        main.style.marginLeft = 0.5 * (document.body.clientWidth - mainWidth - border);
+        main.style.marginRight = 0.5 * (document.body.clientWidth - mainWidth - border);
+    }
+	else
+	{
+		main.style.marginLeft = 10;
+	}
+  };
+  window.onresize=center;
+  </script>
+</head>
+<body onload="center();">
+
+<div class="main" id="main">
+
+<h1>A Nu / Hkongso Keyboard</h1>
+
+<h2>Keyboard Layout to allow typing of tones and ü vowel</h2>
+
+<p>This keyboard
+provides a smart keyboard layout for typing a Nu and Hkongsu.
+It should work with Unicode fonts such as Doulos SIL.</p>
+<p>This Keyboard requires either Tavultesoft Keyman (Windows), Ekaya (Windows) or SCIM with KMFL support (Linux). You can then
+click on the keyboard icon on the task bar and select the Keyboard <img src="aNuHkongso.png" alt="icon"/>. To type again in English, click on the Keyman icon again and select &ldquo;English&rdquo; or &ldquo;No Keyman Keyboard&rdquo;.</p>
+<h2>Keyboard Layout</h2>
+<p>The keyboard layout is the same as for US, except that tone marks can be added after some vowels. Marks shown in <span style="color:#f0f0ff; background-color: #707070;">white</span> are typed by pressing the specified key after a <span class="vowel">vowel</span>. Marks shown in <span class="shift" style="background-color: #707070;">green</span> are typed by pressing Shift + the specified key after a <span class="vowel">vowel</span>.</p>
+<table class="keyboard">
+<tr>
+<td style="width:2em;"><span class="my"><span class="shift">◌̃</span>◌̀</span><span class="en">`</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">1</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">2</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">3</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">4</span></td>
+<td style="width:2em;"><span class="my"><span class="shift">◌̈</span></span><span class="en">5</span></td>
+<td style="width:2em;"><span class="my"><span class="shift">◌̂</span></span><span class="en">6</span></td>
+<td style="width:2em;"><span class="my"><span class="shift">◌̌</span></span><span class="en">7</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">8</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">9</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">0</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">-</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">=</span></td>
+<td style="width:3em;" class="special"><span class="en">Bksp</span></td>
+</tr>
+</table>
+<table class="keyboard">
+<tr>
+<td style="width:3em;" class="special"><span class="en">Tab</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">q</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">w</span></td>
+<td style="width:2em;"><span class="my"></span><span class="vowel">e</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">r</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">t</span></td>
+<td style="width:2em;"><span class="my"></span><span class="vowel">y</span></td>
+<td style="width:2em;"><span class="my"></span><span class="vowel">u</span></td>
+<td style="width:2em;"><span class="my"></span><span class="vowel">i</span></td>
+<td style="width:2em;"><span class="my"></span><span class="vowel">o</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">p</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">[</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">]</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">\</span></td>
+
+</tr>
+</table>
+<table class="keyboard">
+<tr>
+<td style="width:3.5em;" class="special"><span class="en">Caps</span></td>
+<td style="width:2em;"><span class="my">​</span><span class="vowel">a</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">s</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">d</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">f</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">g</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">h</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">j</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">k</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">l</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">;</span></td>
+<td style="width:2em;"><span class="my">◌́</span><span class="en">'</span></td>
+<td style="width:3.8em;" class="special"><span class="en">Enter</span></td>
+</tr>
+</table>
+
+<table class="keyboard">
+<tr>
+<td style="width:4.5em;" class="special"><span class="en">Shift</span></td>
+<td style="width:2em;"><span class="my">​</span><span class="en">z</span></td>
+<td style="width:2em;"><span class="my"></span><span class="vowel">x</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">c</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">v</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">b</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">n</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">m</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">,</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">.</span></td>
+<td style="width:2em;"><span class="my"></span><span class="en">/</span></td>
+<td style="width:5.0em;" class="special"><span class="en">Shift</span></td>
+</tr>
+</table>
+<table class="keyboard">
+<tr>
+<td style="width:3em;" class="special"><span class="en">Ctrl</span></td>
+<td style="width:3em;" class="special"><span class="en">Win</span></td>
+<td style="width:3em;" class="special"><span class="en">Alt</span></td>
+<td style="width:12.8em;" ><span class="en"></span></td>
+<td style="width:3em;" class="special"><span class="en">AltGr</span></td>
+<td style="width:3em;" class="special"><span class="en">Menu</span></td>
+<td style="width:3em;" class="special"><span class="en">Ctrl</span></td>
+
+</tr>
+</table>
+
+<h2>Examples</h2>
+
+<p></p>
+
+
+<div class="table">
+<p class="center">
+<table>
+
+  <tbody>
+
+    <tr>
+
+      <th>Visible Vowel</th>
+
+      <th class="keys">Typed sequence</th>
+
+    </tr>
+
+    <tr>
+      <td>á</td>
+      <td class="keys">a'</td>
+    </tr>
+    <tr>
+      <td>à</td>
+      <td class="keys">a`</td>
+    </tr>
+    <tr>
+      <td>â</td>
+      <td class="keys">a^</td>
+    </tr>
+    <tr>
+      <td>ǎ</td>
+      <td class="keys">a&</td>
+    </tr>
+    <tr>
+      <td>ã</td>
+      <td class="keys">a~</td>
+    </tr>
+    <tr>
+      <td>áw</td>
+      <td class="keys">a'w</td>
+    </tr>
+
+    <tr>
+
+      <td>ü</td>
+
+      <td class="keys">u%</td>
+
+    </tr>
+
+    <tr>
+      <td>ǘ</td>
+      <td class="keys">u%'</td>
+    </tr>
+
+    <tr>
+      <td>ǜ</td>
+      <td class="keys">u%`</td>
+    </tr>
+
+  </tbody>
+</table>
+</p>
+</div>
+
+</div>
+
+<p class="footer">Developed by <a href="http://www.thanlwinsoft.org/">ThanLwinSoft.org</a></p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,95 @@
+c Copyright (C) 2010 Keith Stribley, www.thanlwinsoft.org
+c 
+c Bugs/Comments: <mailto:devel@thanlwinsoft.org>
+c Distributable under the terms of the GNU Lesser General Public License,
+c either version 2.1 of the License, or (at your option) any later version.
+c http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+
+NAME "Anu Hkongso"
+VERSION 5.0
+store(&Copyright) "© 2010 Keith Stribley, ThanLwinSoft.org (License: LGPL)"
+store( &Message ) ""\
+"This keyboard is freely redistributable under the terms of the GNU Lesser General Public License."
+store(&Language) "anl"
+
+BITMAP aNuHkongso.png
+HOTKEY  "^+A"
+
+begin Unicode > use(Main)
+c Insert stores here-------------------------------------------------
+
+store(baseK)      "!@#$%^&*()_+'~" \
+                  "ABCDEFGHIJ"\
+                  "KLMNOPQRST"\
+                  "UVWXYZ<>?|:"\
+                  "abcdefghij"\
+                  "klmnopqrst"\
+                  "uvwxyz,./\;"\
+                  '0123456789-="`' c input
+
+c üÜ éâù ̀́̂̃̌
+c \x{0300}\x{0301}\x{0302}\x{0303}\x{030c}
+c umlaut 0308
+c ü  don't use q
+
+
+
+store(baseU)      "!@#$%^&*()_+'~" \
+                  "ABCDEFGHIJ"\
+                  "KLMNOPQRST"\
+                  "UVWXYZ<>?|:"\
+                  "abcdefghij"\
+                  "klmnopqrst"\
+                  "uvwxyz,./\;"\
+                  '0123456789-="`' c output
+
+store(lowK) "`"
+store(lowU) U+0300
+
+store(highK) "'"
+store(highU) U+0301
+
+store(fallK) "^"
+store(fallU) U+0302
+
+store(riseK) "&"
+store(riseU) U+030C
+
+store(fallRiseK) "~"
+store(fallRiseU) U+0303
+
+c - is only in here to allow stand alone vowels to be easily typed
+store(vowel) "aeiouxyAEIOUX-" U+0308
+
+store(tone) U+0300 U+0301 U+0302 U+0303 U+030C
+
+c only with u and U
+store(shwaBase) "uU"
+store(shwaK) "%"
+store(shwaU) U+0308
+
+store(awA) "aA"
+store(awW) "wW"
+
+group(Main) using keys
+
+c Tones
+any(vowel) + any(lowK) > context index(lowU, 2)
+any(vowel) + any(highK) > context index(highU, 2)
+any(vowel) + any(fallK) > context index(fallU, 2)
+any(vowel) + any(riseK) > context index(riseU, 2)
+any(vowel) + any(fallRiseK) > context index(fallRiseU, 2)
+
+c For the aw vowel, we always put the tone mark on the a, not the w
+any(awA) any(awW) + any(lowK) > index(awA, 1) index(lowU, 3) index(awW, 2)
+any(awA) any(awW) + any(highK) > index(awA, 1) index(highU, 3) index(awW, 2)
+any(awA) any(awW) + any(fallK) > index(awA, 1) index(fallU, 3) index(awW, 2)
+any(awA) any(awW) + any(riseK) > index(awA, 1) index(riseU, 3) index(awW, 2)
+any(awA) any(awW) + any(fallRiseK) > index(awA, 1) index(fallRiseU, 3) index(awW, 2)
+
+c shwa vowel
+any(shwaBase) + any(shwaK) > index(shwaBase, 1) index(shwaU, 2)
+any(shwaBase) any(tone) + any(shwaK) > index(shwaBase, 1) index(shwaU, 3) index(tone, 2)
+
++ any(baseK) > index(baseU, 1)
+
