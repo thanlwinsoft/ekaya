@@ -12,7 +12,7 @@ store( &Message ) ""\
 "This keyboard is freely redistributable under the terms of the GNU Lesser General Public License."
 store(&Language) "zzz"
 
-BITMAP template.bmp
+c BITMAP template.bmp
 c HOTKEY  "^+H"
 
 begin Unicode > use(Main)
