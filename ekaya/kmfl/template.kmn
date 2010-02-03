@@ -18,8 +18,27 @@ c HOTKEY  "^+H"
 begin Unicode > use(Main)
 c Insert stores here-------------------------------------------------
 
+store(baseK)      "!@#$%^&*()_+'~" \
+                  "ABCDEFGHIJ"\
+                  "KLMNOPQRST"\
+                  "UVWXYZ<>?|:"\
+                  "abcdefghij"\
+                  "klmnopqrst"\
+                  "uvwxyz,./\;"\
+                  '0123456789-="`' c input
+
+store(baseU)      "!@#$%^&*()_+'~" \
+                  "ABCDEFGHIJ"\
+                  "KLMNOPQRST"\
+                  "UVWXYZ<>?|:"\
+                  "abcdefghij"\
+                  "klmnopqrst"\
+                  "uvwxyz,./\;"\
+                  '0123456789-="`' c output
+
 
 group(Main) using keys
 c Insert substitutions here -----------------------------------------
 
++ any(baseK) > index(baseU, 1)
 
