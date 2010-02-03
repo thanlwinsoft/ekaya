@@ -1,0 +1,25 @@
+c Copyright (C) 2010 Keith Stribley, www.thanlwinsoft.org
+c 
+c Bugs/Comments: <mailto:devel@thanlwinsoft.org>
+c Distributable under the terms of the GNU Lesser General Public License,
+c either version 2.1 of the License, or (at your option) any later version.
+c http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+
+NAME "Template"
+VERSION 5.0
+store(&Copyright) "© 2010 Keith Stribley, ThanLwinSoft.org (License: LGPL)"
+store( &Message ) ""\
+"This keyboard is freely redistributable under the terms of the GNU Lesser General Public License."
+store(&Language) "zzz"
+
+BITMAP template.bmp
+c HOTKEY  "^+H"
+
+begin Unicode > use(Main)
+c Insert stores here-------------------------------------------------
+
+
+group(Main) using keys
+c Insert substitutions here -----------------------------------------
+
+

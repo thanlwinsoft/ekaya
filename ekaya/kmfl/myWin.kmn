@@ -34,8 +34,9 @@ c KRS   2.2.5   15-Nov-2008     Kinzi with 104e
 c KRS   2.2.6   28-Aug-2009     Fix typing U+100B U+1039 U+100C U+1031
 c KRS   2.2.7   26-Sep-2009     Fix backspace with medial + 1031
 c KRS   2.3.0   21-Oct-2009     Change to use normalized order. Improve Kinzi handling.
+c KRS   2.3.1   07-Dec-2009    Allow Asat with u103C
 
-NAME "my-Win 2.3.0 Unicode 5.2"
+NAME "my-Win 2.3.1 Unicode 5.2"
 VERSION 5.0
 store(&Copyright) "© 2004-2009 SIL & ThanLwinSoft.org (License: LGPL)"
 store( &Message ) "Myanmar keyboard for typing Burmese with Unicode 5.2.0. "\
@@ -195,6 +196,12 @@ c U+1031 U+101E U+101E + any(stackK) > U+103F U+1031
 U+1031 any(consU) + any(stackK) > outs(stackU) index(consU, 2) U+1031
 U+1005 U+1031 + any(yDiaK) > U+1008 U+1031
 
+c Asat and 103c Not for Myanmar
+any(consU) U+103A + any(rDiaK) > index(consU, 1) U+103A index(rDiaU, 3)
+any(consU) U+103C + any(aftereDK) > index(consU, 1) index(aftereDU, 3) U+103C
+any(consU) U+1031 + any(aftereDK) > index(consU, 1) index(aftereDU, 3) U+1031
+any(consU) U+103C U+1031 + any(aftereDK) > index(consU, 1) index(aftereDU, 4) U+103C U+1031
+
 c modify space keys
  + [SHIFT K_SPACE] > U+200B      
  
@@ -239,7 +246,7 @@ c and aa so this rules are probably OK
 U+1037 + any(aaK) > index(aaU, 2) context
 c allow tone marks to be typed in either order
 U+1038 + any(lDotK) > index(lDotU, 2) context
-U+103A U+1038 + any(lDotK) > index(lDotU, 2) context
+U+103A U+1038 + any(lDotK) > index(lDotU, 3) context
 U+1037 + 'H' > U+1036 U+1037
 
 c any(udiaU) + any(ldiaK) > index(ldiaU, 2) context
