@@ -35,6 +35,7 @@ c KRS   2.2.6   28-Aug-2009     Fix typing U+100B U+1039 U+100C U+1031
 c KRS   2.2.7   26-Sep-2009     Fix backspace with medial + 1031
 c KRS   2.3.0   21-Oct-2009     Change to use normalized order. Improve Kinzi handling.
 c KRS   2.3.1   07-Dec-2009    Allow Asat with u103C
+c KRS   2.3.2    09-Feb-2010     Fix U+102F U+1032
 
 NAME "my-Win 2.3.1 Unicode 5.2"
 VERSION 5.0
@@ -100,8 +101,11 @@ store (lDotU)   U+1037
 store (visargaK) ';'
 store (visargaU) U+1038
                       
-store(udiaK)    'dDJKL'
-store(udiaU)    U+102D U+102E U+1032 U+102F U+1030
+store(udiaK)    'dDKL'
+store(udiaU)    U+102D U+102E U+102F U+1030
+
+store(anusvaraK) 'JH'
+store(anusvaraU) U+1032 U+1036
                   
 store(ldiaK)    'kl'
 store(ldiaU)    U+102F U+1030
@@ -170,8 +174,8 @@ store(allDiaU)  U+1031 U+102F U+1030 U+102D U+1032 U+1036 U+1037
 c only a subset can correctly occur together  
 c (U+1031 U+1037) (U+102D U+102F) 
 c (U+102F U+1036) (U+1032 U+1037) (U+102D U+1036)
-store(firstDiaU) U+1031 U+102D U+102F U+1032 
-store(secondDiaU) U+102F U+1036 U+1037    
+store(firstDiaU) U+1031 U+102D U+102F
+store(secondDiaU) U+102F U+1032 U+1036 U+1037    
 c It is possible for U+102F U+102D U+1037 to occur,
 c but in this case its fairly obvious to type the medials
 c before the final U+1037    
@@ -216,7 +220,7 @@ U+1025 + 'm' > U+1009 U+102C
 any(numOrLetU) + 'm' > index(numAsLetU, 1) U+102C
 any(numOrLetU) + 'g' > index(numAsLetU, 1) U+102B
 any(numOrLetU) + 'f' > index(numAsLetU, 1) U+103A
-any(numOrLetU) + 'H' > index(numAsLetU, 1) U+1036
+any(numOrLetU) + any(anusvaraK) > index(numAsLetU, 1) index(anusvaraU, 2)
 U+1044 U+1004 U+103A + ';' >  U+104E U+1004 U+103A U+1038
 any(numOrLetU) U+1004 + 'f' > index(numAsLetU, 1) U+1004 U+103A
 any(numOrLetU) any(consU) + 'f' > index(numAsLetU, 1) index(consU, 2) U+103A
@@ -237,17 +241,17 @@ any(ldiaU) U+1037 + any(udiaK) > index(udiaU, 3) context
 U+1037 + any(udiaK) > index(udiaU, 2) context
 U+1037 + any(ldiaK) > index(ldiaU, 2) context
 
- + 'H' > U+1036
-U+1036 + any(udiaK) > index(udiaU, 2) context
-any(ldiaU) U+1036 + any(udiaK) > index(udiaU, 3) context
-U+1036 + any(ldiaK) > index(ldiaU, 2) context
+ + any(anusvaraK) > index(anusvaraU, 1)
+any(anusvaraU) + any(udiaK) > index(udiaU, 2) context
+any(ldiaU) any(anusvaraU) + any(udiaK) > index(udiaU, 3) context
+any(anusvaraU) + any(ldiaK) > index(ldiaU, 2) context
 c it is unlikely that other combinations will occur with U1037 
 c and aa so this rules are probably OK
 U+1037 + any(aaK) > index(aaU, 2) context
 c allow tone marks to be typed in either order
 U+1038 + any(lDotK) > index(lDotU, 2) context
 U+103A U+1038 + any(lDotK) > index(lDotU, 3) context
-U+1037 + 'H' > U+1036 U+1037
+U+1037 + any(anusvaraK) > index(anusvaraU, 2) U+1037
 
 c any(udiaU) + any(ldiaK) > index(ldiaU, 2) context
 any(ldiaU) + any(udiaK) > index(udiaU, 2) context

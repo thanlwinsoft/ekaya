@@ -1,3 +1,5 @@
+KRS   2.3.2    09-Feb-2010     Fix U+102F U+1032
+KRS   2.3.1   07-Dec-2009    Allow Asat with u103C
 KRS   2.3.0   21-Oct-2009     Change to use normalized order. Improve Kinzi handling.
 KRS   2.2.7   26-Sep-2009     Fix backspace with medial + 1031
 KRS   2.2.6   28-Aug-2009     Fix typing U+100B U+1039 U+100C U+1031

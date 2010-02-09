@@ -1,3 +1,9 @@
+kmfl-keyboards-mywin (2.3.1-1ubuntu1) karmic; urgency=low
+
+  * Fix sequence of U+102F U+1032 to conform to UTN11-3
+
+ -- Keith Stribley <devel@thanlwinsoft.org>  Tue, 09 Feb 2010 14:09:45 +0630
+
 kmfl-keyboards-mywin (2.3.0-1) unstable; urgency=low
 
   * Change to use normalized 1037
