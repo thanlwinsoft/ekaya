@@ -1,0 +1,10 @@
+Document: kmfl-keyboards-paoh
+Title: Pa-Oh Keyboard layout
+Author: Keith Stribley
+Abstract: Describes the keyboard layout used by the Pa-Oh Unicode keyboard for use with SCIM/KMFL.
+Section: System/Language Environment
+
+Format: HTML
+Index: /usr/share/doc/kmfl-keyboards-paoh/pa-oh.html
+Files: /usr/share/doc/kmfl-keyboards-paoh/*.html
+

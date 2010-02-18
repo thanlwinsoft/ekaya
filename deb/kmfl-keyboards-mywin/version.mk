@@ -1,2 +1,2 @@
-keyboardVersion=2.3.1
-pkgVersion=2.3.1-1ubuntu1
+keyboardVersion=2.3.2
+pkgVersion=2.3.2-1ubuntu1

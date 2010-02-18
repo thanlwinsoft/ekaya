@@ -1,0 +1,22 @@
+This package was debianized by Keith Stribley <devel@thanlwinsoft.org> on
+Thu, 18 Feb 2010 11:24:45 +0630.
+
+It was downloaded from http://www.thanlwinsoft.org/
+
+Upstream Author: Keith Stribley <devel@thanlwinsoft.org>
+
+Copyright: (C) 2010, Keith Stribley <devel@thanlwinsoft.org>
+
+License:
+
+You are free to distribute this software under the terms of
+the GNU Lesser General Public License  either version 2.1 of the License,
+or (at your option) any later version.
+On Debian systems, the complete text of the GNU Lesser General Public
+License can be found in the file `/usr/share/common-licenses/LGPL-2.1'
+
+The Debian packaging is Copyright 2010, 
+Keith Stribley <devel@thanlwinsoft.org> and is licensed under the GPL either
+version 2 of the License or (at your option) any later version, see 
+`/usr/share/common-licenses/GPL-2'.
+

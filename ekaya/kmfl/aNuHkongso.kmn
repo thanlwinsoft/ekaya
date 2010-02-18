@@ -10,9 +10,9 @@ VERSION 5.0
 store(&Copyright) "© 2010 Keith Stribley, ThanLwinSoft.org (License: LGPL)"
 store( &Message ) ""\
 "This keyboard is freely redistributable under the terms of the GNU Lesser General Public License."
-store(&Language) "anl"
+c store(&Language) "anl"
 
-BITMAP aNuHkongso.png
+BITMAP aNuHkongso.bmp
 HOTKEY  "^+A"
 
 begin Unicode > use(Main)
@@ -27,18 +27,11 @@ store(baseK)      "!@#$%^&*()_+'~" \
                   "uvwxyz,./\;"\
                   '0123456789-="`' c input
 
-c üÜ éâù ̀́̂̃̌
-c \x{0300}\x{0301}\x{0302}\x{0303}\x{030c}
-c umlaut 0308
-c ü  don't use q
-
-
-
-store(baseU)      "!@#$%^&*()_+'~" \
+store(baseU)      "!a#$%^&*()_+'~" \
                   "ABCDEFGHIJ"\
                   "KLMNOPQRST"\
                   "UVWXYZ<>?|:"\
-                  "abcdefghij"\
+                  U+0251 "bcdefghij"\
                   "klmnopqrst"\
                   "uvwxyz,./\;"\
                   '0123456789-="`' c output
@@ -59,7 +52,7 @@ store(fallRiseK) "~"
 store(fallRiseU) U+0303
 
 c - is only in here to allow stand alone vowels to be easily typed
-store(vowel) "aeiouxyAEIOUX-" U+0308
+store(vowel) U+0251 "aeiouxyAEIOUX-" U+0308
 
 store(tone) U+0300 U+0301 U+0302 U+0303 U+030C
 
@@ -68,7 +61,7 @@ store(shwaBase) "uU"
 store(shwaK) "%"
 store(shwaU) U+0308
 
-store(awA) "aA"
+store(awA) U+0251 "aA"
 store(awW) "wW"
 
 group(Main) using keys

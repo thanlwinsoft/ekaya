@@ -4,6 +4,7 @@ syntax: glob
 *.bz2
 *.ncb
 *.bak
+*.kmfl
 *~
 kmflcomp-0.9.8/Debug/*.ilk
 kmflcomp-0.9.8/Debug/*.res

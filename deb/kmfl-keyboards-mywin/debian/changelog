@@ -1,4 +1,4 @@
-kmfl-keyboards-mywin (2.3.1-1ubuntu1) karmic; urgency=low
+kmfl-keyboards-mywin (2.3.2-1ubuntu1) karmic; urgency=low
 
   * Fix sequence of U+102F U+1032 to conform to UTN11-3
 
