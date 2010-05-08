@@ -27,7 +27,12 @@ class EkayaKeyboard
 {
 public:
 	virtual ~EkayaKeyboard(){};
-
+	/** Process a key according to context
+	* @param keyId of key pressed
+	* @param array of context information
+	* @param position in context for insertino
+	* @return new context position, length of insertion
+	*/
 	virtual std::pair<size_t, size_t> processKey(long keyId, std::basic_string<Utf32> &context, size_t contextPos) = 0;
 
 	virtual std::basic_string<Utf32> getDescription() = 0;

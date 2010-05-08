@@ -43,7 +43,7 @@ STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
     ULONG cFetched = 0;
     WCHAR ch = (WCHAR)(mwParam);
     bool fCovered = true;
-	ITfComposition *pComposition = mpTextService->getComposition();
+	//ITfComposition *pComposition = mpTextService->getComposition();
 	ITfInsertAtSelection *pInsertAtSelection = NULL;
 
 #if 0
@@ -163,14 +163,47 @@ STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 		return S_FALSE;
 	}
 	
+	long delCount = static_cast<long>(oldContextPos - keyResult.first);
+	// try to shift start
+	if (delCount > 0)
+	{
+		long actual = 0;
+		ITfRange * shiftedRange = NULL;
+		if (tfSelection.range->Clone(&shiftedRange) == S_OK)
+		{
+			MessageLogger::logMessage("Cloned range\n");
+			ITfRange * docStart = NULL;
+			mpContext->GetStart(ec, &docStart);
+			if (docStart)
+			{
+				TF_HALTCOND halt;			
+				halt.pHaltRange = docStart;
+				halt.aHaltPos = TF_ANCHOR_START;
+				halt.dwFlags = 0;
+				if (shiftedRange->ShiftStart(ec, -delCount, &actual, &halt) == S_OK)
+				{
+					MessageLogger::logMessage("Shifted range by %d / %d\n", actual, -delCount);
+					tfSelection.range->Release();
+					tfSelection.range = shiftedRange;
+					if (mpContext->SetSelection(ec, 1, &tfSelection) == S_OK)
+					{
+						delCount += actual;
+						MessageLogger::logMessage("Set selection\n");
+					}
+				}
+				docStart->Release();
+				docStart = NULL;
+			}
+		}
+	}
+	
 	// shift on selection doesn't work
-	if (oldContextPos > keyResult.first)
+	if (delCount > 0)
 	{
 			int delCount = static_cast<int>(oldContextPos - keyResult.first);
 			
-			const int MAX_DEL = 16;
-			assert(MAX_DEL > delCount);
-			
+			const int MAX_DEL = 2;
+
 			INPUT delInput[MAX_DEL];
 			delInput[0].type = INPUT_KEYBOARD;
 			delInput[0].ki.wVk = VK_BACK;
@@ -206,6 +239,7 @@ STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 	ITfRange *pRangeInsert = NULL;
 	if (pInsertAtSelection->InsertTextAtSelection(ec, TF_IAS_QUERYONLY, NULL, 0, &pRangeInsert) != S_OK)
 	{
+		MessageLogger::logMessage("No insert range\n");
 		tfSelection.range->Release();
 		pInsertAtSelection->Release();
 		return S_FALSE;
@@ -235,6 +269,10 @@ STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 		for (size_t i = 0; i < convertedContext.length(); i++)
 			MessageLogger::logMessage(" %x", (int)convertedContext[i]);
 		MessageLogger::logMessage("\n");
+	}
+	else
+	{
+		MessageLogger::logMessage("Insert failed\n");
 	}
 	// hack to reset after space
 	//if (convertedContext.length() && convertedContext[convertedContext.length()-1] == 0x20 && pComposition)
@@ -270,6 +308,25 @@ STDAPI EkayaEndContextSession::DoEditSession(TfEditCookie ec)
 	return hr;
 }
 
+STDAPI EkayaSetContextSession::DoEditSession(TfEditCookie ec)
+{
+	TF_SELECTION tfSelection;
+	ULONG cFetched;
+	if (mpContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &cFetched) != S_OK || cFetched != 1)
+	{
+		return S_FALSE;
+	}
+	wchar_t buffer[128];
+	tfSelection.range->GetText(ec, 0, buffer, 128, &cFetched);
+	if (cFetched > 0)
+	{
+		for (size_t i = 0; i < cFetched; i++)
+			MessageLogger::logMessage("%x ", buffer[i]);
+		MessageLogger::logMessage("\nSelection has %d characters\n", (int)cFetched);
+	}
+	tfSelection.range->Release();
+	return S_OK;
+}
 
 /*
 ITfMouseTracker * pMouseTracker = NULL;
