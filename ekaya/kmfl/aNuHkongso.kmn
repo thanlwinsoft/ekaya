@@ -52,7 +52,7 @@ store(fallRiseK) "~"
 store(fallRiseU) U+0303
 
 c - is only in here to allow stand alone vowels to be easily typed
-store(vowel) U+0251 "aeiouxyAEIOUX-" U+0308
+store(vowel) U+0251 "aeiouxyAEIOUXY-" U+0308
 
 store(tone) U+0300 U+0301 U+0302 U+0303 U+030C
 
