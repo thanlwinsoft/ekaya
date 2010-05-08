@@ -20,6 +20,7 @@
 #include <ole2.h>
 #include <olectl.h>
 #include <assert.h>
+#include <msctf.h>
 
 #include "Ekaya.h"
 #include "EkayaLangBarButton.h"
@@ -28,6 +29,7 @@
 #include "EkayaEditSession.h"
 #include "EkayaInputProcessor.h"
 #include "KmflKeyboardFactory.h"
+#include "UtfConversion.h"
 #include "MessageLogger.h"
 #include "resource.h"
 
@@ -58,7 +60,7 @@ EkayaInputProcessor::EkayaInputProcessor()
   mMouseCookie(TF_INVALID_COOKIE), mTextLayoutCookie(TF_INVALID_COOKIE),
   mContextOwnerCookie(TF_INVALID_COOKIE),
   mGdiToken(NULL),
-  mpThreadMgr(NULL), mpLangBarButton(NULL), 
+  mpThreadMgr(NULL), mpLangBarButton(NULL), mExpectDummyKey(false),
   mpComposition(NULL), mpCompositionRange(NULL)
 {
 	DllAddRef();
@@ -234,13 +236,16 @@ STDAPI EkayaInputProcessor::Activate(ITfThreadMgr *pThreadMgr, TfClientId tfClie
 	{
 		Deactivate(); // cleanup any half-finished init
 	}
-	mOpen = true;
+	else
+	{
+		mOpen = true;
+	}
     return status;
 }
 
 STDAPI EkayaInputProcessor::Deactivate()
 {
-
+	MessageLogger::logMessage("EkayaInputProcessor::Deactivate\n");
 	ITfSource *pSource;
 	
 	if (mpThreadMgr->QueryInterface(IID_ITfSource, (void **)&pSource) == S_OK)
@@ -300,7 +305,7 @@ STDAPI EkayaInputProcessor::Deactivate()
 	mGdiToken = NULL;
 
     mClientId = TF_CLIENTID_NULL;
-
+	mOpen = false;
     return S_OK;
 }
 
@@ -399,6 +404,10 @@ STDAPI EkayaInputProcessor::OnSetFocus(ITfDocumentMgr *pDocMgrFocus, ITfDocument
 STDAPI EkayaInputProcessor::OnPushContext(ITfContext *pContext)		
 {
 	MessageLogger::logMessage("PushContext %lx\n", (long long)pContext);
+	EkayaSetContextSession * contextSession = new EkayaSetContextSession(this, pContext);
+	HRESULT hr = S_OK;
+	hr = pContext->RequestEditSession(mClientId, contextSession, TF_ES_SYNC | TF_ES_READ, &hr);
+	contextSession->Release();
 	// reset context
 	mContext = L"";
 	mPendingData = L"";
@@ -409,6 +418,10 @@ STDAPI EkayaInputProcessor::OnPushContext(ITfContext *pContext)
 STDAPI EkayaInputProcessor::OnPopContext(ITfContext *pContext)
 {
 	MessageLogger::logMessage("PopContext %lx\n", (long long)pContext);
+	EkayaSetContextSession * contextSession = new EkayaSetContextSession(this, pContext);
+	HRESULT hr = S_OK;
+	hr = pContext->RequestEditSession(mClientId, contextSession, TF_ES_SYNC | TF_ES_READ, &hr);
+	contextSession->Release();
 	// reset context
 	mContext = L"";
 	mPendingData = L"";
@@ -420,8 +433,8 @@ STDAPI EkayaInputProcessor::OnPopContext(ITfContext *pContext)
 STDAPI EkayaInputProcessor::OnEndEdit(ITfContext *pContext, TfEditCookie ecReadOnly, ITfEditRecord *pEditRecord)
 {
 	BOOL fSelectionChanged;
-    IEnumTfRanges *pEnumTextChanges;
-    ITfRange *pRange;
+    //IEnumTfRanges *pEnumTextChanges;
+    //ITfRange *pRange;
 	MessageLogger::logMessage("EndEdit ");
     //
     // did the selection change?
@@ -433,13 +446,82 @@ STDAPI EkayaInputProcessor::OnEndEdit(ITfContext *pContext, TfEditCookie ecReadO
         fSelectionChanged)
     {
 		MessageLogger::logMessage("Selection changed\n");
+		TF_SELECTION tfSelection;
+		ULONG cFetched;
+        // If we have pending data then the ranges are unchangeable and we may be mid-delete so don't reset the
+        // context. Otherwise, try to get the new context.
+        if (mPendingDelete == 0 && mPendingData.length() == 0 &&
+            pContext->GetSelection(ecReadOnly, TF_DEFAULT_SELECTION, 1, &tfSelection, &cFetched) == S_OK && cFetched > 0)
+		{
+            // reset context
+		    mContext = L"";
+		    mPendingData = L"";
+		    mPendingDelete = 0;
+            MessageLogger::logMessage("Got selection\n");
+			wchar_t buffer[128];
+			tfSelection.range->GetText(ecReadOnly, 0, buffer, 128, &cFetched);
+			if (cFetched > 0)
+			{
+				for (size_t i = 0; i < cFetched; i++)
+					MessageLogger::logMessage("%x ", buffer[i]);
+				MessageLogger::logMessage("\nSelection has %d characters\n", (int)cFetched);
+			}
+			const size_t MAX_CONTEXT_LEN = 16;
+			ITfRange * contextRange = NULL;
+			if (tfSelection.range->Clone(&contextRange) == S_OK)
+			{
+				ITfRange * docStart = NULL;
+				pContext->GetStart(ecReadOnly, &docStart);
+				if (docStart)
+				{
+					TF_HALTCOND halt;
+					halt.pHaltRange = docStart;
+					halt.aHaltPos = TF_ANCHOR_START;
+					halt.dwFlags = 0;
+					long shiftSize = 0;
+					// for the context, we only want what is in front of selection
+					contextRange->Collapse(ecReadOnly, TF_ANCHOR_START);
+					// try to shift to update context
+					if (contextRange->ShiftStart(ecReadOnly, -MAX_CONTEXT, &shiftSize, &halt) == S_OK && shiftSize < 0)
+					{
+						wchar_t contextBuf[MAX_CONTEXT];
+						ULONG contextLength = 0;
+						if (contextRange->GetText(ecReadOnly, 0, contextBuf, MAX_CONTEXT, &contextLength) == S_OK &&
+							contextLength > 0)
+						{
+							mContext.assign(std::wstring(contextBuf, contextLength));
+							for (size_t i = 0; i < contextLength; i++)
+								MessageLogger::logMessage("%x ", contextBuf[i]);
+							MessageLogger::logMessage("\n");
+						}
+					}
+					docStart->Release();
+				}
+				contextRange->Release();
+			}
+
+			tfSelection.range->Release();
+		}
+		/*
+		const GUID * props[16];
+		IEnumTfRanges * pRanges = NULL;
+		HRESULT hr = pEditRecord->GetTextAndPropertyUpdates(0, props, 16, &pRanges);
+		if (hr == S_OK && pRanges != NULL)
+		{
+			ITfRange * ranges[16];
+			ULONG fetched = 0;
+			pRanges->Next(16, ranges, &fetched);
+			MessageLogger::logMessage("%d ranges\n", (int)fetched);
+		}
+		*/
     }
 	else
 	{
-		MessageLogger::logMessage("End edit\n");
+		MessageLogger::logMessage("no selection change\n");
 	}
 
     // text modification?
+	/*
     if (pEditRecord->GetTextAndPropertyUpdates(TF_GTP_INCL_TEXT, NULL, 0, &pEnumTextChanges) == S_OK)
     {
         if (pEnumTextChanges->Next(1, &pRange, NULL) == S_OK)
@@ -451,7 +533,7 @@ STDAPI EkayaInputProcessor::OnEndEdit(ITfContext *pContext, TfEditCookie ecReadO
 
         pEnumTextChanges->Release();
     }
-
+	*/
 	return S_OK;
 }
 
@@ -563,6 +645,7 @@ STDAPI EkayaInputProcessor::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, L
 		if (mPendingDelete > 0)
 		{
 			mPendingDelete -= bkspCount;
+			mExpectDummyKey = true;
 			if (mPendingDelete <= 0)
 			{
 				// Request append
@@ -746,9 +829,38 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 				break;
 			}
 		}
+		if (wParam == 0xFF08)
+		{
+			// eat if we are expecting the dummy key instead, to avoid muliple deletes
+			if (mExpectDummyKey)
+			{
+				MessageLogger::logMessage("Eaten delete while waiting for dummy\n");
+				*pfEaten = TRUE;
+				return S_OK;
+			}
+			// check whether this is a delete sent by us, if the app hasn't called 
+			// OnTestKeyDown e.g. Publisher
+			// also pass through if there is no context available
+			if((mPendingDelete > 0) || (mContext.length() == 0))
+			{
+				wParam = VK_BACK;
+				int bkspCount = (lParam & 0xff);
+				if (mPendingDelete > 0)
+				{
+					mPendingDelete -= bkspCount;
+					if (mPendingDelete < 0) mPendingDelete = 0;
+					mExpectDummyKey = true;
+				}
+				
+				*pfEaten = FALSE;
+				MessageLogger::logMessage("Received %d deletes, which we sent. Now %d pending.\n", bkspCount, mPendingDelete);
+				return S_OK;
+			}
+		}
 		// the dummy key is sent by us during a delete to keep track of progress
 		if (wParam == DUMMY_KEY)
 		{
+			mExpectDummyKey = false;
 			if (mPendingDelete > 0)
 			{
 				INPUT delInput[2];
@@ -780,6 +892,8 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 		}
 		else
 		{
+			// it is a normal key, reset, dummy key may have been lost somehow
+			mExpectDummyKey = false;
 			// we'll insert a char ourselves in place of this keystroke
 			if ((pEditSession = new EkayaEditSession(this, pContext, wParam)) == NULL)
 				return E_FAIL;

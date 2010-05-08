@@ -158,6 +158,7 @@ private:
 	std::wstring mContext;
 	std::wstring mPendingData;
 	int mPendingDelete;
+	bool mExpectDummyKey;
 	ITfComposition * mpComposition;
 	ITfRangeBackup * mpCompositionRange;
 
