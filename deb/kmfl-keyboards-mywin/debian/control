@@ -3,12 +3,12 @@ Section: utils
 Priority: extra
 Maintainer: Keith Stribley <devel@thanlwinsoft.org>
 Build-Depends: debhelper (>= 5)
-Standards-Version: 3.8.3
+Standards-Version: 3.8.4
 Homepage: http://www.thanlwinsoft.org/
 
 Package: kmfl-keyboards-mywin
 Architecture: all
-Depends: scim-kmfl-imengine
+Depends: scim-kmfl-imengine,${misc:Depends}
 Recommends: ttf-sil-padauk
 Description: myWin Myanmar (Burmese) Unicode Keyboard
  This implements a smart keyboard for Myanmar/Burmese using SCIM and KMFL. 
