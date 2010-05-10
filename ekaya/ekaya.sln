@@ -2,6 +2,9 @@
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual C++ Express 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ekaya", "ekaya.vcproj", "{60307EFC-365C-4C14-9E66-4FC7DE0930D9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{18A1D750-2D71-4EF9-98DF-8ECA529218A7} = {18A1D750-2D71-4EF9-98DF-8ECA529218A7}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winkmfl", "..\winkmfl\winkmfl.vcproj", "{18A1D750-2D71-4EF9-98DF-8ECA529218A7}"
 EndProject
