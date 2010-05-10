@@ -275,22 +275,11 @@ STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 		MessageLogger::logMessage("Insert failed\n");
 	}
 	// hack to reset after space
-	//if (convertedContext.length() && convertedContext[convertedContext.length()-1] == 0x20 && pComposition)
+	//if (convertedContext.length() && convertedContext[convertedContext.length()-1] == 0x20)
 	//{
-	//	pComposition->EndComposition(ec);
-	//	mpTextService->setComposition(NULL);// includes Release
-	//	pComposition = NULL;
+	//	mpTextService->setTextContext(std::wstring(L""));
 	//}
-	if (convertedContext.length() && convertedContext[convertedContext.length()-1] == 0x20)
-	{
-		mpTextService->setTextContext(std::wstring(L""));
-	}
-	//ITfRangeBackup * pRangeClone = NULL;
-	//if (mpContext->CreateRangeBackup(ec, pCompositionRange, &pRangeClone) == S_OK)
-	//{
-	//	mpTextService->setCompositionRange(pRangeClone);
-	//}
-	
+
 	//pCompositionRange->Release();
 	tfSelection.range->Release();
 	pRangeInsert->Release();

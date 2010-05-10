@@ -339,7 +339,7 @@ U+1038 + any(aftereDK) > index(aftereDU, 2) context
 
  + any(kinziK) > index(kinziU, 2) U+103A U+1039
 c The above line doesn't seem to work reliably
-U+0020 + any(kinziK) > index(kinziU, 2) U+103A U+1039 U+0020
+U+0020 + any(kinziK) > U+0020 index(kinziU, 2) U+103A U+1039
 any(consU) + any(kinziK) > index(kinziU, 2) U+103A U+1039 index(consU, 1)
 U+104E + any(kinziK) > index(kinziU, 2) U+103A U+1039 U+104E
 any(numOrLetU) + any(kinziK) > index(kinziU, 2) U+103A U+1039 index(numAsLetU, 1)

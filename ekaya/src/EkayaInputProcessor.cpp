@@ -453,10 +453,6 @@ STDAPI EkayaInputProcessor::OnEndEdit(ITfContext *pContext, TfEditCookie ecReadO
         if (mPendingDelete == 0 && mPendingData.length() == 0 &&
             pContext->GetSelection(ecReadOnly, TF_DEFAULT_SELECTION, 1, &tfSelection, &cFetched) == S_OK && cFetched > 0)
 		{
-            // reset context
-		    mContext = L"";
-		    mPendingData = L"";
-		    mPendingDelete = 0;
             MessageLogger::logMessage("Got selection\n");
 			wchar_t buffer[128];
 			tfSelection.range->GetText(ecReadOnly, 0, buffer, 128, &cFetched);
@@ -489,10 +485,35 @@ STDAPI EkayaInputProcessor::OnEndEdit(ITfContext *pContext, TfEditCookie ecReadO
 						if (contextRange->GetText(ecReadOnly, 0, contextBuf, MAX_CONTEXT, &contextLength) == S_OK &&
 							contextLength > 0)
 						{
-							mContext.assign(std::wstring(contextBuf, contextLength));
-							for (size_t i = 0; i < contextLength; i++)
-								MessageLogger::logMessage("%x ", contextBuf[i]);
-							MessageLogger::logMessage("\n");
+                            bool useNewContext = true;
+                            if (contextLength < mContext.length())
+                            {
+                                useNewContext = false;
+                                // if the new context matches the old context, but is shorter, we keep the old context
+                                // this happens in notepad for example
+                                for (int i = mContext.length() - 1, j = contextLength - 1; i >= 0 && j >= 0; i--, j--)
+                                {
+                                    if (mContext[i] != contextBuf[j])
+                                    {
+                                        useNewContext = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (useNewContext)
+                            {
+		                        mPendingData = L"";
+		                        mPendingDelete = 0;
+                                mContext.assign(std::wstring(contextBuf, contextLength));
+							    for (size_t i = 0; i < contextLength; i++)
+								    MessageLogger::logMessage("%x ", contextBuf[i]);
+							    MessageLogger::logMessage("\n");
+                            }
+                            else
+                            {
+                                MessageLogger::logMessage("keeping old context since new length is %d not %d\n",
+                                    (int)contextLength, (int)mContext.length());
+                            }
 						}
 					}
 					docStart->Release();
