@@ -141,7 +141,6 @@ STDAPI_(ULONG) EkayaInputProcessor::Release(void)
 	unsigned long count = --mRefCount;
 	if (count == 0)
 		delete this;
-	assert(count >= 0);
 	return count;
 }
 
@@ -395,7 +394,7 @@ STDAPI EkayaInputProcessor::OnUninitDocumentMgr(ITfDocumentMgr *pDocMgr)
 	return S_OK;
 }
 
-STDAPI EkayaInputProcessor::OnSetFocus(ITfDocumentMgr *pDocMgrFocus, ITfDocumentMgr *pDocMgrPrevFocus)
+STDAPI EkayaInputProcessor::OnSetFocus(ITfDocumentMgr *pDocMgrFocus, ITfDocumentMgr * /*pDocMgrPrevFocus*/)
 {
 	MessageLogger::logMessage("SetFocus %lx\n", (long long)pDocMgrFocus);
 	return setTextEditSink(pDocMgrFocus);
@@ -462,7 +461,6 @@ STDAPI EkayaInputProcessor::OnEndEdit(ITfContext *pContext, TfEditCookie ecReadO
 					MessageLogger::logMessage("%x ", buffer[i]);
 				MessageLogger::logMessage("\nSelection has %d characters\n", (int)cFetched);
 			}
-			const size_t MAX_CONTEXT_LEN = 16;
 			ITfRange * contextRange = NULL;
 			if (tfSelection.range->Clone(&contextRange) == S_OK)
 			{
@@ -491,7 +489,8 @@ STDAPI EkayaInputProcessor::OnEndEdit(ITfContext *pContext, TfEditCookie ecReadO
                                 useNewContext = false;
                                 // if the new context matches the old context, but is shorter, we keep the old context
                                 // this happens in notepad for example
-                                for (int i = mContext.length() - 1, j = contextLength - 1; i >= 0 && j >= 0; i--, j--)
+                                for (int i = static_cast<int>(mContext.length() - 1),
+									j = contextLength - 1; i >= 0 && j >= 0; i--, j--)
                                 {
                                     if (mContext[i] != contextBuf[j])
                                     {
@@ -567,23 +566,23 @@ STDAPI EkayaInputProcessor::OnSetFocus(BOOL fForeground)
 
 
 STDAPI EkayaInputProcessor::OnStartComposition( 
-            /* [in] */ __RPC__in_opt ITfCompositionView *pComposition,
-            /* [out] */ __RPC__out BOOL *pfOk)
+            /* [in] */ __RPC__in_opt ITfCompositionView * /*pComposition*/,
+            /* [out] */ __RPC__out BOOL * /*pfOk*/)
 {
 	MessageLogger::logMessage("StartComposition");
 	return S_OK;
 }
         
 STDAPI EkayaInputProcessor::OnUpdateComposition( 
-            /* [in] */ __RPC__in_opt ITfCompositionView *pComposition,
-            /* [in] */ __RPC__in_opt ITfRange *pRangeNew)
+            /* [in] */ __RPC__in_opt ITfCompositionView * /*pComposition*/,
+            /* [in] */ __RPC__in_opt ITfRange * /*pRangeNew*/)
 {
 	MessageLogger::logMessage("UpdateComposition");
 	return S_OK;
 }
         
 STDAPI EkayaInputProcessor::OnEndComposition( 
-            /* [in] */ __RPC__in_opt ITfCompositionView *pComposition)
+            /* [in] */ __RPC__in_opt ITfCompositionView * /*pComposition*/)
 {
 	MessageLogger::logMessage("EndComposition");
 	return S_OK;
@@ -619,7 +618,7 @@ bool EkayaInputProcessor::ignoreKey(WPARAM wParam)
 	return true;
 }
 
-STDAPI EkayaInputProcessor::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pfEaten)
+STDAPI EkayaInputProcessor::OnTestKeyDown(ITfContext * /*pContext*/, WPARAM wParam, LPARAM lParam, BOOL *pfEaten)
 {
 	MessageLogger::logMessage("OnTestKeyDown %x %x\n", (int)wParam, (int)lParam);
 	HRESULT hr = S_OK;
@@ -958,7 +957,7 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 	return hr;
 }
 
-STDMETHODIMP EkayaInputProcessor::OnTestKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pfEaten)
+STDMETHODIMP EkayaInputProcessor::OnTestKeyUp(ITfContext * /*pContext*/, WPARAM wParam, LPARAM lParam, BOOL *pfEaten)
 {
 	MessageLogger::logMessage("OnTestKeyUp %x %x\n", (int)wParam, (int)lParam);
 	if (!isKeyboardOpen() || isKeyboardDisabled())
@@ -984,7 +983,7 @@ STDMETHODIMP EkayaInputProcessor::OnTestKeyUp(ITfContext *pContext, WPARAM wPara
 	return S_OK;
 }
 
-STDMETHODIMP EkayaInputProcessor::OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pfEaten)
+STDMETHODIMP EkayaInputProcessor::OnKeyUp(ITfContext * /*pContext*/, WPARAM wParam, LPARAM lParam, BOOL *pfEaten)
 {
 	MessageLogger::logMessage("OnKeyUp %x %x\n", (int)wParam, (int)lParam);
 	// check for control keys
@@ -1017,7 +1016,7 @@ STDMETHODIMP EkayaInputProcessor::OnKeyUp(ITfContext *pContext, WPARAM wParam, L
 	return S_OK;
 }
 
-STDMETHODIMP EkayaInputProcessor::OnPreservedKey(ITfContext *pContext, REFGUID rguid, BOOL *pfEaten)
+STDMETHODIMP EkayaInputProcessor::OnPreservedKey(ITfContext * /*pContext*/, REFGUID rguid, BOOL *pfEaten)
 {
 	MessageLogger::logMessage("OnPreservedKey\n");
 	if (IsEqualGUID(rguid, GUID_PRESERVEDKEY_ONOFF))
@@ -1051,7 +1050,7 @@ STDMETHODIMP EkayaInputProcessor::OnPreservedKey(ITfContext *pContext, REFGUID r
 // someone other than this service ends a composition.
 //----------------------------------------------------------------------------
 
-STDAPI EkayaInputProcessor::OnCompositionTerminated(TfEditCookie ecWrite, ITfComposition *pComposition)
+STDAPI EkayaInputProcessor::OnCompositionTerminated(TfEditCookie /*ecWrite*/, ITfComposition * /*pComposition*/)
 {
 
     // releae our cached composition
@@ -1069,10 +1068,10 @@ STDAPI EkayaInputProcessor::OnCompositionTerminated(TfEditCookie ecWrite, ITfCom
     return S_OK;
 }
 
-STDAPI EkayaInputProcessor::OnMouseEvent(ULONG uEdge,
-                         ULONG uQuadrant,
-                         DWORD dwBtnStatus,
-                         BOOL *pfEaten)
+STDAPI EkayaInputProcessor::OnMouseEvent(ULONG /*uEdge*/,
+                         ULONG /*uQuadrant*/,
+                         DWORD /*dwBtnStatus*/,
+                         BOOL * /* pfEaten*/)
 {
 	return S_OK;
 }
@@ -1103,7 +1102,7 @@ HRESULT EkayaInputProcessor::CreateInstance(IUnknown *pUnkOuter, REFIID riid, vo
     return hr;
 }
 
-STDAPI EkayaInputProcessor::OnLayoutChange(ITfContext *pContext, TfLayoutCode lcode, ITfContextView *pContextView)
+STDAPI EkayaInputProcessor::OnLayoutChange(ITfContext * /*pContext*/, TfLayoutCode lcode, ITfContextView * /*pContextView*/)
 {
 	switch (lcode)
 	{
@@ -1111,8 +1110,10 @@ STDAPI EkayaInputProcessor::OnLayoutChange(ITfContext *pContext, TfLayoutCode lc
 		break;
 	case TF_LC_DESTROY:
 		break;
+	default:
+		break;
 	}
-	MessageLogger::logMessage("OnLayoutChange\n");
+	MessageLogger::logMessage("OnLayoutChange %d\n", lcode);
 	return S_OK;
 }
 
@@ -1325,12 +1326,11 @@ int EkayaInputProcessor::getConfigValue(std::string configName, int defaultValue
 				DWORD dValue = 0;
 				DWORD type;
 				DWORD bytes = sizeof(dValue);
-				LSTATUS ret;
+				LSTATUS ret = RegQueryValueExA(hKeyProgram, configName.c_str(), NULL,
+                    &type, reinterpret_cast<BYTE*>(&dValue), &bytes);
 				// RegGetValue doesn't seem to work on Windows XP
 //				if ((ret = RegGetValueA(hKeyProgram, NULL, configName.c_str(), RRF_RT_REG_DWORD, &type, reinterpret_cast<BYTE*>(&dValue), &bytes) == ERROR_SUCCESS) &&
-                if ((ret = RegQueryValueExA(hKeyProgram, configName.c_str(), NULL,
-                    &type, reinterpret_cast<BYTE*>(&dValue), &bytes) == ERROR_SUCCESS)
-					&& (type == REG_DWORD))
+                if ((ret == ERROR_SUCCESS) && (type == REG_DWORD))
 				{
 					int value = static_cast<int>(dValue);
 					MessageLogger::logMessage("Read value %d from %s\n", value, configName.c_str());

@@ -87,10 +87,14 @@ extern "C" {
 #endif
 #endif
 
+#ifdef _WIN32
+	typedef int INT; // matches definition in windef.h
+#else
 #ifdef __int32_t_defined
 	typedef int32_t INT;
 #else
 	typedef long INT;	// 32-bit unsigned integer (general purpose)
+#endif
 #endif
 
 #ifdef __uint8_t_defined

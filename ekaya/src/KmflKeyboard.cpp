@@ -83,6 +83,12 @@ KmflKeyboard::KmflKeyboard(int kmflId, std::string baseDir, std::string filename
 		ekayaKmflOutputBeep, ekayaKmflForwardKeyevent, ekayaKmflEraseChar);
 }
 
+// KmflKeyboard::KmflKeyboard(const KmflKeyboard & parent)
+	// : mKmflId(-1), mContextBuffer(sDummy)
+// {
+	// assert(false);
+// }
+
 KmflKeyboard::~KmflKeyboard()
 {
 	kmfl_delete_keyboard_instance(mKmsi);
@@ -146,12 +152,12 @@ void KmflKeyboard::outputString(char *p)
 	UTF32 utf32[KMFL_MAX_CONTEXT];
 	UTF32 * p32 = utf32;
 	// this is UTF-8 so convert to UTF-32
-	size_t result = IConvertUTF8toUTF32((const UTF8 **)&p,(const UTF8 *)p+utf8Len,&p32,p32 + KMFL_MAX_CONTEXT);
+	//size_t result = 
+	IConvertUTF8toUTF32((const UTF8 **)&p,(const UTF8 *)p+utf8Len,&p32,p32 + KMFL_MAX_CONTEXT);
 	mContextBuffer = mContextBuffer.insert(mContextBuffer.length(), utf32, p32 - utf32);
-	//mContextPosition += (p32 - utf32);
 }
 
-void KmflKeyboard::outputChar(BYTE q)
+void KmflKeyboard::outputChar(BYTE /*q*/)
 {
 	// doesn't seem to be used
 	assert(false);

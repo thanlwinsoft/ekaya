@@ -50,7 +50,7 @@ public:
 		DUMMY_KEY = VK_OEM_8
 	} Constants;
     EkayaInputProcessor();
-    ~EkayaInputProcessor();
+    virtual ~EkayaInputProcessor();
 
     // IUnknown
     STDMETHODIMP QueryInterface(REFIID riid, void **ppvObj);

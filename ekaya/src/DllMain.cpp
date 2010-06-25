@@ -21,7 +21,7 @@
 #include "Ekaya.h"
 
 
-BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID pvReserved)
+BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID /*pvReserved*/)
 {
     switch (dwReason)
     {

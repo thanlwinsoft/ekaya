@@ -233,7 +233,7 @@ STDAPI EkayaLangBarButton::GetTooltipString(BSTR *pbstrToolTip)
 // OnClick
 //----------------------------------------------------------------------------
 
-STDAPI EkayaLangBarButton::OnClick(TfLBIClick click, POINT pt, const RECT *prcArea)
+STDAPI EkayaLangBarButton::OnClick(TfLBIClick /*click*/, POINT /*pt*/, const RECT * /*prcArea*/)
 {
     return S_OK;
 }
@@ -278,7 +278,7 @@ STDAPI EkayaLangBarButton::InitMenu(ITfMenu *pMenu)
 	}
 	delete pHelpBitmap;
 
-    bool loadIcons = (mIcons.size())? false : true;
+    //bool loadIcons = (mIcons.size())? false : true;
 	for (size_t i = 0; i < mpTextService->getKeyboards().size(); i++)
 	{
 		dwFlags = 0;

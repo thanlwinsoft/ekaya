@@ -37,26 +37,38 @@ typedef unsigned short  UTF16;
 typedef unsigned char   UTF8;
 #endif
 
+#ifdef _WIN32
+#define KMFL_EXPORT __declspec(dllexport)
+#else
+#define KMFL_EXPORT
+#endif
+
+KMFL_EXPORT
 size_t IConvertUTF8toUTF16 (
 		const UTF8** sourceStart, const UTF8* sourceEnd, 
 		UTF16** targetStart, UTF16* targetEnd);
 
+KMFL_EXPORT
 size_t IConvertUTF16toUTF8 (
 		const UTF16** sourceStart, const UTF16* sourceEnd, 
 		UTF8** targetStart, UTF8* targetEnd);
-		
+
+KMFL_EXPORT
 size_t IConvertUTF8toUTF32 (
 		const UTF8** sourceStart, const UTF8* sourceEnd, 
 		UTF32** targetStart, UTF32* targetEnd);
 
+KMFL_EXPORT
 size_t IConvertUTF32toUTF8 (
 		const UTF32** sourceStart, const UTF32* sourceEnd, 
 		UTF8** targetStart, UTF8* targetEnd);
-		
+
+KMFL_EXPORT
 size_t IConvertUTF16toUTF32 (
 		const UTF16** sourceStart, const UTF16* sourceEnd, 
 		UTF32** targetStart, UTF32* targetEnd);
 
+KMFL_EXPORT
 size_t IConvertUTF32toUTF16 (
 		const UTF32** sourceStart, const UTF32* sourceEnd, 
 		UTF16** targetStart, UTF16* targetEnd);

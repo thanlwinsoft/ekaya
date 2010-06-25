@@ -41,7 +41,7 @@ STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 	ITfRange *pCompositionRange = NULL;
     TF_SELECTION tfSelection;
     ULONG cFetched = 0;
-    WCHAR ch = (WCHAR)(mwParam);
+    //WCHAR ch = (WCHAR)(mwParam);
     bool fCovered = true;
 	//ITfComposition *pComposition = mpTextService->getComposition();
 	ITfInsertAtSelection *pInsertAtSelection = NULL;

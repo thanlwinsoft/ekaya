@@ -39,6 +39,11 @@ libkmfl-0.9.8/Debug/*.dep
 *.ilk
 *.dep
 *.suo
+*.o
+*.lo
+.libs
+.deps
+build*
 Debug/*.res
 Release/*.res
 *.manifest

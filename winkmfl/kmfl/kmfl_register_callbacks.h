@@ -22,7 +22,7 @@
 #ifdef  __cplusplus
 extern "C" {
 #endif
-
+__declspec(dllexport)
 void kmfl_register_callbacks(void(*poutput_string)(void *connection, char *p), 
 						void(*poutput_char)(void *connection, BYTE q),
 						void(*poutput_beep)(void *connection),

@@ -25,6 +25,7 @@ void(*fOutputBeep)(void *connection) = 0;
 void(*fForwardKeyevent)(void *connection, UINT key, UINT state) = 0;
 void(*fEraseChar)(void *connection) = 0;
 
+__declspec(dllexport)
 void kmfl_register_callbacks(void(*poutput_string)(void *connection, char *p), 
 						void(*poutput_char)(void *connection, BYTE q),
 						void(*poutput_beep)(void *connection),
@@ -38,30 +39,35 @@ void kmfl_register_callbacks(void(*poutput_string)(void *connection, char *p),
 	fEraseChar = perase_char;
 }
 
+__declspec(dllexport)
 void output_string(void *connection, char *p)
 {
 	if (fOutputString)
 		(fOutputString)(connection,p);
 }
 
+__declspec(dllexport)
 void output_char(void *connection, BYTE q)
 {
 	if (fOutputChar)
 		(fOutputChar)(connection,q);
 }
+
+__declspec(dllexport)
 void output_beep(void *connection)
 {
 	if (fOutputBeep)
 		(fOutputBeep)(connection);
 }
 
+__declspec(dllexport)
 void forward_keyevent(void *connection, UINT key, UINT state)
 {
 	if (fForwardKeyevent)
 		(fForwardKeyevent)(connection,key,state);
 }
 
-
+__declspec(dllexport)
 void erase_char(void *connection)
 {
 	if (fEraseChar)

@@ -30,7 +30,7 @@ class EkayaLangBarButton : public ITfLangBarItemButton,
 {
 public:
     EkayaLangBarButton(EkayaInputProcessor *pTextService);
-    ~EkayaLangBarButton();
+    virtual ~EkayaLangBarButton();
 
     // IUnknown
     STDMETHODIMP QueryInterface(REFIID riid, void **ppvObj);

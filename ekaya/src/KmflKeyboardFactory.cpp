@@ -20,7 +20,7 @@
 #include <stdio.h>
 
 #include <kmfl/kmfl.h>
-#include <libkmfl.h>
+#include <kmfl/libkmfl.h>
 
 #include "KmflKeyboard.h"
 #include "KmflKeyboardFactory.h"

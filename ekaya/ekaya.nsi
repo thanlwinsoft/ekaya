@@ -4,11 +4,32 @@
 
 ; Some useful definitions that may need changing for different versions
 !ifndef VERSION
-  !define VERSION '0.1.3'
+  !define VERSION '0.1.4'
+!endif
+
+!ifndef EKAYA_BINARY_DIR
+	!define EKAYA_BINARY_DIR "Release"
+!endif
+
+!ifndef WINKMFL_BINARY_DIR
+	!define WINKMFL_BINARY_DIR "..\winkmfl\Release"
+!endif
+
+!ifndef ICONV_BINARY_DIR
+	!define ICONV_BINARY_DIR "..\..\win-iconv\bin"
 !endif
 
 !define APP_NAME 'Ekaya'
 !define INSTALL_SUFFIX "ThanLwinSoft.org"
+
+!if ${ARCH} == 'x86_64'
+	!define LIBRARY_X64 1
+	!define REDIST "vcredist_x64.exe"
+	InstallDir $PROGRAMFILES64\${INSTALL_SUFFIX}
+!else
+	!define REDIST "vcredist_x86.exe"
+	InstallDir $PROGRAMFILES\${INSTALL_SUFFIX}
+!endif
 
 ;--------------------------------
 ;Include Modern UI
@@ -19,11 +40,10 @@
 ;General
 
   ;Name and file
-  Name "${APP_NAME} (${VERSION})"
+  Name "${APP_NAME} (${VERSION} ${ARCH})"
   Caption "Ekaya Input Method"
 
-  OutFile "${APP_NAME}-${VERSION}.exe"
-  InstallDir $PROGRAMFILES\${INSTALL_SUFFIX}
+  OutFile "${APP_NAME}-${VERSION}_${ARCH}.exe"
   
   ;Get installation folder from registry if available
   InstallDirRegKey HKLM "Software\${INSTALL_SUFFIX}\${APP_NAME}" ""
@@ -74,28 +94,41 @@ Section "-!${APP_NAME}" SecApp
 
 NoOverwrite:
 
-  
   SetOutPath "$INSTDIR"
 
   CreateDirectory "$INSTDIR\${APP_NAME}"
   SetOutPath "$INSTDIR\${APP_NAME}"
+
+!if ${ARCH} == 'x86_64'
+	SetRegView 64
+	MessageBox MB_OK "Info using 64 bit $INSTDIR"
+!else
+	SetRegView 32
+!endif
+
   File "ekaya.ico"
   File /oname=license.txt "COPYING"
 
   ;File "Uninstall.ico"
   
-  File "Release\ekaya.dll"
-  File "Release\ekaya.dll*.manifest*"
-  File "..\winkmfl\Release\libkmfl.dll"
-  File "..\winkmfl\Release\libkmfl.dll*.manifest*"
-  File "..\..\iconv-1.9.2.win32\bin\iconv.dll"
+  File "${EKAYA_BINARY_DIR}\ekaya.dll"
+  File "${EKAYA_BINARY_DIR}\ekaya.dll*.manifest*"
+  File "${WINKMFL_BINARY_DIR}\winkmfl.dll"
+  File "${WINKMFL_BINARY_DIR}\winkmfl.dll*.manifest*"
+  File "${ICONV_BINARY_DIR}\iconv.dll"
   File /r "doc"
   
   ; Redist dlls
-  File "C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\msvcp90.dll"
-  File "C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\msvcr90.dll"
-  File "C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\msvcm90.dll"
-  File "C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest"
+  File redist\${REDIST}
+  #File "C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\msvcp90.dll"
+  #File "C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\msvcr90.dll"
+  #File "C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\msvcm90.dll"
+  #File "C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest"
+
+  ClearErrors
+  ExecWait '$INSTDIR\${APP_NAME}\${REDIST} /q' $0
+  IfErrors 0 +2
+	MessageBox MB_OK|MB_ICONEXCLAMATION "Warning: failed to install Microsoft Redistributable DLLs"
 
   ClearErrors
   RegDLL "$INSTDIR\${APP_NAME}\ekaya.dll"
@@ -175,6 +208,18 @@ Section /o "Sgaw Karen Unicode 5.2 keyboard" SecSgawKaren
 		"$INSTDIR\${APP_NAME}\kmfl\SgawKaren.html" '' \
 		"" 0 SW_SHOWNORMAL \
 		"" "Sgaw Karen Keyboard"
+SectionEnd
+
+Section /o "Pa-O Unicode 5.2 keyboard" SecPaO
+	SetOutPath "$INSTDIR\${APP_NAME}\kmfl"
+	File "kmfl\pa-oh.bmp"
+	File "kmfl\pa-oh.png"
+	File "kmfl\pa-oh.kmn"
+	File "kmfl\pa-oh.html"
+	CreateShortCut "$SMPROGRAMS\${APP_NAME}\Pa-O Keyboard.lnk" \
+		"$INSTDIR\${APP_NAME}\kmfl\pa-oh.html" '' \
+		"" 0 SW_SHOWNORMAL \
+		"" "Pa-O Keyboard"
 SectionEnd
 ;--------------------------------
 ;Descriptions
