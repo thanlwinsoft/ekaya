@@ -26,9 +26,10 @@ class KmflKeyboardFactory : public EkayaKeyboardFactory
 public:
 	KmflKeyboardFactory(){};
 	~KmflKeyboardFactory();
-	virtual std::vector <EkayaKeyboard * > loadKeyboards();
+	virtual std::vector <EkayaKeyboard * > loadKeyboards(const char * installDir);
 	static const std::string KMFL_PATTERN;
 	static const std::string KMFL_DIR;
+    static const std::string THANLWINSOFT_KMFL_DIR;
 };
 
 #endif

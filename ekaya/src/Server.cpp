@@ -176,7 +176,6 @@ void FreeGlobalObjects(void)
 //+---------------------------------------------------------------------------
 //  DllGetClassObject
 //----------------------------------------------------------------------------
-__declspec(dllexport)
 STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, void **ppvObj)
 {
     if (g_ObjectInfo[0] == NULL)
@@ -215,7 +214,6 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, void **ppvObj)
 //+---------------------------------------------------------------------------
 //  DllCanUnloadNow
 //----------------------------------------------------------------------------
-__declspec(dllexport)
 STDAPI DllCanUnloadNow(void)
 {
     if (g_cRefDll >= 0) // -1 with no refs
@@ -227,7 +225,6 @@ STDAPI DllCanUnloadNow(void)
 //+---------------------------------------------------------------------------
 //  DllUnregisterServer
 //----------------------------------------------------------------------------
-__declspec(dllexport)
 STDAPI DllUnregisterServer(void)
 {
     UnregisterProfiles();
@@ -240,7 +237,6 @@ STDAPI DllUnregisterServer(void)
 //+---------------------------------------------------------------------------
 //  DllRegisterServer
 //----------------------------------------------------------------------------
-__declspec(dllexport)
 STDAPI DllRegisterServer(void)
 {
     // register this service's profile with the tsf

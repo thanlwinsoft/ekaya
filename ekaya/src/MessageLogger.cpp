@@ -18,18 +18,36 @@
  */
 #include <windows.h>
 #include <stdio.h>
+#include <cassert>
+#include <stdarg.h>
+
 #include "MessageLogger.h"
 
-void MessageLogger::logMessage(const char * msg)
+static const int MAX_MSG_LEN = 1024;
+
+void MessageLogger::logMessage(const char * msg, ...)
 {
-	OutputDebugStringA(msg);
+    va_list args;
+    va_start(args, msg);
+    char buffer[MAX_MSG_LEN];
+    int len = vsnprintf(buffer, MAX_MSG_LEN, msg, args);
+    assert(len + 1 < MAX_MSG_LEN);
+	OutputDebugStringA(buffer);
+    va_end(args);
 }
 
-void MessageLogger::logMessage(const wchar_t * msg)
+void MessageLogger::logMessage(const wchar_t * msg, ...)
 {
-	OutputDebugStringW(msg);
+	va_list args;
+    va_start(args, msg);
+    wchar_t buffer[MAX_MSG_LEN];
+    int len = _vsnwprintf(buffer, MAX_MSG_LEN, msg, args);
+    assert(len + 1 < MAX_MSG_LEN);
+	OutputDebugStringW(buffer);
+    va_end(args);
 }
 
+/*
 void MessageLogger::logMessage(const char * msg, int param)
 {
 	char msgText[256];
@@ -119,3 +137,4 @@ void MessageLogger::logMessage(const char * msg, long long param, long long para
 	sprintf_s(msgText, msg, param, paramB);
 	OutputDebugStringA(msgText);
 }
+*/

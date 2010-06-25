@@ -282,15 +282,12 @@ STDAPI EkayaLangBarButton::InitMenu(ITfMenu *pMenu)
 	for (size_t i = 0; i < mpTextService->getKeyboards().size(); i++)
 	{
 		dwFlags = 0;
-		if (i == mpTextService->getActiveKeyboard()) dwFlags |= TF_LBMENUF_CHECKED;
+		if (static_cast<int>(i) == mpTextService->getActiveKeyboard())
+            dwFlags |= TF_LBMENUF_CHECKED;
 		std::basic_string<Utf32> keyboardDesc = mpTextService->getKeyboards()[i]->getDescription();
 
 		std::wstring keyboardDesc16 = UtfConversion::convertUtf32ToUtf16(keyboardDesc);
-		dwFlags = 0;
-		if (mpTextService->getActiveKeyboard() == i)
-		{
-			dwFlags |= TF_LBMENUF_CHECKED;
-		}
+
 		// try to load an icon
         HBITMAP hIcon = NULL;
 		Gdiplus::Bitmap * bm = mIcons[i];
@@ -375,8 +372,8 @@ STDAPI EkayaLangBarButton::OnMenuSelect(UINT wID)
 	{
 		HWND hWnd = NULL;
 		pContextView->GetWnd(&hWnd);
-		long long hi = reinterpret_cast<long long>(ShellExecuteW(hWnd, L"open", docFile.c_str(), NULL, NULL, SW_SHOWNORMAL));
-		if (hi != 32)
+		HINSTANCE hi = ShellExecuteW(hWnd, L"open", docFile.c_str(), NULL, NULL, SW_SHOWNORMAL);
+		if (hi != (HINSTANCE)32)
 		{
 			MessageLogger::logMessage(L"ShellExecute failed %ld %ls\n", (long)hi, docFile.c_str());
 		}

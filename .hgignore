@@ -6,6 +6,8 @@ syntax: glob
 *.bak
 *.kmfl
 *~
+*.orig
+*.bak
 kmflcomp-0.9.8/Debug/*.ilk
 kmflcomp-0.9.8/Debug/*.res
 kmflcomp-0.9.8/Debug/*.exe

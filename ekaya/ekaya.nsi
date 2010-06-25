@@ -46,7 +46,7 @@
   OutFile "${APP_NAME}-${VERSION}_${ARCH}.exe"
   
   ;Get installation folder from registry if available
-  InstallDirRegKey HKLM "Software\${INSTALL_SUFFIX}\${APP_NAME}" ""
+  InstallDirRegKey HKLM "Software\${INSTALL_SUFFIX}\${APP_NAME}_${ARCH}" ""
   
   SetCompressor lzma
 
@@ -101,7 +101,8 @@ NoOverwrite:
 
 !if ${ARCH} == 'x86_64'
 	SetRegView 64
-	MessageBox MB_OK "Info using 64 bit $INSTDIR"
+	# FIXME debug hack
+	MessageBox MB_OK "Info using 64 bit programfiles=$PROGRAMFILES64 system=$SYSDIR install=$INSTDIR"
 !else
 	SetRegView 32
 !endif
@@ -112,9 +113,9 @@ NoOverwrite:
   ;File "Uninstall.ico"
   
   File "${EKAYA_BINARY_DIR}\ekaya.dll"
-  File "${EKAYA_BINARY_DIR}\ekaya.dll*.manifest*"
+  File /nonfatal "${EKAYA_BINARY_DIR}\ekaya.dll*.manifest*"
   File "${WINKMFL_BINARY_DIR}\winkmfl.dll"
-  File "${WINKMFL_BINARY_DIR}\winkmfl.dll*.manifest*"
+  File /nonfatal "${WINKMFL_BINARY_DIR}\winkmfl.dll*.manifest*"
   File "${ICONV_BINARY_DIR}\iconv.dll"
   File /r "doc"
   
@@ -131,8 +132,12 @@ NoOverwrite:
 	MessageBox MB_OK|MB_ICONEXCLAMATION "Warning: failed to install Microsoft Redistributable DLLs"
 
   ClearErrors
+!if ${ARCH} == 'x86_64'  
+  ExecWait '"$SYSDIR\regsvr32" "$INSTDIR\${APP_NAME}\ekaya.dll"' $0
+!else
   RegDLL "$INSTDIR\${APP_NAME}\ekaya.dll"
-  ; ExecWait 'regsvr32 "$INSTDIR\${APP_NAME}\ekaya.dll"' $0
+!endif
+
   IfErrors 0 +2
 	MessageBox MB_OK|MB_ICONEXCLAMATION "Warning: Regsvr32 failed to register Ekaya Text Service DLL"
   
@@ -151,9 +156,8 @@ NoOverwrite:
 	"" "Uninstall ${APP_NAME}"
 	
   ;Store installation folder
-  WriteRegStr HKLM "Software\${INSTALL_SUFFIX}\${APP_NAME}" "" $INSTDIR
+  WriteRegStr HKLM "Software\${INSTALL_SUFFIX}\${APP_NAME}_${ARCH}" "" $INSTDIR
 
-  
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\${APP_NAME}\Uninstall.exe"
   

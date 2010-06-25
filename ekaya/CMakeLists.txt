@@ -17,7 +17,10 @@ find_program(NSIS_COMPILER makensis PATHS $ENV{ProgramFiles}/NSIS)
 # 4263 member function does not override any base class virtual member function
 # 4061 enumerator in switch of enum is not explicitly handled by a case label
 # 4571 semantics changed since Visual C++ 7.1 (SEH) are no longer caught
-add_definitions(-wd4820 -wd4668 -wd4548 -wd4710 -wd4365 -wd4917 -wd4263 -wd4264 -wd4061 -wd4571)
+# 4711 selected for automatic inline expansion
+add_definitions(-wd4820 -wd4668 -wd4548 -wd4710 -wd4365 -wd4917 -wd4263 -wd4264 -wd4061 -wd4571 -wd4711)
+
+file(GLOB EKAYA_HEADERS src/*.h)
 
 add_library(ekaya MODULE
 	src/DllMain.cpp
@@ -30,7 +33,8 @@ add_library(ekaya MODULE
 	src/MessageLogger.cpp
 	src/Register.cpp
 	src/Server.cpp
-	src/UtfConversion.cpp)
+	src/UtfConversion.cpp
+	${EKAYA_HEADERS})
 
 set_target_properties(ekaya PROPERTIES LINK_FLAGS ${CMAKE_LINK_DEF_FILE_FLAG}${PROJECT_SOURCE_DIR}/src/ekaya.def)
 
@@ -56,9 +60,9 @@ else (${CMAKE_CL_64})
 endif (${CMAKE_CL_64})
 
 # disable installer target for debug to try to prevent accidental use with debug configuration
-if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 	message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} Installer target disabled")
-else (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+else ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 	add_custom_target(installer 
 		COMMAND ${NSIS_COMPILER} "-DEKAYA_BINARY_DIR=${EKAYA_BINARY_DIR}"
 			"-DWINKMFL_BINARY_DIR=${WINKMFL_BINARY_DIR}"
@@ -66,4 +70,4 @@ else (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 			"-DARCH=${TARGET_ARCH}"
 			${PROJECT_SOURCE_DIR}/ekaya.nsi
 		WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} COMMENT "NSIS installer")
-endif (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+endif ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")

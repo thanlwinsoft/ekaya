@@ -22,7 +22,8 @@
 class MessageLogger
 {
 public:
-	static void logMessage(const char * msg);
+	static void logMessage(const char * msg, ...);
+/*
 	static void logMessage(const char * msg, int param);
 	static void logMessage(const char * msg, const char * paramA);
 	static void logMessage(const char * msg, int paramA, int paramB);
@@ -36,7 +37,9 @@ public:
 	static void logMessage(const char * msg, long paramA, const char * paramB);
 	static void logMessage(const wchar_t * msg, long paramA, const wchar_t * paramB);
 	static void logMessage(const char * msg, const char * paramA, long paramB);
-	static void logMessage(const wchar_t * msg);
+    */
+	static void logMessage(const wchar_t * msg, ...);
+
 };
 
 #endif

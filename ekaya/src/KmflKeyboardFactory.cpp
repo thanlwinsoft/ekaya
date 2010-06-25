@@ -25,11 +25,12 @@
 #include "KmflKeyboard.h"
 #include "KmflKeyboardFactory.h"
 
-const std::string KmflKeyboardFactory::KMFL_DIR = "\\ThanLwinSoft.org\\Ekaya\\kmfl\\";
+const std::string KmflKeyboardFactory::THANLWINSOFT_KMFL_DIR = "\\ThanLwinSoft.org\\Ekaya\\kmfl\\";
+const std::string KmflKeyboardFactory::KMFL_DIR = "\\Ekaya\\kmfl\\";
 const std::string KmflKeyboardFactory::KMFL_PATTERN = "*.kmn";
 
 std::vector<EkayaKeyboard*>
-KmflKeyboardFactory::loadKeyboards()
+KmflKeyboardFactory::loadKeyboards(const char * installPath)
 {
 	std::vector<EkayaKeyboard*> keyboards;
 
@@ -45,7 +46,7 @@ KmflKeyboardFactory::loadKeyboards()
 	if (appDir)
 	{
 		getenv_s( &requiredSize, appDir, requiredSize, "APPDATA" );
-		basePath = std::string(appDir) + KMFL_DIR;
+		basePath = std::string(appDir) + THANLWINSOFT_KMFL_DIR;
 		pattern = basePath + KMFL_PATTERN;
 	}
 	else
@@ -67,13 +68,21 @@ KmflKeyboardFactory::loadKeyboards()
 		if (FindNextFileA(hFind, &ffd) == 0) break;
 	}
 	delete [] appDir;
+    appDir = NULL;
 	// read files under Program Files
-	getenv_s( &requiredSize, NULL, 0, "ProgramFiles");
-	appDir = new char[requiredSize];
-	if (!appDir)
-		return keyboards;
-	getenv_s( &requiredSize, appDir, requiredSize, "ProgramFiles" );
-	basePath = std::string(appDir) + KMFL_DIR;
+    if (installPath == NULL)
+    {
+	    getenv_s( &requiredSize, NULL, 0, "ProgramFiles");
+	    appDir = new char[requiredSize];
+	    if (!appDir)
+		    return keyboards;
+    	getenv_s( &requiredSize, appDir, requiredSize, "ProgramFiles" );
+        basePath = std::string(appDir) + THANLWINSOFT_KMFL_DIR;
+    }
+    else
+    {
+        basePath = std::string(installPath) + KMFL_DIR;
+    }
 	pattern = basePath + KMFL_PATTERN;
 	hFind = FindFirstFileA(pattern.c_str(), &ffd);
 	while (INVALID_HANDLE_VALUE != hFind)
@@ -85,7 +94,10 @@ KmflKeyboardFactory::loadKeyboards()
 		}
 		if (FindNextFileA(hFind, &ffd) == 0) break;
 	}
-	delete [] appDir;
+    if (installPath == NULL)
+    {
+	    delete [] appDir;
+    }
 	return keyboards;
 }
 

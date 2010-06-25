@@ -24,7 +24,7 @@
 class EkayaKeyboardFactory
 {
 public:
-	virtual std::vector <EkayaKeyboard * > loadKeyboards() = 0;
+	virtual std::vector <EkayaKeyboard * > loadKeyboards(const char * installDir) = 0;
 	virtual ~EkayaKeyboardFactory(){};
 };
 

@@ -49,6 +49,13 @@ static const GUID GUID_PRESERVEDKEY_NEXT =
 
 const std::string EkayaInputProcessor::EKAYA_DIR = "\\ThanLwinSoft.org\\Ekaya";
 
+#ifdef _M_AMD64
+const std::wstring EkayaInputProcessor::EKAYA_INSTALL_REGKEY = L"Ekaya_x86_64";
+#endif
+#ifdef _M_IX86
+const std::wstring EkayaInputProcessor::EKAYA_INSTALL_REGKEY = L"Ekaya_x86";
+#endif
+
 const std::wstring EkayaInputProcessor::LIB_NAME = std::wstring(L"Ekaya");
 const std::wstring EkayaInputProcessor::ORGANISATION = std::wstring(L"ThanLwinSoft.org");
 const std::string EkayaInputProcessor::CONFIG_ACTIVE_KEYBOARD = std::string("activeKeyboard");
@@ -384,25 +391,25 @@ HRESULT EkayaInputProcessor::setTextEditSink(ITfDocumentMgr *pDocMgrFocus)
 // ITfThreadMgrEventSink
 STDAPI EkayaInputProcessor::OnInitDocumentMgr(ITfDocumentMgr *pDocMgr)
 {
-	MessageLogger::logMessage("InitDocumentMgr %lx\n", (long long)pDocMgr);
+	MessageLogger::logMessage("InitDocumentMgr %lu\n", pDocMgr);
 	return S_OK;
 }
 
 STDAPI EkayaInputProcessor::OnUninitDocumentMgr(ITfDocumentMgr *pDocMgr)
 {
-	MessageLogger::logMessage("UninitDocumentMgr %lx\n", (long long)pDocMgr);
+	MessageLogger::logMessage("UninitDocumentMgr %lx\n", pDocMgr);
 	return S_OK;
 }
 
 STDAPI EkayaInputProcessor::OnSetFocus(ITfDocumentMgr *pDocMgrFocus, ITfDocumentMgr * /*pDocMgrPrevFocus*/)
 {
-	MessageLogger::logMessage("SetFocus %lx\n", (long long)pDocMgrFocus);
+	MessageLogger::logMessage("SetFocus %lx\n", pDocMgrFocus);
 	return setTextEditSink(pDocMgrFocus);
 }
 
 STDAPI EkayaInputProcessor::OnPushContext(ITfContext *pContext)		
 {
-	MessageLogger::logMessage("PushContext %lx\n", (long long)pContext);
+	MessageLogger::logMessage("PushContext %lx\n", pContext);
 	EkayaSetContextSession * contextSession = new EkayaSetContextSession(this, pContext);
 	HRESULT hr = S_OK;
 	hr = pContext->RequestEditSession(mClientId, contextSession, TF_ES_SYNC | TF_ES_READ, &hr);
@@ -416,7 +423,7 @@ STDAPI EkayaInputProcessor::OnPushContext(ITfContext *pContext)
 
 STDAPI EkayaInputProcessor::OnPopContext(ITfContext *pContext)
 {
-	MessageLogger::logMessage("PopContext %lx\n", (long long)pContext);
+	MessageLogger::logMessage("PopContext %lx\n", pContext);
 	EkayaSetContextSession * contextSession = new EkayaSetContextSession(this, pContext);
 	HRESULT hr = S_OK;
 	hr = pContext->RequestEditSession(mClientId, contextSession, TF_ES_SYNC | TF_ES_READ, &hr);
@@ -942,7 +949,7 @@ STDMETHODIMP EkayaInputProcessor::OnKeyDown(ITfContext *pContext, WPARAM wParam,
 	HWND hWindow;
 	contextView->GetWnd(&hWindow);
 	contextView->Release();
-	MessageLogger::logMessage("Window:%lx %lx\n", (long long)hWindow, (long long)GetActiveWindow());
+	MessageLogger::logMessage("Window:%lx %lx\n", hWindow, GetActiveWindow());
 
 	if (pEditSession)
 	{
@@ -1261,10 +1268,11 @@ ITfComposition * EkayaInputProcessor::getComposition()
 void EkayaInputProcessor::initKeyboards()
 {
 	// TODO initialize factories more generically
-
+    std::string installPath = getInstallLocation();
 	for (size_t i = 0; i < mKeyboardFactories.size(); i++)
 	{
-		std::vector <EkayaKeyboard * > keyboards = mKeyboardFactories[i]->loadKeyboards();
+		std::vector <EkayaKeyboard * > keyboards =
+            mKeyboardFactories[i]->loadKeyboards(installPath.size()? installPath.c_str() : NULL);
 		for (size_t j = 0; j < keyboards.size(); j++)
 		{
 			if (keyboards[j])
@@ -1312,11 +1320,66 @@ void EkayaInputProcessor::setActiveKeyboard(int keyboardIndex)
 * @param defaultValue value to return if the key isn't found
 * @return value of the configuration parameter
 */
+std::string EkayaInputProcessor::getInstallLocation()
+{
+	HKEY hKeySoftware;
+	HKEY hKeyOrg;
+	HKEY hKeyProgram;
+    std::string value;
+	if (RegOpenKeyW(HKEY_LOCAL_MACHINE, L"Software", &hKeySoftware) == ERROR_SUCCESS)
+	{
+		if (RegOpenKeyW(hKeySoftware, (ORGANISATION).c_str(), &hKeyOrg) == ERROR_SUCCESS)
+		{
+			if (RegOpenKeyW(hKeyOrg, (EKAYA_INSTALL_REGKEY).c_str(), &hKeyProgram) == ERROR_SUCCESS)
+			{
+				char data[1024];
+				DWORD type;
+				DWORD bytes = sizeof(data);
+				LSTATUS ret = RegQueryValueExA(hKeyProgram, NULL, NULL,
+                    &type, reinterpret_cast<BYTE*>(data), &bytes);
+				// RegGetValue doesn't seem to work on Windows XP
+				//if ((ret = RegGetValueA(hKeyProgram, NULL, configName.c_str(), RRF_RT_REG_SZ, &type, data, &bytes) == ERROR_SUCCESS) &&
+                if ((ret == ERROR_SUCCESS) && (type == REG_SZ))
+				{
+                    data[bytes] = '\0';
+					MessageLogger::logMessage("Read value %s\n", data);
+                    value = std::string(data);
+				}
+				else
+				{
+					MessageLogger::logMessage("Failed to read value (error %d) type %d\n", ret, type);
+				}
+        		RegCloseKey(hKeyProgram);
+			}
+            else
+            {
+                MessageLogger::logMessage(L"Key not found in registry %s\n",
+                    EKAYA_INSTALL_REGKEY.c_str());
+            }
+    		RegCloseKey(hKeyOrg);
+		}
+        else
+        {
+            MessageLogger::logMessage("Organisation not found in registry\n");
+        }
+		RegCloseKey(hKeySoftware);
+	}
+	return value;
+}
+
+
+/**
+* Gets a configuration parameter from the registry
+* @param configName name of key
+* @param defaultValue value to return if the key isn't found
+* @return value of the configuration parameter
+*/
 int EkayaInputProcessor::getConfigValue(std::string configName, int defaultValue)
 {
 	HKEY hKeySoftware;
 	HKEY hKeyOrg;
 	HKEY hKeyProgram;
+    int value = defaultValue;
 	if (RegOpenKeyW(HKEY_CURRENT_USER, L"Software", &hKeySoftware) == ERROR_SUCCESS)
 	{
 		if (RegOpenKeyW(hKeySoftware, (ORGANISATION).c_str(), &hKeyOrg) == ERROR_SUCCESS)
@@ -1332,13 +1395,12 @@ int EkayaInputProcessor::getConfigValue(std::string configName, int defaultValue
 //				if ((ret = RegGetValueA(hKeyProgram, NULL, configName.c_str(), RRF_RT_REG_DWORD, &type, reinterpret_cast<BYTE*>(&dValue), &bytes) == ERROR_SUCCESS) &&
                 if ((ret == ERROR_SUCCESS) && (type == REG_DWORD))
 				{
-					int value = static_cast<int>(dValue);
+					value = static_cast<int>(dValue);
 					MessageLogger::logMessage("Read value %d from %s\n", value, configName.c_str());
-					return value;
 				}
 				else
 				{
-					MessageLogger::logMessage("Falied to read value (error %d) from %s\n", ret, configName.c_str());
+					MessageLogger::logMessage("Failed to read value (error %d) from %s\n", ret, configName.c_str());
 				}
         		RegCloseKey(hKeyProgram);
 			}
@@ -1346,7 +1408,7 @@ int EkayaInputProcessor::getConfigValue(std::string configName, int defaultValue
 		}
 		RegCloseKey(hKeySoftware);
 	}
-	return defaultValue;
+	return value;
 }
 
 /**

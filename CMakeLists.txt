@@ -34,11 +34,5 @@ add_subdirectory(winkmfl)
 
 file(GLOB BUILD_FILES ${PROJECT_BINARY_DIR}/*)
 
-add_custom_target(distclean 
-	COMMAND ${CMAKE_COMMAND} .
-	COMMAND ${CMAKE_COMMAND} -E remove -f ${BUILD_FILES}
-	COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}/ekaya
-	COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}/winkmfl
-	COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}/win-iconv
-	COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}/CMakeFiles
-	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+# Attempting to create a target to wipe out the CMake build directory
+# fails with permission problems, so need to do it by hand.

@@ -121,15 +121,17 @@ public:
 
 	std::wstring getTextContext() { return mContext; }
 	void setTextContext(std::wstring & context) { mContext = context; }
-	void setPendingData(int pendingDelete, std::wstring data)
+	void setPendingData(int pendingDelete, const std::wstring & data)
 	{ 
 		mPendingData = data;
 		mPendingDelete = pendingDelete;
 	}
 	ITfContext * getTextEditSinkContext() { return mpTextEditSinkContext; }
+    std::string getInstallLocation();
 	int getConfigValue(std::string configName, int defaultValue);
 	void setConfigValue(std::string configName, int value);
 	static const std::string EKAYA_DIR;
+    static const std::wstring EKAYA_INSTALL_REGKEY;
 	static const std::wstring ORGANISATION;
 	static const std::wstring LIB_NAME;
 	static const std::string CONFIG_ACTIVE_KEYBOARD;
