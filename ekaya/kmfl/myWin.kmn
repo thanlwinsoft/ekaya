@@ -159,7 +159,9 @@ store(ttatthaK) '|'
 
 c U+200B causes problems in OpenOffice, but Padauk now removes 200C/D,
 c so it doesn't have correct effect
-store(filler)   U+200B
+c store(filler)   U+200B
+store(filler)   U+200A
+c store(filler)   U+2060
 
 c F is Kinzi - it should be possible to create a Kinzi   
 store(kinziK)   'F'
@@ -217,6 +219,7 @@ c users usually type u-tha when they mean nya child tha
 U+1025 + 'f' > U+1009 U+103A
 U+1025 + 'm' > U+1009 U+102C
 U+1025 U+1037 + 'f' > U+1009 U+1037 U+103A
+U+1009 U+103A + any(lDotK) > U+1009 index(lDotU, 3) U+103A
 
 any(numOrLetU) + 'm' > index(numAsLetU, 1) U+102C
 any(numOrLetU) + 'g' > index(numAsLetU, 1) U+102B
