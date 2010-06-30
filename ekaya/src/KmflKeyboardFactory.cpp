@@ -22,6 +22,7 @@
 #include <kmfl/kmfl.h>
 #include <kmfl/libkmfl.h>
 
+#include "MessageLogger.h"
 #include "KmflKeyboard.h"
 #include "KmflKeyboardFactory.h"
 
@@ -33,7 +34,7 @@ std::vector<EkayaKeyboard*>
 KmflKeyboardFactory::loadKeyboards(const char * installPath)
 {
 	std::vector<EkayaKeyboard*> keyboards;
-
+    MessageLogger::logMessage("Loading keyboards\n");
 	char* appDir = NULL;
     size_t requiredSize;
 	
@@ -60,11 +61,17 @@ KmflKeyboardFactory::loadKeyboards(const char * installPath)
 	hFind = FindFirstFileA(pattern.c_str(), &ffd);
 	while (INVALID_HANDLE_VALUE != hFind)
 	{
-		int kmflId = kmfl_load_keyboard((basePath + ffd.cFileName).c_str());
+        std::string kmflFileName = basePath + ffd.cFileName;
+        MessageLogger::logMessage("Loading %s\n", kmflFileName.c_str());
+		int kmflId = kmfl_load_keyboard((kmflFileName).c_str());
 		if (kmflId > -1)
 		{
 			keyboards.push_back(new KmflKeyboard(kmflId, basePath, ffd.cFileName));
 		}
+        else
+        {
+            MessageLogger::logMessage("Failed to load %s\n", kmflFileName.c_str());
+        }
 		if (FindNextFileA(hFind, &ffd) == 0) break;
 	}
 	delete [] appDir;
@@ -87,17 +94,24 @@ KmflKeyboardFactory::loadKeyboards(const char * installPath)
 	hFind = FindFirstFileA(pattern.c_str(), &ffd);
 	while (INVALID_HANDLE_VALUE != hFind)
 	{
-		int kmflId = kmfl_load_keyboard((basePath + ffd.cFileName).c_str());
+        std::string kmflFileName = basePath + ffd.cFileName;
+        MessageLogger::logMessage("Loading %s\n", kmflFileName.c_str());
+		int kmflId = kmfl_load_keyboard(kmflFileName.c_str());
 		if (kmflId > -1)
 		{
 			keyboards.push_back(new KmflKeyboard(kmflId, basePath, ffd.cFileName));
 		}
+        else
+        {
+            MessageLogger::logMessage("Failed to load %s\n", kmflFileName.c_str());
+        }
 		if (FindNextFileA(hFind, &ffd) == 0) break;
 	}
     if (installPath == NULL)
     {
 	    delete [] appDir;
     }
+    MessageLogger::logMessage("Loaded %d keyboards\n", keyboards.size());
 	return keyboards;
 }
 

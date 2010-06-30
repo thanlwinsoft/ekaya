@@ -19,6 +19,9 @@
 #ifndef kmfl_register_callbacks_h
 #define kmfl_register_callbacks_h
 
+//#include <vadefs.h>
+#include <stdarg.h>
+
 #ifdef  __cplusplus
 extern "C" {
 #endif
@@ -27,7 +30,8 @@ void kmfl_register_callbacks(void(*poutput_string)(void *connection, char *p),
 						void(*poutput_char)(void *connection, BYTE q),
 						void(*poutput_beep)(void *connection),
 						void(*pforward_keyevent)(void *connection, UINT key, UINT state),
-						void(*perase_char)(void *connection));
+						void(*perase_char)(void *connection),
+                        void(*plog_message)(const char *fmt, va_list args));
 
 #ifdef  __cplusplus
 }

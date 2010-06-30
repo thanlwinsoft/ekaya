@@ -20,20 +20,60 @@
 #include <stdio.h>
 #include <cassert>
 #include <stdarg.h>
-
+#include "UtfConversion.h"
 #include "MessageLogger.h"
 
 static const int MAX_MSG_LEN = 1024;
+
+MessageLogger * MessageLogger::instance = NULL;
+
+void ekayaLogMessage(const char * msg, ...)
+{
+    va_list args;
+    va_start(args, msg);
+    MessageLogger::logMessage(msg, &args);
+    va_end(args);
+}
+
+void ekayaLogMessageArgs(const char * msg, va_list args)
+{
+    MessageLogger::logMessage(msg, args);
+    MessageLogger::logMessage("\n");
+}
 
 void MessageLogger::logMessage(const char * msg, ...)
 {
     va_list args;
     va_start(args, msg);
     char buffer[MAX_MSG_LEN];
-    int len = vsnprintf(buffer, MAX_MSG_LEN, msg, args);
+#ifndef NDEBUG
+    int len = 
+#endif
+        vsnprintf(buffer, MAX_MSG_LEN, msg, args);
     assert(len + 1 < MAX_MSG_LEN);
 	OutputDebugStringA(buffer);
+    if (instance && instance->mFile)
+    {
+        fprintf(instance->mFile, buffer);
+        fflush(instance->mFile);
+    }
     va_end(args);
+}
+
+void MessageLogger::logMessage(const char * msg, va_list & args)
+{
+    char buffer[MAX_MSG_LEN];
+#ifndef NDEBUG
+    int len = 
+#endif
+        vsnprintf(buffer, MAX_MSG_LEN, msg, args);
+    assert(len + 1 < MAX_MSG_LEN);
+	OutputDebugStringA(buffer);
+    if (instance && instance->mFile)
+    {
+        fprintf(instance->mFile, buffer);
+        fflush(instance->mFile);
+    }
 }
 
 void MessageLogger::logMessage(const wchar_t * msg, ...)
@@ -41,9 +81,18 @@ void MessageLogger::logMessage(const wchar_t * msg, ...)
 	va_list args;
     va_start(args, msg);
     wchar_t buffer[MAX_MSG_LEN];
-    int len = _vsnwprintf(buffer, MAX_MSG_LEN, msg, args);
+#ifndef NDEBUG
+    int len = 
+#endif
+        _vsnwprintf(buffer, MAX_MSG_LEN, msg, args);
     assert(len + 1 < MAX_MSG_LEN);
 	OutputDebugStringW(buffer);
+    if (instance && instance->mFile)
+    {
+        std::string utf8Msg = UtfConversion::convertUtf16ToUtf8(std::wstring(buffer));
+        fprintf(instance->mFile, utf8Msg.c_str());
+        fflush(instance->mFile);
+    }
     va_end(args);
 }
 

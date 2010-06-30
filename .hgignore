@@ -66,4 +66,4 @@ ekaya/Debug/*.htm
 *.gz
 *.changes
 *.log
-
+CMakeFiles

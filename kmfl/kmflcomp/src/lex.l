@@ -324,6 +324,8 @@ switch					{return TOK_SWITCH;/*  (obsolete) */}
 ^c{SPACES}*/\n		{/* ignore */}
 {SPACES}+c/\r		{/* ignore */}
 {SPACES}+c/\n		{/* ignore */}
+^c{SPACES}.*\\{SPACES}*/\r		{/* ignore even though it has \\ */}
+^c{SPACES}.*\\{SPACES}*/\n		{/* ignore even though it has \\ */}
 
 ^[ ]*c{SPACES}	{BEGIN(SKIP);}
 

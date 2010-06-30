@@ -4,6 +4,7 @@
 
 #include "Ekaya.h"
 #include "EkayaInputProcessor.h"
+#include "MessageLogger.h"
 
 // from Register.cpp
 BOOL RegisterProfiles();
@@ -86,6 +87,7 @@ private:
 
 STDAPI EkayaClassFactory::QueryInterface(REFIID riid, void **ppvObj)
 {
+    MessageLogger::logMessage("QueryInterface %x\n", riid);
     if (IsEqualIID(riid, IID_IClassFactory) || IsEqualIID(riid, IID_IUnknown))
     {
         *ppvObj = this;
@@ -122,6 +124,8 @@ STDAPI_(ULONG) EkayaClassFactory::Release()
 
 STDAPI EkayaClassFactory::CreateInstance(IUnknown *pUnkOuter, REFIID riid, void **ppvObj)
 {
+    MessageLogger::logMessage("CreateInstance %x-%x-%x-%x\n",
+        riid.Data1, riid.Data2, riid.Data3, riid.Data4);
     return mpfnCreateInstance(pUnkOuter, riid, ppvObj);
 }
 
@@ -149,6 +153,7 @@ STDAPI EkayaClassFactory::LockServer(BOOL fLock)
 
 void BuildGlobalObjects(void)
 {
+    MessageLogger::logMessage("Ekaya BuildGlobalObjects\n");
     // Build CClassFactory Objects
     g_ObjectInfo[0] = new EkayaClassFactory(CLSID_EKAYA_SERVICE, EkayaInputProcessor::CreateInstance);
 
@@ -178,6 +183,9 @@ void FreeGlobalObjects(void)
 //----------------------------------------------------------------------------
 STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, void **ppvObj)
 {
+    MessageLogger::logMessage("DllGetClassObject %x-%x-%x-%x %x-%x-%x-%x\n",
+        rclsid.Data1, rclsid.Data2, rclsid.Data3, rclsid.Data4,
+        riid.Data1, riid.Data2, riid.Data3, riid.Data4);
     if (g_ObjectInfo[0] == NULL)
     {
         EnterCriticalSection(&g_cs);

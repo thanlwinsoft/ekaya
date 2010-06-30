@@ -217,7 +217,8 @@ STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 			delInput[1] = delInput[0];
 			delInput[1].ki.wVk = EkayaInputProcessor::DUMMY_KEY;
 
-			mpTextService->setTextContext(convertedContext.substr(0, keyResult.first));
+            std::wstring contextBefore = convertedContext.substr(0, keyResult.first);
+			mpTextService->setTextContext(contextBefore);
 			mpTextService->setPendingData(delCount, convertedContext.substr(keyResult.first, keyResult.second - keyResult.first));
 			// SentInput really works, send deletes one at a time with dummy key so we get feedback
 			SendInput(2, delInput, sizeof(INPUT));
@@ -263,8 +264,9 @@ STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 			mpTextService->setTextContext(convertedContext);
 		else
 		{
-			mpTextService->setTextContext(convertedContext.substr(convertedContext.length()
-				- EkayaInputProcessor::MAX_CONTEXT, EkayaInputProcessor::MAX_CONTEXT));
+            std::wstring truncatedContext = convertedContext.substr(convertedContext.length()
+				- EkayaInputProcessor::MAX_CONTEXT, EkayaInputProcessor::MAX_CONTEXT);
+			mpTextService->setTextContext(truncatedContext);
 		}
 		for (size_t i = 0; i < convertedContext.length(); i++)
 			MessageLogger::logMessage(" %x", (int)convertedContext[i]);

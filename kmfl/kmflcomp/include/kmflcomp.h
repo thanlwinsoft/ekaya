@@ -31,7 +31,15 @@ extern int errcount, errlimit, warnings, warnlimit;
 extern int yydebug;
 extern jmp_buf fatal_error_buf;
 
+#ifdef _WIN32
+#define KMFL_EXPORT __declspec(dllexport)
+#else
+#define KMFL_EXPORT
+#endif
+
+KMFL_EXPORT
 unsigned long compile_keyboard_to_buffer(const char * infile, void ** keyboard_buffer);
+KMFL_EXPORT
 void write_keyboard(char * fname, void *keyboard_buffer, int keyboard_buffer_size);
 
 #ifdef  __cplusplus

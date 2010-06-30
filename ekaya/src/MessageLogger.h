@@ -19,27 +19,34 @@
 #ifndef MessageLogger_h
 #define MessageLogger_h
 
+#include <stdio.h>
+#include <stdarg.h>
+
+#ifdef __cplusplus
+
 class MessageLogger
 {
 public:
 	static void logMessage(const char * msg, ...);
-/*
-	static void logMessage(const char * msg, int param);
-	static void logMessage(const char * msg, const char * paramA);
-	static void logMessage(const char * msg, int paramA, int paramB);
-	static void logMessage(const char * msg, int paramA, const char * paramB);
-	static void logMessage(const char * msg, const char * paramA, int paramB);
-	static void logMessage(const char * msg, const char * paramA, const char * paramB);
-	static void logMessage(const char * msg, int paramA, int paramB, int paramC);
-	static void logMessage(const char * msg, long param);
-	static void logMessage(const char * msg, long long param);
-	static void logMessage(const char * msg, long long param, long long paramB);
-	static void logMessage(const char * msg, long paramA, const char * paramB);
-	static void logMessage(const wchar_t * msg, long paramA, const wchar_t * paramB);
-	static void logMessage(const char * msg, const char * paramA, long paramB);
-    */
 	static void logMessage(const wchar_t * msg, ...);
+    static void logMessage(const char * msg, va_list & args);
 
+    MessageLogger(const char * filename) : mFile(fopen(filename, "wb")) { instance = this; };
+    ~MessageLogger() { if (mFile) { fclose(mFile); mFile = NULL; } instance = NULL; };
+private:
+    static MessageLogger * instance;
+    FILE * mFile;
 };
+
+extern "C" {
+#endif
+
+    extern __declspec(dllexport) void ekayaLogMessage(const char * msg, ...);
+    extern __declspec(dllexport) void ekayaLogMessageArgs(const char * msg, va_list args);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif

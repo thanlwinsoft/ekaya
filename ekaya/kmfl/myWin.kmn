@@ -207,8 +207,8 @@ any(consU) U+1031 + any(aftereDK) > index(consU, 1) index(aftereDU, 3) U+1031
 any(consU) U+103C U+1031 + any(aftereDK) > index(consU, 1) index(aftereDU, 4) U+103C U+1031
 
 c modify space keys
- + [SHIFT K_SPACE] > U+200B      
- 
+c + [SHIFT K_SPACE] > U+200B
+
 c Convert sequences for composite vowels into single code point
 U+101E U+103C U+1031 U+102c + any(aftereDK) > U+102A
 U+101E + 'j' > U+1029
@@ -216,6 +216,7 @@ U+1025 + 'D' > U+1026
 c users usually type u-tha when they mean nya child tha
 U+1025 + 'f' > U+1009 U+103A
 U+1025 + 'm' > U+1009 U+102C
+U+1025 U+1037 + 'f' > U+1009 U+1037 U+103A
 
 any(numOrLetU) + 'm' > index(numAsLetU, 1) U+102C
 any(numOrLetU) + 'g' > index(numAsLetU, 1) U+102B
@@ -337,7 +338,7 @@ any(aftereDU) + any(lDotK) > index(lDotU, 2) index(aftereDU, 1)
 
 U+1038 + any(aftereDK) > index(aftereDU, 2) context
 
- + any(kinziK) > index(kinziU, 2) U+103A U+1039
+ + any(kinziK) > index(kinziU, 1) U+103A U+1039
 c The above line doesn't seem to work reliably
 U+0020 + any(kinziK) > U+0020 index(kinziU, 2) U+103A U+1039
 any(consU) + any(kinziK) > index(kinziU, 2) U+103A U+1039 index(consU, 1)

@@ -208,8 +208,9 @@ BOOL RegisterServer()
         return FALSE;
     memcpy(achIMEKey, c_szInfoKeyPrefix, sizeof(c_szInfoKeyPrefix)-sizeof(char));
 
-    if (fRet = RegCreateKeyExA(HKEY_CLASSES_ROOT, achIMEKey, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, &dw)
-            == ERROR_SUCCESS)
+    fRet = (RegCreateKeyExA(HKEY_CLASSES_ROOT, achIMEKey, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, &dw)
+            == ERROR_SUCCESS);
+    if (fRet)
     {
         fRet &= RegSetValueExA(hKey, NULL, 0, REG_SZ, (BYTE *)TEXTSERVICE_DESC_A, static_cast<DWORD>((strlen(TEXTSERVICE_DESC_A)+1)*sizeof(char)))
             == ERROR_SUCCESS;

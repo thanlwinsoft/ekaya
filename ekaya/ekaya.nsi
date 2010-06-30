@@ -102,7 +102,7 @@ NoOverwrite:
 !if ${ARCH} == 'x86_64'
 	SetRegView 64
 	# FIXME debug hack
-	MessageBox MB_OK "Info using 64 bit programfiles=$PROGRAMFILES64 system=$SYSDIR install=$INSTDIR"
+	# MessageBox MB_OK "Info using 64 bit programfiles=$PROGRAMFILES64 system=$SYSDIR install=$INSTDIR"
 !else
 	SetRegView 32
 !endif
@@ -160,6 +160,16 @@ NoOverwrite:
 
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\${APP_NAME}\Uninstall.exe"
+
+  ; Do we need to send a message that these have changed? Will they take affect on reboot?
+  ; Make sure langbar is visible at least for user installing it try HKU?
+  WriteRegDWORD HKCU "SOFTWARE\Microsoft\CTF\LangBar" "ExtraIconsOnMinimized" 0x1  
+  # 3 is hidden 0 or 4 are ok
+  ReadRegDWORD $0 HKCU "SOFTWARE\Microsoft\CTF\LangBar" "ShowStatus"
+  IntCmp $0 3 0 NoChange NoChange
+	WriteRegDWORD HKCU "SOFTWARE\Microsoft\CTF\LangBar" "ShowStatus" 0x0
+
+NoChange:
   
   ; Enable Advanced Text Services for all programs on XP
   ClearErrors

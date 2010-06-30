@@ -1,10 +1,11 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 
 project(ekaya)
+enable_language(C CXX)
 
-include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/../winkmfl
+include_directories(${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/../winkmfl
 	${PROJECT_BINARY_DIR}/../winkmfl/include)
-	
+
 find_program(NSIS_COMPILER makensis PATHS $ENV{ProgramFiles}/NSIS)
 
 # 4548 expression before , has no effect
@@ -20,7 +21,14 @@ find_program(NSIS_COMPILER makensis PATHS $ENV{ProgramFiles}/NSIS)
 # 4711 selected for automatic inline expansion
 add_definitions(-wd4820 -wd4668 -wd4548 -wd4710 -wd4365 -wd4917 -wd4263 -wd4264 -wd4061 -wd4571 -wd4711)
 
-file(GLOB EKAYA_HEADERS src/*.h)
+file(GLOB EKAYA_HEADERS ${PROJECT_SOURCE_DIR}/src/*.h)
+
+# This works around a problem where the output path is bad for NMake
+# also all the CXX defines get appended unnecessarily
+add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/ekaya.res
+	COMMAND ${CMAKE_RC_COMPILER} /fo${PROJECT_BINARY_DIR}/ekaya.res ${PROJECT_SOURCE_DIR}/src/ekaya.rc
+	DEPENDS ${PROJECT_SOURCE_DIR}/src/ekaya.rc ${PROJECT_SOURCE_DIR}/src/resource.h
+	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 
 add_library(ekaya MODULE
 	src/DllMain.cpp
@@ -34,14 +42,34 @@ add_library(ekaya MODULE
 	src/Register.cpp
 	src/Server.cpp
 	src/UtfConversion.cpp
-	${EKAYA_HEADERS})
+	${PROJECT_BINARY_DIR}/ekaya.res
+	${EKAYA_HEADERS}
+	${PROJECT_SOURCE_DIR}/src/ekaya.def 
+	${PROJECT_SOURCE_DIR}/src/ekaya.rc
+	)
 
+add_executable(ekaya_test test/ekayaTest.cpp src/Ekaya.cpp)
+
+add_custom_target(copy_dlls
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${winkmfl_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}winkmfl${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR}
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${win_iconv_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}iconv${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR}
+	)
+
+set_source_files_properties(${PROJECT_SOURCE_DIR}/src/ekaya.def 
+	${PROJECT_SOURCE_DIR}/src/ekaya.rc
+	PROPERTIES HEADER_FILE_ONLY true)
 set_target_properties(ekaya PROPERTIES LINK_FLAGS ${CMAKE_LINK_DEF_FILE_FLAG}${PROJECT_SOURCE_DIR}/src/ekaya.def)
 
 add_dependencies(ekaya winkmfl iconv)
 target_link_libraries(ekaya winkmfl gdiplus)
 
-install(TARGETS ekaya LIBRARY DESTINATION lib RUNTIME DESTINATION lib)
+add_dependencies(copy_dlls winkmfl iconv)
+add_dependencies(ekaya_test ekaya copy_dlls)
+target_link_libraries(ekaya_test)
+
+add_test(NAME ekaya_test_dll COMMAND $<TARGET_FILE:ekaya_test>)
+
+# install(TARGETS ekaya LIBRARY DESTINATION lib RUNTIME DESTINATION lib)
 
 if (${CMAKE_CFG_INTDIR} STREQUAL ".")
 	file(TO_NATIVE_PATH "${PROJECT_BINARY_DIR}" EKAYA_BINARY_DIR)

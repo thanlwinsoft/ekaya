@@ -17,6 +17,7 @@
  *
  */
 #include <windows.h>
+#include <cstdio>
 #include <ole2.h>
 #include <olectl.h>
 #include <assert.h>
@@ -59,6 +60,7 @@ const std::wstring EkayaInputProcessor::EKAYA_INSTALL_REGKEY = L"Ekaya_x86";
 const std::wstring EkayaInputProcessor::LIB_NAME = std::wstring(L"Ekaya");
 const std::wstring EkayaInputProcessor::ORGANISATION = std::wstring(L"ThanLwinSoft.org");
 const std::string EkayaInputProcessor::CONFIG_ACTIVE_KEYBOARD = std::string("activeKeyboard");
+const std::string EkayaInputProcessor::CONFIG_LOGGING = std::string("logging");
 
 EkayaInputProcessor::EkayaInputProcessor()
 : mOpen(true), mDisabled(true), mRawCodes(true), mRefCount(1), mActiveKeyboard(-1),
@@ -68,9 +70,34 @@ EkayaInputProcessor::EkayaInputProcessor()
   mContextOwnerCookie(TF_INVALID_COOKIE),
   mGdiToken(NULL),
   mpThreadMgr(NULL), mpLangBarButton(NULL), mExpectDummyKey(false),
-  mpComposition(NULL), mpCompositionRange(NULL)
+  mpComposition(NULL), mpCompositionRange(NULL), mLogger(NULL)
 {
 	DllAddRef();
+    int logging = getConfigValue(CONFIG_LOGGING, 0);
+    
+    if (logging == 0)
+        setConfigValue(CONFIG_LOGGING, 0);
+    if (logging)
+    {
+        // create a logging directory under APPDATA
+        char* appDir = NULL;
+        size_t requiredSize;
+        getenv_s( &requiredSize, NULL, 0, "APPDATA");
+	    appDir = new char[requiredSize];
+	    if (appDir)
+        {
+	        std::string basePath;
+		    getenv_s( &requiredSize, appDir, requiredSize, "APPDATA" );
+		    basePath = std::string(appDir) + "\\ThanLwinSoft.org";
+            //mkdir(basePath);
+            // ignore return since it may already exist
+            CreateDirectoryA(basePath.c_str(), NULL);
+            basePath += "\\ekaya.log";
+            mLogger = new MessageLogger(basePath.c_str());
+            delete appDir;
+            MessageLogger::logMessage("Logging to %s\n", basePath.c_str());
+	    }
+    }
 	mKeyboardFactories.push_back(new KmflKeyboardFactory());
 	initKeyboards();
 }
@@ -83,12 +110,19 @@ EkayaInputProcessor::~EkayaInputProcessor()
 		delete (*i);
 		++i;
 	}
+    if (mLogger)
+    {
+        delete mLogger;
+        mLogger = NULL;
+    }
 	DllRelease();
 }
 
 // IUnknown
 STDAPI EkayaInputProcessor::QueryInterface(REFIID riid, void **ppvObj)
 {
+    MessageLogger::logMessage("EkayaInputProcessor::QueryInterface %x-%x-%x-%x\n",
+        riid.Data1, riid.Data2, riid.Data3, riid.Data4);
 	if (ppvObj == NULL)
         return E_INVALIDARG;
 
@@ -1088,6 +1122,8 @@ HRESULT EkayaInputProcessor::CreateInstance(IUnknown *pUnkOuter, REFIID riid, vo
 {
 	EkayaInputProcessor *pCase;
     HRESULT hr;
+    MessageLogger::logMessage("CreateInstance %x-%x-%x-%x outer %x\n", riid.Data1,
+        riid.Data2, riid.Data3, riid.Data4, pUnkOuter);
 
     if (ppvObj == NULL)
         return E_INVALIDARG;

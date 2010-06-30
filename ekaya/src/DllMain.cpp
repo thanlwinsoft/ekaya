@@ -17,7 +17,7 @@
  *
  */
 #include <windows.h>
-
+#include "MessageLogger.h"
 #include "Ekaya.h"
 
 
@@ -29,9 +29,11 @@ BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID /*pvReserved*/)
             g_hInst = hInstance;
             if (!InitializeCriticalSectionAndSpinCount(&g_cs, 0))
                 return FALSE;
+            MessageLogger::logMessage("Ekaya DLL Attach\n");
             break;
 
         case DLL_PROCESS_DETACH:
+            MessageLogger::logMessage("Ekaya DLL Detach\n");
             DeleteCriticalSection(&g_cs);
             break;
     }

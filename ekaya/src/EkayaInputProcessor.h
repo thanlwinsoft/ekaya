@@ -29,6 +29,7 @@
 class EkayaLangBarButton;
 class EkayaKeyboard;
 class EkayaKeyboardFactory;
+class MessageLogger;
 
 class EkayaInputProcessor : public ITfTextInputProcessor,
                      public ITfThreadMgrEventSink,
@@ -135,6 +136,7 @@ public:
 	static const std::wstring ORGANISATION;
 	static const std::wstring LIB_NAME;
 	static const std::string CONFIG_ACTIVE_KEYBOARD;
+    static const std::string CONFIG_LOGGING;
 private:
 	HRESULT setTextEditSink(ITfDocumentMgr *pDocMgrFocus);
 	bool ignoreKey(WPARAM code);
@@ -163,7 +165,7 @@ private:
 	bool mExpectDummyKey;
 	ITfComposition * mpComposition;
 	ITfRangeBackup * mpCompositionRange;
-
+    MessageLogger * mLogger;
 };
 
 #endif

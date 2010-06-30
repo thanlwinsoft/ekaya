@@ -203,7 +203,7 @@ XKEYBOARD * kmfl_load_keyboard_from_file(const char *filename)
      	errcode = setjmp(fatal_error_buf);
     	
         if (errcode == 0)
-        {       
+        {
             compile_keyboard_to_buffer(filename, (void *) &p_kbd);
     		memcpy(version_string,p_kbd->version,3); // Copy to ensure terminated
     		kbver = (unsigned)atoi(version_string);

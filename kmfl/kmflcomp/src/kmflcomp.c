@@ -51,9 +51,12 @@
 	#define O_BINARY 	0
 	#define DIRDELIM	'/'
 #endif
+#ifdef EKAYA
+__declspec(dllexport)
+void log_message(const char *fmt, ...);
+#endif
 
 #include <fcntl.h>
-
 
 // Compiler options
 int opt_debug=0;
@@ -224,6 +227,7 @@ unsigned long compile_keyboard_to_buffer(const char * infile, void ** keyboard_b
 	{
 		fail(2,"%d error%s and %d warning%s",errcount,(errcount==1?"":"s"),
 			warncount,(warncount==1?"":"s"));
+        return 0;
 	}
 
 	// Sort the rules in each group
@@ -859,7 +863,7 @@ STORE *new_store(char *name, ITEM *ip0, int line)
 			}
 		}
 
-		sp->items = checked_alloc(len+1,4);
+		sp->items = (ITEM*)checked_alloc(len+1,4);
 		sp->len = len;
 
 		for(ip=ip0,ipt=sp->items; *ip; ip++)
@@ -893,7 +897,7 @@ STORE *new_store(char *name, ITEM *ip0, int line)
 	}
 	else	// allow for empty stores, just in case
 	{
-		sp->items = checked_alloc(1,4);
+		sp->items = (ITEM*)checked_alloc(1,4);
 		sp->len = 0;
 	}
 
@@ -1158,7 +1162,7 @@ void process_special_store(char *name, STORE *sp, int line)
 	int n, kbver;
 	
 	// Identify store by name
-	for(n=0;special_stores[n];n++)
+	for(n=0; n < sizeof(special_stores)/sizeof(special_stores[0]); n++)
 	{
 		if(strcasecmp(name,special_stores[n]) == 0 ) break;
 	}
@@ -1213,14 +1217,18 @@ void fail(int errcode, char *s, ...)
 	va_start(v1,s); 
 	vsnprintf(t,511,s,v1);
 	va_end(v1);
-	
+#ifdef EKAYA
+    log_message("*** Compilation failed: %s ***\n", t);
+#else
 	fprintf(stderr, "*** Compilation failed: %s ***\n", t);
 	fflush(stderr);
+#endif
 
 #ifdef _WIN32	
 	if(opt_debug) getch();
-#endif	
+#else
     longjmp(fatal_error_buf, -errcode);
+#endif
 }
 
 void kmflcomp_error(int lineno,char *s, ...)
@@ -1234,6 +1242,11 @@ void kmflcomp_error(int lineno,char *s, ...)
 	vsnprintf(t,511,s,v1);
 	va_end(v1);
 
+#ifdef EKAYA
+    log_message("  Error: %s (line %d)\n", t, lineno);
+    if(errcount == errlimit) 
+		log_message("    -------(remaining errors unreported)-------\n");
+#else
 	if(lineno)
 		fprintf(stderr, "  Error: %s (line %d)\n", t, lineno);
 	else
@@ -1241,35 +1254,56 @@ void kmflcomp_error(int lineno,char *s, ...)
 
 	if(errcount == errlimit) 
 		fprintf(stderr, "    -------(remaining errors unreported)-------\n");
+#endif
 }
 
 void dwarn(int lineno,char *fmt,...)
 {
+    char buffer[512];
     va_list args;
-
-    fprintf(stderr,"debug: ");
     va_start(args,fmt);
+#ifdef EKAYA
+    vsnprintf(buffer, 512, fmt, args);
+    log_message("warn: %s", buffer);
+#else
+    fprintf(stderr,"debug: ");
     vfprintf(stderr,fmt,args);
+#endif
     va_end(args);
 }
 void kmflcomp_warn(int lineno,char *s, ...)
 {
 	va_list v1;
+    char buffer[512];
 	
 	if(++warncount > warnlimit) return;
 
+	va_start(v1,s);
+#ifdef EKAYA
+    vsnprintf(buffer, 512, s, v1);
+    log_message("warn (line %d): %s", lineno, buffer);
+#else
 	fprintf(stderr, "  Warning: ");
-	va_start(v1,s); 
 	vfprintf(stderr,s,v1);
+#endif
 	va_end(v1);
-	
+
+#ifdef EKAYA
+#else
 	if(lineno)
 		fprintf(stderr, "  (line %d)\n", lineno);
 	else
 		fprintf(stderr, "  \n");
+#endif
 
 	if(warncount == warnlimit) 
+    {
+#ifdef EKAYA
+        log_message("    -------(remaining warnings unreported)-------\n");
+#else
 		fprintf(stderr, "    -------(remaining warnings unreported)-------\n");
+#endif
+    }
 }
 void debug(int lineno,char *s, ...)
 {
@@ -1282,10 +1316,14 @@ void debug(int lineno,char *s, ...)
 	vsnprintf(t,511,s,v1);
 	va_end(v1);
 
+#ifdef EKAYA
+    log_message("Debug %s (line %d)\n", t, lineno);
+#else
 	if(lineno)
 		fprintf(stderr, "Debug: %s (line %d)\n", t, lineno);
 	else
 		fprintf(stderr, "Debug: %s\n", t);
+#endif
 }
 
 // Checked memory allocation, always allocating one more element than requested
@@ -1433,7 +1471,8 @@ char *find_first_match(char *path)
 // of the name exists (different case, .bmp or .png suffixes)
 int check_bitmap_file(STORE *sp, int line)
 {
-	char *p,*bmp_path=NULL,tname[64];
+	const char *p;
+    char *bmp_path=NULL,tname[64];
 	struct stat fstat;
 	UINT i;
 	UTF32 *p1,*titems=NULL;
@@ -1444,7 +1483,8 @@ int check_bitmap_file(STORE *sp, int line)
 	IConvertUTF32toUTF8((const UTF32 **)&p1,(const UTF32 *)(sp->items+sp->len),&p2,(UTF8 *)(tname+63));
 	*p2 = 0;
 
-	if((p=rindex(fname,DIRDELIM)) != NULL) 
+	//if((p=rindex(fname,(int)DIRDELIM)) != NULL) 
+    if((p=strrchr(fname,(int)DIRDELIM)) != NULL) 
 	{
 		bmp_path = (char *)checked_alloc((p-fname+1)+strlen(tname)+6,1);
 		strncpy(bmp_path,fname,p-fname+1); 
@@ -1544,7 +1584,6 @@ FILE *UTF16toUTF8(FILE *fp, char ** pName)
 	return fp8;
 }
 
-
 #ifdef _WIN32
 
 #include <windows.h>
@@ -1553,7 +1592,7 @@ FILE *UTF16toUTF8(FILE *fp, char ** pName)
 
 char *GetInputFile(void)
 {
-	OPENFILENAME OFN={0};
+	OPENFILENAMEA OFN={0};
 	static char FileName[MAX_PATH], KeyboardName[32];
 
 	OFN.lStructSize = sizeof(OPENFILENAME);
@@ -1572,6 +1611,6 @@ char *GetInputFile(void)
 		| OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST;
 	OFN.lpstrDefExt = "kmn";
 	OFN.lpfnHook = NULL;
-	return(GetOpenFileName(&OFN) != 0 ? FileName : NULL);
+	return(GetOpenFileNameA(&OFN) != 0 ? FileName : NULL);
 }
 #endif

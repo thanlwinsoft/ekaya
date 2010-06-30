@@ -375,7 +375,7 @@ STDAPI EkayaLangBarButton::OnMenuSelect(UINT wID)
 		HINSTANCE hi = ShellExecuteW(hWnd, L"open", docFile.c_str(), NULL, NULL, SW_SHOWNORMAL);
 		if (hi != (HINSTANCE)32)
 		{
-			MessageLogger::logMessage(L"ShellExecute failed %ld %ls\n", (long)hi, docFile.c_str());
+			MessageLogger::logMessage(L"ShellExecute failed %ld %ls\n", hi, docFile.c_str());
 		}
 	}
 

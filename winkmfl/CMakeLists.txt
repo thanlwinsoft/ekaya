@@ -2,15 +2,17 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6.0 FATAL_ERROR)
 
 project(winkmfl)
 
+enable_language(CXX)
 # 4267 conversion from size_t to int
 # 4820 padding bytes between data members
 # 4100 unreferenced formal parameter
-add_definitions(-DWINKMFL_EXPORTS -DYY_NO_UNISTD_H -wd4100 -wd4820 -wd4267)
+add_definitions(-DWINKMFL_EXPORTS -DEKAYA -DYY_NO_UNISTD_H -wd4100 -wd4820 -wd4267)
 
 include_directories(${PROJECT_SOURCE_DIR} 
 	${PROJECT_SOURCE_DIR}/../kmfl/kmflcomp/include
 	${PROJECT_SOURCE_DIR}/../kmfl/libkmfl/include
 	${PROJECT_BINARY_DIR}/include
+	${PROJECT_SOURCE_DIR}/../ekaya/src
 	${win_iconv_SOURCE_DIR})
 
 add_custom_target(kmfl_headers
@@ -39,4 +41,4 @@ set_source_files_properties(../kmfl/kmflcomp/src/yacc.c PROPERTIES COMPILE_FLAGS
 add_dependencies(winkmfl iconv kmfl_headers)
 target_link_libraries(winkmfl iconv)
 
-install(TARGETS winkmfl RUNTIME DESTINATION bin LIBRARY DESTINATION lib)
+# install(TARGETS winkmfl RUNTIME DESTINATION bin LIBRARY DESTINATION lib)

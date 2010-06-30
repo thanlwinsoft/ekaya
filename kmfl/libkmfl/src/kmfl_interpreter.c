@@ -299,7 +299,7 @@ int match_rule(KMSI *p_kmsi, XRULE *rp, ITEM *any_index, int usekeys)
 			index= any_index[INDEX_OFFSET(*pr)-1];
 			if (index >= store_length(p_kmsi,STORE_NUMBER(*pr)))
 			{
-				ERRMSG("\"any index\" out of range\n");
+				ERRMSG("\"any\" index %d out of range\n", index);
 				return 0;
 			} else {
 				ps = store_content(p_kmsi,STORE_NUMBER(*pr));
@@ -394,7 +394,7 @@ int process_rule(KMSI *p_kmsi, XRULE *rp, ITEM *any_index, int usekeys)
 			index= any_index[INDEX_OFFSET(*pr)-1];
 			if (index >= store_length(p_kmsi,STORE_NUMBER(*pr)))
 			{
-				ERRMSG("\"any index\" out of range\n");
+                ERRMSG("\"any index %d\" out of range\n", index);
 				return -1;
 			} else {
 				ps = store_content(p_kmsi,STORE_NUMBER(*pr));

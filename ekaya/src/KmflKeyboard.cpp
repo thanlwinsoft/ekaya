@@ -80,7 +80,8 @@ KmflKeyboard::KmflKeyboard(int kmflId, std::string baseDir, std::string filename
 {
 	mKmsi = kmfl_make_keyboard_instance(this);
 	kmfl_register_callbacks(ekayaKmflOutputString, ekayaKmflOutputChar, 
-		ekayaKmflOutputBeep, ekayaKmflForwardKeyevent, ekayaKmflEraseChar);
+		ekayaKmflOutputBeep, ekayaKmflForwardKeyevent, ekayaKmflEraseChar,
+        ekayaLogMessageArgs);
 }
 
 // KmflKeyboard::KmflKeyboard(const KmflKeyboard & parent)
@@ -111,6 +112,7 @@ std::pair<size_t, size_t> KmflKeyboard::processKey(long keyId, std::basic_string
 
 	set_history(mKmsi, contextItems, static_cast<UINT>(contextLen));
 	status = kmfl_interpret(mKmsi, static_cast<UINT>(keyId), state);
+    MessageLogger::logMessage("kmfl_interpret status=%d\n", status);
 
 	size_t newLength = (mContextBuffer.length());
 	context = mContextBuffer;
@@ -148,6 +150,7 @@ std::basic_string<UTF32> KmflKeyboard::getHelpFileName()
 void KmflKeyboard::outputString(char *p)
 {
 	size_t utf8Len = strlen(p);
+    MessageLogger::logMessage("KMFL outputString length %d %s\n", utf8Len, p); 
 	assert(utf8Len < KMFL_MAX_CONTEXT);
 	UTF32 utf32[KMFL_MAX_CONTEXT];
 	UTF32 * p32 = utf32;
@@ -157,9 +160,10 @@ void KmflKeyboard::outputString(char *p)
 	mContextBuffer = mContextBuffer.insert(mContextBuffer.length(), utf32, p32 - utf32);
 }
 
-void KmflKeyboard::outputChar(BYTE /*q*/)
+void KmflKeyboard::outputChar(BYTE q)
 {
 	// doesn't seem to be used
+    MessageLogger::logMessage("KMFL outputChar %x\n", q);
 	assert(false);
 }
 
