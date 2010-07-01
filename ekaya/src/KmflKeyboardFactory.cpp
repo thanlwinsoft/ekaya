@@ -26,6 +26,8 @@
 #include "KmflKeyboard.h"
 #include "KmflKeyboardFactory.h"
 
+namespace EKAYA_NS {
+
 const std::string KmflKeyboardFactory::THANLWINSOFT_KMFL_DIR = "\\ThanLwinSoft.org\\Ekaya\\kmfl\\";
 const std::string KmflKeyboardFactory::KMFL_DIR = "\\Ekaya\\kmfl\\";
 const std::string KmflKeyboardFactory::KMFL_PATTERN = "*.kmn";
@@ -119,4 +121,6 @@ KmflKeyboardFactory::~KmflKeyboardFactory()
 {
 	// should we use this or delete them individually?
 	kmfl_unload_all_keyboards();
+}
+
 }

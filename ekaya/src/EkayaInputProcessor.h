@@ -25,6 +25,9 @@
 #include <vector>
 #include <bitset>
 
+#include "Ekaya.h"
+
+namespace EKAYA_NS {
 
 class EkayaLangBarButton;
 class EkayaKeyboard;
@@ -167,5 +170,7 @@ private:
 	ITfRangeBackup * mpCompositionRange;
     MessageLogger * mLogger;
 };
+
+}
 
 #endif

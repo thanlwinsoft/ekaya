@@ -26,15 +26,15 @@ BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID /*pvReserved*/)
     switch (dwReason)
     {
         case DLL_PROCESS_ATTACH:
-            g_hInst = hInstance;
-            if (!InitializeCriticalSectionAndSpinCount(&g_cs, 0))
+            EKAYA_NS::g_hInst = hInstance;
+            if (!InitializeCriticalSectionAndSpinCount(&EKAYA_NS::g_cs, 0))
                 return FALSE;
-            MessageLogger::logMessage("Ekaya DLL Attach\n");
+            EKAYA_NS::MessageLogger::logMessage("Ekaya DLL Attach\n");
             break;
 
         case DLL_PROCESS_DETACH:
-            MessageLogger::logMessage("Ekaya DLL Detach\n");
-            DeleteCriticalSection(&g_cs);
+            EKAYA_NS::MessageLogger::logMessage("Ekaya DLL Detach\n");
+            DeleteCriticalSection(&EKAYA_NS::g_cs);
             break;
     }
 

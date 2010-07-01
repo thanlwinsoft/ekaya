@@ -18,28 +18,25 @@
  */
 #include "Ekaya.h"
 
+namespace EKAYA_NS {
+
 // Use different IDs for 32 bit, 64 bit and 32 bit debug
 #ifdef _M_AMD64
-const GUID GUID_PROFILE = { /* 0aebc972-c366-4c72-a53b-ddb953cdb1a0 */
-    0x0aebc972,
-    0xc366,
-    0x4c72,
-    {0xa5, 0x3b, 0xdd, 0xb9, 0x53, 0xcd, 0xb1, 0xa0}
-  };
+// {F9DCA3B7-0812-48a4-B002-C7DCE0D3F069}
+const GUID GUID_PROFILE = 
+{ 0xf9dca3b7, 0x812, 0x48a4, { 0xb0, 0x2, 0xc7, 0xdc, 0xe0, 0xd3, 0xf0, 0x69 } };
 
-const GUID GUID_LANGBAR_BUTTON = { /* 9900a593-1e5c-4873-a493-fe14e8f486fe */
-    0x9900a593,
-    0x1e5c,
-    0x4873,
-    {0xa4, 0x93, 0xfe, 0x14, 0xe8, 0xf4, 0x86, 0xfe}
-  };
+// {3EB1B464-27B2-49fa-9698-F8F26FE0E101}
+const GUID GUID_LANGBAR_BUTTON = 
+{ 0x3eb1b464, 0x27b2, 0x49fa, { 0x96, 0x98, 0xf8, 0xf2, 0x6f, 0xe0, 0xe1, 0x1 } };
 
-const CLSID CLSID_EKAYA_SERVICE = { /* d8b8ef91-c206-419f-87ce-be28e0e00ae0 */
-    0xd8b8ef91,
-    0xc206,
-    0x419f,
-    {0x87, 0xce, 0xbe, 0x28, 0xe0, 0xe0, 0x0a, 0xe0}
-  };
+// {119D8CAC-D4D6-4e58-B6B6-A0DB26A01625}
+const CLSID CLSID_EKAYA_SERVICE =
+{ 0x119d8cac, 0xd4d6, 0x4e58, { 0xb6, 0xb6, 0xa0, 0xdb, 0x26, 0xa0, 0x16, 0x25 } };
+
+// {2871C7B9-E43B-446c-8EB9-0BB4F4619C4E}
+const GUID GUID_CATEGORY = 
+{ 0x2871c7b9, 0xe43b, 0x446c, { 0x8e, 0xb9, 0xb, 0xb4, 0xf4, 0x61, 0x9c, 0x4e } };
 
 const char * TEXTSERVICE_DESC_A = "Ekaya Input Method (64)";
 const wchar_t * TEXTSERVICE_DESC = L"Ekaya Input Method (64)";
@@ -58,6 +55,10 @@ const GUID GUID_LANGBAR_BUTTON =
 const CLSID CLSID_EKAYA_SERVICE = 
 { 0xed1b095, 0xa469, 0x4a68, { 0xb7, 0xf9, 0x84, 0xe2, 0x61, 0x1c, 0x81, 0x3a } };
 
+// {D42EC696-09BA-439e-9782-C7E398041642}
+const GUID GUID_CATEGORY =
+{ 0xd42ec696, 0x9ba, 0x439e, { 0x97, 0x82, 0xc7, 0xe3, 0x98, 0x4, 0x16, 0x42 } };
+
 const char * TEXTSERVICE_DESC_A = "Ekaya Input Method (debug)";
 const wchar_t * TEXTSERVICE_DESC = L"Ekaya Input Method (debug)";
 #else
@@ -74,6 +75,10 @@ const GUID GUID_LANGBAR_BUTTON =
 const CLSID CLSID_EKAYA_SERVICE = 
 { 0xacc98569, 0x4415, 0x4303, { 0x8f, 0xdc, 0x3d, 0xb1, 0x42, 0x65, 0x6e, 0x77 } };
 
+// {1702CADD-F93B-48ea-BD11-D48AFEDDBED0}
+const GUID GUID_CATEGORY =
+{ 0x1702cadd, 0xf93b, 0x48ea, { 0xbd, 0x11, 0xd4, 0x8a, 0xfe, 0xdd, 0xbe, 0xd0 } };
+
 const char * TEXTSERVICE_DESC_A = "Ekaya Input Method";
 const wchar_t * TEXTSERVICE_DESC = L"Ekaya Input Method";
 #endif
@@ -88,3 +93,5 @@ const char * TEXTSERVICE_MODEL = "Apartment";
 HINSTANCE g_hInst = NULL;
 CRITICAL_SECTION g_cs;
 LONG g_cRefDll = 0;
+
+}

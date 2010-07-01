@@ -9,8 +9,6 @@ cmake_minimum_required(VERSION 2.8)
 project(thanlwinsoft_ekaya)
 
 enable_language(C CXX)
-add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DUNICODE -Wall
- -wd4820 -wd4668)
 
 set(CPACK_GENERATOR "NSIS")
 set(CPACK_SOURCE_GENERATOR "NSIS")

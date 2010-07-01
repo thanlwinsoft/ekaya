@@ -21,8 +21,11 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include "Ekaya.h"
 
 #ifdef __cplusplus
+
+namespace EKAYA_NS {
 
 class MessageLogger
 {
@@ -37,6 +40,8 @@ private:
     static MessageLogger * instance;
     FILE * mFile;
 };
+
+}
 
 extern "C" {
 #endif

@@ -21,11 +21,15 @@
 
 #include "EkayaKeyboard.h"
 
+namespace EKAYA_NS {
+
 class EkayaKeyboardFactory
 {
 public:
 	virtual std::vector <EkayaKeyboard * > loadKeyboards(const char * installDir) = 0;
 	virtual ~EkayaKeyboardFactory(){};
 };
+
+}
 
 #endif

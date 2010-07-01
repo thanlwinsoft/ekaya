@@ -19,6 +19,13 @@
 #include <windows.h>
 #include <string.h>
 
+#ifndef EKAYA_H
+#define EKAYA_H
+
+#define EKAYA_NS ekaya
+
+namespace EKAYA_NS {
+
 void DllAddRef();
 void DllRelease();
 
@@ -34,4 +41,9 @@ extern const ULONG TEXTSERVICE_ICON_INDEX;
 
 extern const CLSID CLSID_EKAYA_SERVICE;
 extern const GUID GUID_PROFILE;
+extern const GUID GUID_CATEGORY;
 extern const GUID GUID_LANGBAR_BUTTON;
+
+}
+
+#endif

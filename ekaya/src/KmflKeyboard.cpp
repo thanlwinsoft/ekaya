@@ -17,6 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  *
  */
+#include <algorithm>
+
 #include <kmfl/kmfl.h>
 #include <kmfl/kmfl_register_callbacks.h>
 #include <kmfl/kmflutfconv.h>
@@ -24,6 +26,11 @@
 #include "UtfConversion.h"
 #include "KmflKeyboard.h"
 #include "MessageLogger.h"
+
+using namespace EKAYA_NS;
+
+#undef min
+#undef max
 
 // callback functions
 void ekayaKmflOutputString(void *connection, char *p)
@@ -72,6 +79,8 @@ void ekayaKmflEraseChar(void *connection)
 	}
 }
 
+namespace EKAYA_NS {
+
 std::basic_string<Utf32> KmflKeyboard::sDummy;
 
 
@@ -82,6 +91,8 @@ KmflKeyboard::KmflKeyboard(int kmflId, std::string baseDir, std::string filename
 	kmfl_register_callbacks(ekayaKmflOutputString, ekayaKmflOutputChar, 
 		ekayaKmflOutputBeep, ekayaKmflForwardKeyevent, ekayaKmflEraseChar,
         ekayaLogMessageArgs);
+  	int status = kmfl_attach_keyboard(mKmsi, mKmflId);
+    MessageLogger::logMessage("KMFL attached keyboard %d status %d\n", mKmflId, status);
 }
 
 // KmflKeyboard::KmflKeyboard(const KmflKeyboard & parent)
@@ -92,38 +103,59 @@ KmflKeyboard::KmflKeyboard(int kmflId, std::string baseDir, std::string filename
 
 KmflKeyboard::~KmflKeyboard()
 {
+    int status = kmfl_detach_keyboard(mKmsi);
+    MessageLogger::logMessage("KMFL detached keyboard %d status %d\n", mKmflId, status);
 	kmfl_delete_keyboard_instance(mKmsi);
 }
 
 std::pair<size_t, size_t> KmflKeyboard::processKey(long keyId, std::basic_string<Utf32> & context, size_t contextPos)
 {
-	int status = kmfl_attach_keyboard(mKmsi, mKmflId);
+	int status = 0;
+    //kmfl_attach_keyboard(mKmsi, mKmflId);
 	mContextBuffer = context;
 	mContextPosition = contextPos;
 
 	UINT state = 0;
 	ITEM contextItems[KMFL_MAX_CONTEXT];
 	assert(contextPos <= KMFL_MAX_CONTEXT);
-	size_t contextLen = std::min(static_cast<size_t>(KMFL_MAX_CONTEXT), contextPos);
-	for (UINT i = 0; i < contextLen; i++)
+    size_t contextLen = ::std::min(static_cast<size_t>(KMFL_MAX_CONTEXT), contextPos);
+    bool replaceHistory = false;
+    size_t iKmfl = 1; // KMFL history is offset by 1
+    // Skip over dead keys in kmfl history, since they aren't in the real context
+    while (mKmsi->history[iKmfl] & 0x5000000)
+    {
+        ++iKmfl;
+    }
+	for (UINT i = 0; i < contextLen; i++, iKmfl++)
 	{
 		contextItems[i] = context[contextLen - 1 - i];//[contextPos - contextLen + i];
+        // have a peek at the raw history and see if we need to set it
+        // otherwise, we may lose dead keys.
+        if (mKmsi->nhistory < iKmfl ||
+            (mKmsi->history[iKmfl] & 0xffffff) != contextItems[i])
+        {
+            MessageLogger::logMessage("KMFL reset history %d,%d %x!=%x len %d\n", i, iKmfl,
+                 contextItems[i], mKmsi->history[iKmfl], mKmsi->nhistory);
+            replaceHistory = true;
+        }
 	}
-
-	set_history(mKmsi, contextItems, static_cast<UINT>(contextLen));
+    if (replaceHistory)
+    {
+	    set_history(mKmsi, contextItems, static_cast<UINT>(contextLen));
+    }
 	status = kmfl_interpret(mKmsi, static_cast<UINT>(keyId), state);
     MessageLogger::logMessage("kmfl_interpret status=%d\n", status);
 
 	size_t newLength = (mContextBuffer.length());
 	context = mContextBuffer;
-	status = kmfl_detach_keyboard(mKmsi);
+	//status = kmfl_detach_keyboard(mKmsi);
 	mContextBuffer = sDummy;
 	return std::make_pair(mContextPosition, newLength);
 }
 
 std::basic_string<Utf32> KmflKeyboard::getDescription()
 {
-	int status = kmfl_attach_keyboard(mKmsi, mKmflId);
+	//int status = kmfl_attach_keyboard(mKmsi, mKmflId);
 	
 	std::basic_string<Utf32> desc;
 	for (size_t i = 0; i < NAMELEN; i++)
@@ -132,7 +164,7 @@ std::basic_string<Utf32> KmflKeyboard::getDescription()
 		if (utf32 == 0) break;
 		desc = desc.append(1, utf32);
 	}
-	status = kmfl_detach_keyboard(mKmsi);
+	//status = kmfl_detach_keyboard(mKmsi);
 	return desc;
 }
 
@@ -186,3 +218,5 @@ void KmflKeyboard::eraseChar(void)
 		mContextBuffer.erase(mContextPosition, mContextPosition + 1);
 	}
 }
+
+} // EKAYA_NS

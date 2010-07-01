@@ -6,6 +6,8 @@
 #include "EkayaInputProcessor.h"
 #include "MessageLogger.h"
 
+namespace EKAYA_NS {
+
 // from Register.cpp
 BOOL RegisterProfiles();
 void UnregisterProfiles();
@@ -178,37 +180,39 @@ void FreeGlobalObjects(void)
     }
 }
 
+} // EKAYA_NS
+
 //+---------------------------------------------------------------------------
 //  DllGetClassObject
 //----------------------------------------------------------------------------
 STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, void **ppvObj)
 {
-    MessageLogger::logMessage("DllGetClassObject %x-%x-%x-%x %x-%x-%x-%x\n",
+    EKAYA_NS::MessageLogger::logMessage("DllGetClassObject %x-%x-%x-%x %x-%x-%x-%x\n",
         rclsid.Data1, rclsid.Data2, rclsid.Data3, rclsid.Data4,
         riid.Data1, riid.Data2, riid.Data3, riid.Data4);
-    if (g_ObjectInfo[0] == NULL)
+    if (EKAYA_NS::g_ObjectInfo[0] == NULL)
     {
-        EnterCriticalSection(&g_cs);
+        EnterCriticalSection(&EKAYA_NS::g_cs);
 
             // need to check ref again after grabbing mutex
-            if (g_ObjectInfo[0] == NULL)
+            if (EKAYA_NS::g_ObjectInfo[0] == NULL)
             {
-                BuildGlobalObjects();
+                EKAYA_NS::BuildGlobalObjects();
             }
 
-        LeaveCriticalSection(&g_cs);
+        LeaveCriticalSection(&EKAYA_NS::g_cs);
     }
 
     if (IsEqualIID(riid, IID_IClassFactory) ||
         IsEqualIID(riid, IID_IUnknown))
     {
-        for (int i = 0; i < ARRAYSIZE(g_ObjectInfo); i++)
+        for (int i = 0; i < ARRAYSIZE(EKAYA_NS::g_ObjectInfo); i++)
         {
-            if (NULL != g_ObjectInfo[i] &&
-                IsEqualGUID(rclsid, g_ObjectInfo[i]->mRclsId))
+            if (NULL != EKAYA_NS::g_ObjectInfo[i] &&
+                IsEqualGUID(rclsid, EKAYA_NS::g_ObjectInfo[i]->mRclsId))
             {
-                *ppvObj = (void *)g_ObjectInfo[i];
-                DllAddRef();    // class factory holds DLL ref count
+                *ppvObj = (void *)EKAYA_NS::g_ObjectInfo[i];
+                EKAYA_NS::DllAddRef();    // class factory holds DLL ref count
                 return NOERROR;
             }
         }
@@ -224,7 +228,7 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, void **ppvObj)
 //----------------------------------------------------------------------------
 STDAPI DllCanUnloadNow(void)
 {
-    if (g_cRefDll >= 0) // -1 with no refs
+    if (EKAYA_NS::g_cRefDll >= 0) // -1 with no refs
         return S_FALSE;
 
     return S_OK;
@@ -235,9 +239,9 @@ STDAPI DllCanUnloadNow(void)
 //----------------------------------------------------------------------------
 STDAPI DllUnregisterServer(void)
 {
-    UnregisterProfiles();
-    UnregisterCategories();
-    UnregisterServer();
+    EKAYA_NS::UnregisterProfiles();
+    EKAYA_NS::UnregisterCategories();
+    EKAYA_NS::UnregisterServer();
 
     return S_OK;
 }
@@ -248,9 +252,9 @@ STDAPI DllUnregisterServer(void)
 STDAPI DllRegisterServer(void)
 {
     // register this service's profile with the tsf
-    if (!RegisterServer() ||
-        !RegisterProfiles() ||
-        !RegisterCategories())
+    if (!EKAYA_NS::RegisterServer() ||
+        !EKAYA_NS::RegisterProfiles() ||
+        !EKAYA_NS::RegisterCategories())
     {
         DllUnregisterServer(); // cleanup any loose ends
         return E_FAIL;

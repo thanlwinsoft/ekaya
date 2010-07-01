@@ -117,6 +117,8 @@ NoOverwrite:
   File "${WINKMFL_BINARY_DIR}\winkmfl.dll"
   File /nonfatal "${WINKMFL_BINARY_DIR}\winkmfl.dll*.manifest*"
   File "${ICONV_BINARY_DIR}\iconv.dll"
+  File "${KMFLTEST_BINARY_DIR}\kmfltest.exe"
+  File /nonfatal "${KMFLTEST_BINARY_DIR}\kmfltest.exe*.manifest*"
   File /r "doc"
   
   ; Redist dlls

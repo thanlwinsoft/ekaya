@@ -23,6 +23,8 @@
 #include <windows.h>
 #include "EkayaInputProcessor.h"
 
+namespace EKAYA_NS {
+
 class EkayaBaseEditSession : public ITfEditSession
 {
 public:
@@ -138,5 +140,7 @@ public:
 private:
     WPARAM mwParam;
 };
+
+}
 
 #endif

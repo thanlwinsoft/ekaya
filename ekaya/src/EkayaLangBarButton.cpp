@@ -30,6 +30,8 @@
 #include "MessageLogger.h"
 #include "resource.h"
 
+using namespace EKAYA_NS;
+
 const DWORD TEXTSERVICE_LANGBARITEMSINK_COOKIE = 0xae4e6c21;
 
 EkayaLangBarButton::EkayaLangBarButton(EkayaInputProcessor *pTextService)

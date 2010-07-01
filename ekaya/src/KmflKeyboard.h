@@ -24,6 +24,8 @@
 #include <kmfl/kmfl.h>
 #include <kmfl/libkmfl.h>
 
+namespace EKAYA_NS {
+
 enum { KMFL_MAX_CONTEXT = 32 };
 
 class KmflKeyboard : public EkayaKeyboard
@@ -53,5 +55,6 @@ private:
 	std::string mFilename;
 };
 
+}
 
 #endif

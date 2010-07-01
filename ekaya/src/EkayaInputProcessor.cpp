@@ -34,12 +34,24 @@
 #include "MessageLogger.h"
 #include "resource.h"
 
+using namespace EKAYA_NS;
+
 static const TF_PRESERVEDKEY KEY_ONOFF = { 0x20, TF_MOD_CONTROL };
 static const TF_PRESERVEDKEY KEY_NEXT = { 0x20, TF_MOD_CONTROL | TF_MOD_SHIFT };
 
 static const WCHAR ONOFF_DESC[]    = L"OnOff";
 static const WCHAR NEXT_DESC[]    = L"Next Keyboard";
 
+#ifdef _DEBUG
+// {3A76F650-7784-454a-92F5-33DFFE6A8DDB}
+static const GUID GUID_PRESERVEDKEY_ONOFF = 
+{ 0x3a76f650, 0x7784, 0x454a, { 0x92, 0xf5, 0x33, 0xdf, 0xfe, 0x6a, 0x8d, 0xdb } };
+
+// {8DD8D792-29A1-42a9-A86B-7E70DAB3EE0C}
+static const GUID GUID_PRESERVEDKEY_NEXT = 
+{ 0x8dd8d792, 0x29a1, 0x42a9, { 0xa8, 0x6b, 0x7e, 0x70, 0xda, 0xb3, 0xee, 0xc } };
+
+#else
 // {7963550C-192E-41e0-A7B0-898881899F1F}
 static const GUID GUID_PRESERVEDKEY_ONOFF = 
 { 0x7963550c, 0x192e, 0x41e0, { 0xa7, 0xb0, 0x89, 0x88, 0x81, 0x89, 0x9f, 0x1f } };
@@ -47,6 +59,7 @@ static const GUID GUID_PRESERVEDKEY_ONOFF =
 // {21E71720-C4F5-4e4b-9DA7-E5A9E3D514DC}
 static const GUID GUID_PRESERVEDKEY_NEXT = 
 { 0x21e71720, 0xc4f5, 0x4e4b, { 0x9d, 0xa7, 0xe5, 0xa9, 0xe3, 0xd5, 0x14, 0xdc } };
+#endif
 
 const std::string EkayaInputProcessor::EKAYA_DIR = "\\ThanLwinSoft.org\\Ekaya";
 

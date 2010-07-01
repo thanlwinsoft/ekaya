@@ -23,7 +23,10 @@
 #include <msctf.h>
 #include <gdiplus.h>
 
+#include "Ekaya.h"
 #include "EkayaInputProcessor.h"
+
+namespace EKAYA_NS {
 
 class EkayaLangBarButton : public ITfLangBarItemButton,
                            public ITfSource
@@ -64,5 +67,7 @@ private:
     std::vector<Gdiplus::Bitmap *> mIcons;
 	std::vector<std::wstring> mHelpHtml;
 };
+
+}
 
 #endif

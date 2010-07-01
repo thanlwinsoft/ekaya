@@ -182,6 +182,7 @@ U+1025 + 'D' > U+1026
 c users usually type u-tha when they mean nya child tha
 U+1025 + 'f' > U+1009 U+103A
 U+1025 + 'm' > U+1009 U+102C
+U+1025 U+1037 + 'f' > U+1009 U+1037 U+103A
 
 any(numOrLetU) + 'm' > index(numAsLetU, 1) U+102C
 any(numOrLetU) + 'g' > index(numAsLetU, 1) U+102B
@@ -321,7 +322,7 @@ any(aftereDU) + any(lDotK) > index(lDotU, 2) index(aftereDU, 1)
 
 any(visargaU) + any(aftereDK) > index(aftereDU, 2) context
 
-+ any(kinziK) > index(kinziU, 2) U+103A U+1039
++ any(kinziK) > index(kinziU, 1) U+103A U+1039
 any(consU) + any(kinziK) > index(kinziU, 2) U+103A U+1039 index(consU, 1)
 U+104E + any(kinziK) > index(kinziU, 2) U+103A U+1039 U+104E
 any(numOrLetU) + any(kinziK) > index(kinziU, 2) U+103A U+1039 index(numAsLetU, 1)

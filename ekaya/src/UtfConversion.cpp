@@ -18,6 +18,8 @@
  */
 #include "UtfConversion.h"
 
+using namespace EKAYA_NS;
+
 // TODO consider caching the buffers
 
 std::wstring UtfConversion::convertUtf32ToUtf16(std::basic_string<UTF32> utf32)

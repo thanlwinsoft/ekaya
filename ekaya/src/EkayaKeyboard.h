@@ -22,6 +22,9 @@
 typedef unsigned long Utf32;
 #include <vector>
 #include <string>
+#include "Ekaya.h"
+
+namespace EKAYA_NS {
 
 class EkayaKeyboard
 {
@@ -39,5 +42,7 @@ public:
 	virtual std::basic_string<Utf32> getIconFileName() = 0;
 	virtual std::basic_string<Utf32> getHelpFileName() = 0;
 };
+
+}
 
 #endif

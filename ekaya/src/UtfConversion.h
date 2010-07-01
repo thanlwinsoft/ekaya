@@ -21,6 +21,9 @@
 
 #include <kmfl/kmflutfconv.h>
 #include <string>
+#include "Ekaya.h"
+
+namespace EKAYA_NS {
 
 class UtfConversion
 {
@@ -32,5 +35,7 @@ public:
 	static std::string convertUtf32ToUtf8(std::basic_string<UTF32> utf32);
 	static std::string convertUtf16ToUtf8(std::wstring utf16);
 };
+
+}
 
 #endif

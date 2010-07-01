@@ -7,7 +7,8 @@ include_directories(
 	${PROJECT_SOURCE_DIR}/../winkmfl)
 
 if (MSVC)
-	add_definitions(-wd4710 -wd4548 -wd4571)
+	add_definitions(-wd4710 -wd4548 -wd4571
+		-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DUNICODE)
 endif (MSVC)
 
 add_custom_target(copy_kmfltest_dlls ALL

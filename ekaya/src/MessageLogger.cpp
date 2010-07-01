@@ -25,6 +25,8 @@
 
 static const int MAX_MSG_LEN = 1024;
 
+using namespace EKAYA_NS;
+
 MessageLogger * MessageLogger::instance = NULL;
 
 void ekayaLogMessage(const char * msg, ...)

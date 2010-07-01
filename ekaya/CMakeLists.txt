@@ -1,7 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
 
 project(ekaya)
-enable_language(C CXX)
+enable_language(C CXX RC)
 
 include_directories(${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/../winkmfl
 	${PROJECT_BINARY_DIR}/../winkmfl/include)
@@ -19,16 +19,16 @@ find_program(NSIS_COMPILER makensis PATHS $ENV{ProgramFiles}/NSIS)
 # 4061 enumerator in switch of enum is not explicitly handled by a case label
 # 4571 semantics changed since Visual C++ 7.1 (SEH) are no longer caught
 # 4711 selected for automatic inline expansion
-add_definitions(-wd4820 -wd4668 -wd4548 -wd4710 -wd4365 -wd4917 -wd4263 -wd4264 -wd4061 -wd4571 -wd4711)
 
 file(GLOB EKAYA_HEADERS ${PROJECT_SOURCE_DIR}/src/*.h)
+file(GLOB EKAYA_CLASSES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 
 # This works around a problem where the output path is bad for NMake
 # also all the CXX defines get appended unnecessarily
-add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/ekaya.res
-	COMMAND ${CMAKE_RC_COMPILER} /fo${PROJECT_BINARY_DIR}/ekaya.res ${PROJECT_SOURCE_DIR}/src/ekaya.rc
-	DEPENDS ${PROJECT_SOURCE_DIR}/src/ekaya.rc ${PROJECT_SOURCE_DIR}/src/resource.h
-	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+#add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/ekaya.res
+#	COMMAND ${CMAKE_RC_COMPILER} /fo${PROJECT_BINARY_DIR}/ekaya.res ${PROJECT_SOURCE_DIR}/src/ekaya.rc
+#	DEPENDS ${PROJECT_SOURCE_DIR}/src/ekaya.rc ${PROJECT_SOURCE_DIR}/src/resource.h
+#	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 
 add_library(ekaya MODULE
 	src/DllMain.cpp
@@ -42,7 +42,6 @@ add_library(ekaya MODULE
 	src/Register.cpp
 	src/Server.cpp
 	src/UtfConversion.cpp
-	${PROJECT_BINARY_DIR}/ekaya.res
 	${EKAYA_HEADERS}
 	${PROJECT_SOURCE_DIR}/src/ekaya.def 
 	${PROJECT_SOURCE_DIR}/src/ekaya.rc
@@ -51,13 +50,24 @@ add_library(ekaya MODULE
 add_executable(ekaya_test test/ekayaTest.cpp src/Ekaya.cpp)
 
 add_custom_target(copy_dlls
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${winkmfl_BINARY_DIR}/${CMAKE_CFG_INTDIR}
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${winkmfl_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}winkmfl${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR}
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${win_iconv_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}iconv${CMAKE_SHARED_LIBRARY_SUFFIX} ${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR}
 	)
 
+
 set_source_files_properties(${PROJECT_SOURCE_DIR}/src/ekaya.def 
-	${PROJECT_SOURCE_DIR}/src/ekaya.rc
 	PROPERTIES HEADER_FILE_ONLY true)
+
+set_source_files_properties(${PROJECT_SOURCE_DIR}/src/ekaya.rc
+	PROPERTIES COMPILE_FLAGS "-I${PROJECT_SOURCE_DIR}")
+# add compile definitions only to .cpp files
+set_source_files_properties(${EKAYA_CLASSES} PROPERTIES
+    COMPILE_FLAGS
+	"-wd4820 -wd4668 -wd4548 -wd4710 -wd4365 -wd4917 -wd4263 -wd4264 -wd4061 -wd4571 -wd4711 -Wall -wd4820 -wd4668"
+	COMPILE_DEFINITIONS "_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;UNICODE"
+	)
+
 set_target_properties(ekaya PROPERTIES LINK_FLAGS ${CMAKE_LINK_DEF_FILE_FLAG}${PROJECT_SOURCE_DIR}/src/ekaya.def)
 
 add_dependencies(ekaya winkmfl iconv)
@@ -75,10 +85,12 @@ if (${CMAKE_CFG_INTDIR} STREQUAL ".")
 	file(TO_NATIVE_PATH "${PROJECT_BINARY_DIR}" EKAYA_BINARY_DIR)
 	file(TO_NATIVE_PATH "${winkmfl_BINARY_DIR}" WINKMFL_BINARY_DIR)
 	file(TO_NATIVE_PATH "${win_iconv_BINARY_DIR}" ICONV_BINARY_DIR)
+	file(TO_NATIVE_PATH "${kmfltest_BINARY_DIR}" KMFLTEST_BINARY_DIR)
 else (${CMAKE_CFG_INTDIR} STREQUAL ".")
 	file(TO_NATIVE_PATH "${PROJECT_BINARY_DIR}/${CMAKE_CFG_INTDIR}" EKAYA_BINARY_DIR)
 	file(TO_NATIVE_PATH "${winkmfl_BINARY_DIR}/${CMAKE_CFG_INTDIR}" WINKMFL_BINARY_DIR)
 	file(TO_NATIVE_PATH "${win_iconv_BINARY_DIR}/${CMAKE_CFG_INTDIR}" ICONV_BINARY_DIR)
+	file(TO_NATIVE_PATH "${kmfltest_BINARY_DIR}/${CMAKE_CFG_INTDIR}" KMFLTEST_BINARY_DIR)
 endif (${CMAKE_CFG_INTDIR} STREQUAL ".")
 
 if (${CMAKE_CL_64})
@@ -95,6 +107,7 @@ else ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 		COMMAND ${NSIS_COMPILER} "-DEKAYA_BINARY_DIR=${EKAYA_BINARY_DIR}"
 			"-DWINKMFL_BINARY_DIR=${WINKMFL_BINARY_DIR}"
 			"-DICONV_BINARY_DIR=${ICONV_BINARY_DIR}"
+			"-DKMFLTEST_BINARY_DIR=${KMFLTEST_BINARY_DIR}"
 			"-DARCH=${TARGET_ARCH}"
 			${PROJECT_SOURCE_DIR}/ekaya.nsi
 		WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} COMMENT "NSIS installer")

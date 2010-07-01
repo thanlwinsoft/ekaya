@@ -25,6 +25,8 @@
 
 #include <kmfl/kmflutfconv.h>
 
+using namespace EKAYA_NS;
+
 STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 {
 	EkayaKeyboard * keyboard = NULL;

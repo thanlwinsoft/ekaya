@@ -21,6 +21,8 @@
 
 #include "EkayaKeyboardFactory.h"
 
+namespace EKAYA_NS {
+
 class KmflKeyboardFactory : public EkayaKeyboardFactory
 {
 public:
@@ -31,5 +33,7 @@ public:
 	static const std::string KMFL_DIR;
     static const std::string THANLWINSOFT_KMFL_DIR;
 };
+
+}
 
 #endif

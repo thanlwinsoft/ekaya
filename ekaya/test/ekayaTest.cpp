@@ -22,6 +22,8 @@
 
 #include "Ekaya.h"
 
+using namespace EKAYA_NS;
+
 typedef HRESULT (WINAPI * PDllGetClassObject)(REFCLSID rclsid, REFIID riid, void **ppvObj);
 
 int main(int argc, char ** argv)
