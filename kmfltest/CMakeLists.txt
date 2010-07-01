@@ -33,5 +33,6 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	target_link_libraries(kmfltest winkmfl)
 else (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	target_link_libraries(kmfltest kmfl kmflcomp)
+	install(TARGETS kmfltest RUNTIME DESTINATION bin)
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
