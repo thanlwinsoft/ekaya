@@ -202,12 +202,12 @@ SectionEnd
 ; Add more keyboard sections here as needed
 Section "MyWin Burmese Unicode 5.2 keyboard" SecMyWin
 	SetOutPath "$INSTDIR\${APP_NAME}\kmfl"
-	File "kmfl\myWin.png"
-	File "kmfl\myWin.bmp"
-	File "kmfl\myWin.jpg"
-	File "kmfl\myWin.kmn"
-	File "kmfl\myWin.html"
-	File "kmfl\myWin_my.html"
+	File "..\keyboards\kmfl\myWin.png"
+	File "..\keyboards\kmfl\myWin.bmp"
+	File "..\keyboards\kmfl\myWin.jpg"
+	File "..\keyboards\kmfl\myWin.kmn"
+	File "..\keyboards\kmfl\myWin.html"
+	File "..\keyboards\kmfl\myWin_my.html"
 	CreateShortCut "$SMPROGRAMS\${APP_NAME}\myWin Keyboard.lnk" \
 		"$INSTDIR\${APP_NAME}\kmfl\myWin.html" '' \
 		"" 0 SW_SHOWNORMAL \
@@ -216,10 +216,10 @@ SectionEnd
 
 Section /o "Sgaw Karen Unicode 5.2 keyboard" SecSgawKaren
 	SetOutPath "$INSTDIR\${APP_NAME}\kmfl"
-	File "kmfl\SgawKaren.bmp"
-	File "kmfl\SgawKaren.png"
-	File "kmfl\SgawKaren.kmn"
-	File "kmfl\SgawKaren.html"
+	File "..\keyboards\kmfl\SgawKaren.bmp"
+	File "..\keyboards\kmfl\SgawKaren.png"
+	File "..\keyboards\kmfl\SgawKaren.kmn"
+	File "..\keyboards\kmfl\SgawKaren.html"
 	CreateShortCut "$SMPROGRAMS\${APP_NAME}\Sgaw Karen Keyboard.lnk" \
 		"$INSTDIR\${APP_NAME}\kmfl\SgawKaren.html" '' \
 		"" 0 SW_SHOWNORMAL \
@@ -228,10 +228,10 @@ SectionEnd
 
 Section /o "Pa-O Unicode 5.2 keyboard" SecPaO
 	SetOutPath "$INSTDIR\${APP_NAME}\kmfl"
-	File "kmfl\pa-oh.bmp"
-	File "kmfl\pa-oh.png"
-	File "kmfl\pa-oh.kmn"
-	File "kmfl\pa-oh.html"
+	File "..\keyboards\kmfl\pa-oh.bmp"
+	File "..\keyboards\kmfl\pa-oh.png"
+	File "..\keyboards\kmfl\pa-oh.kmn"
+	File "..\keyboards\kmfl\pa-oh.html"
 	CreateShortCut "$SMPROGRAMS\${APP_NAME}\Pa-O Keyboard.lnk" \
 		"$INSTDIR\${APP_NAME}\kmfl\pa-oh.html" '' \
 		"" 0 SW_SHOWNORMAL \
