@@ -4,7 +4,7 @@
 
 ; Some useful definitions that may need changing for different versions
 !ifndef VERSION
-  !define VERSION '0.1.4'
+  !define VERSION '0.1.5'
 !endif
 
 !ifndef EKAYA_BINARY_DIR
@@ -214,6 +214,17 @@ Section "MyWin Burmese Unicode 5.2 keyboard" SecMyWin
 		"" "myWin Keyboard"
 SectionEnd
 
+Section /o "Myanmar3 Unicode 5.2 keyboard" SecMyanmar3
+	SetOutPath "$INSTDIR\${APP_NAME}\kmfl"
+	File "..\keyboards\kmfl\myan3.bmp"
+	File "..\keyboards\kmfl\myanmar3std.kmn"
+	File "..\keyboards\kmfl\myanmar3std.html"
+	CreateShortCut "$SMPROGRAMS\${APP_NAME}\Myanmar3 Keyboard.lnk" \
+		"$INSTDIR\${APP_NAME}\kmfl\myanmar3std.html" '' \
+		"" 0 SW_SHOWNORMAL \
+		"" "Myanmar3 Keyboard"
+SectionEnd
+
 Section /o "Sgaw Karen Unicode 5.2 keyboard" SecSgawKaren
 	SetOutPath "$INSTDIR\${APP_NAME}\kmfl"
 	File "..\keyboards\kmfl\SgawKaren.bmp"
@@ -277,12 +288,12 @@ AppFound:
   RMDir /r /REBOOTOK "$INSTDIR\kmfl"
   Delete /REBOOTOK "$INSTDIR\ekaya.dll"
   Delete /REBOOTOK "$INSTDIR\iconv.dll"
-  Delete /REBOOTOK "$INSTDIR\libkmfl.dll"
+  Delete /REBOOTOK "$INSTDIR\winkmfl.dll"
   Delete /REBOOTOK "$INSTDIR\license.txt"
   Delete /REBOOTOK "$INSTDIR\ekaya.ico"
   Delete /REBOOTOK "$INSTDIR\*.manifest"
-  Delete /REBOOTOK "$INSTDIR\msvc*90.dll"
-  
+  Delete /REBOOTOK "$INSTDIR\vcredist_*.exe"
+
   Delete "$INSTDIR\ekaya-${VERSION}.tar.bz2"
 
   Delete /REBOOTOK "$INSTDIR\Uninstall.exe"

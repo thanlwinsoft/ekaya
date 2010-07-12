@@ -159,8 +159,8 @@ store(ttatthaK) '|'
 
 c U+200B causes problems in OpenOffice, but Padauk now removes 200C/D,
 c so it doesn't have correct effect
-c store(filler)   U+200B
-store(filler)   U+200A
+store(filler)   U+200B
+c store(filler)   U+200A
 c store(filler)   U+2060
 
 c F is Kinzi - it should be possible to create a Kinzi   
