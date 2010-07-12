@@ -8,7 +8,7 @@
 
 kmnBase=myWin
 kmnFile=$(kmnBase).kmn
-keyboardDir=../../ekaya/kmfl
+keyboardDir=../../keyboards/kmfl
 packageName=kmfl-keyboards-mywin
 keyboardVersion=
 

@@ -8,7 +8,7 @@
 
 kmnBase=pa-oh
 kmnFile=$(kmnBase).kmn
-keyboardDir=../../ekaya/kmfl
+keyboardDir=../../keyboards/kmfl
 packageName=kmfl-keyboards-paoh
 keyboardVersion=
 

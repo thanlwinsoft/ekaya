@@ -9,7 +9,7 @@
 kmnBase=SgawKaren
 kmnFile=$(kmnBase).kmn
 iconStem=SgawKaren
-keyboardDir=../../ekaya/kmfl
+keyboardDir=../../keyboards/kmfl
 packageName=kmfl-keyboards-sgawkaren
 keyboardVersion=
 
