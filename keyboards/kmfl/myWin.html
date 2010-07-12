@@ -1,5 +1,5 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <title>Keyboard layout for myWin</title>
   <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
@@ -47,6 +47,9 @@ span.my { font-family: Padauk, Myanmar3, Parabaik, 'MyMyanmar Unicode';}
 td span.my { float: right; color: #f0f0ff;  }
 .footer {text-align: right; border-top-style: solid; border-top-color: black; border-top-width: 1px; margin: 0px; margin-top: 5px;}
 @media print {
+    * { font-size: 12pt; }
+    h1 { font-size: 14pt; }
+    h2 { font-size: 13pt; }
     div.main { margin-left: 10px !important; }
 }
 .chooseLang { float: right; }
@@ -60,8 +63,8 @@ td span.my { float: right; color: #f0f0ff;  }
     {
 		if (window.innerWidth > mainWidth + 20 + border)
 		{
-			main.style.marginLeft = 0.5 * (window.innerWidth - mainWidth - border);
-			main.style.marginRight = 0.5 * (window.innerWidth - mainWidth - border);
+			main.style.marginLeft = 0.5 * (window.innerWidth - mainWidth - border) + "px";
+			main.style.marginRight = 0.5 * (window.innerWidth - mainWidth - border) + "px";
 		}
 		else
 		{
@@ -70,8 +73,8 @@ td span.my { float: right; color: #f0f0ff;  }
     }
     else if (document.body.clientWidth > mainWidth + 20 + border)
     {
-        main.style.marginLeft = 0.5 * (document.body.clientWidth - mainWidth - border);
-        main.style.marginRight = 0.5 * (document.body.clientWidth - mainWidth - border);
+        main.style.marginLeft = 0.5 * (document.body.clientWidth - mainWidth - border) + "px";
+        main.style.marginRight = 0.5 * (document.body.clientWidth - mainWidth - border) + "px";
     }
 	else
 	{
@@ -250,8 +253,8 @@ click on the keyboard icon on the task bar and select the myWin Keyboard <img sr
 <td style="width:2em;"><span class="my">ဦ</span><span class="en">B</span></td>
 <td style="width:2em;"><span class="my">ဈ</span><span class="en">N</span></td>
 <td style="width:2em;"><span class="my" style="font-size: 0.5em; margin-top: 0.5em;">ဪ</span><span class="en">M</span></td>
-<td style="width:2em;"><span class="my">,</span><span class="en"><</span></td>
-<td style="width:2em;"><span class="my">၎</span><span class="en">></span></td>
+<td style="width:2em;"><span class="my">,</span><span class="en">&lt;</span></td>
+<td style="width:2em;"><span class="my">၎</span><span class="en">&gt;</span></td>
 <td style="width:2em;"><span class="my">၊</span><span class="en">?</span></td>
 <td style="width:5.0em; color: white;" class="special"><span class="en">Shift</span></td>
 </tr>
@@ -282,8 +285,8 @@ This means there is no longer any need to use control or alt sequences.</p>
 are typed by typing the normal forms followed by the ` key - which is
 normally in the top left of your keyboard. eg: </p>
 
+<div class="center">
 <div class="table">
-<p class="center">
 <table>
 
   <tbody>
@@ -323,8 +326,7 @@ normally in the top left of your keyboard. eg: </p>
   </tbody>
 </table>
 
-</p>
-
+</div>
 </div>
 
 <h3>Shapping of <span class="my"> ျ ြ ွ ှ</span></h3>
@@ -334,8 +336,8 @@ each medial, it does not matter whether the consonant is wide or small
 or what goes above and below. Composite medials are typed as a sequence
 of the individual medials.</p>
 <p>Note: the medial is always typed after the consonant, this is a change from before, when Yayit was typed before the consonant.</p>
+<div class="center">
 <div class="table">
-<p class="center">
 <table>
 
   <tbody>
@@ -455,8 +457,7 @@ of the individual medials.</p>
   </tbody>
 </table>
 
-</p>
-
+</div>
 </div>
 
 <h3>Kinzi <span class="my">ကင်းစီး ( င်္)</span></h3>
@@ -464,7 +465,7 @@ of the individual medials.</p>
 <p>Kinzi is just typed in the normal way.</p>
 
 <div class="center">
-<div class="table"><span>
+<div class="table">
 <table>
 
   <tbody>
@@ -552,7 +553,7 @@ of the individual medials.</p>
   </tbody>
 </table>
 
-</span></div>
+</div>
 
 </div>
 
