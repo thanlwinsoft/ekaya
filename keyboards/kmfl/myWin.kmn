@@ -211,6 +211,10 @@ any(consU) U+103C U+1031 + any(aftereDK) > index(consU, 1) index(aftereDU, 4) U+
 c modify space keys
 c + [SHIFT K_SPACE] > U+200B
 
+c duplicate quotes goto double quotes
+U+2018 + ']' > U+201C
+U+2019 + '}' > U+201D
+
 c Convert sequences for composite vowels into single code point
 U+101E U+103C U+1031 U+102c + any(aftereDK) > U+102A
 U+101E + 'j' > U+1029
