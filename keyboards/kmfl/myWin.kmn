@@ -34,8 +34,9 @@ c KRS   2.2.5   15-Nov-2008     Kinzi with 104e
 c KRS   2.2.6   28-Aug-2009     Fix typing U+100B U+1039 U+100C U+1031
 c KRS   2.2.7   26-Sep-2009     Fix backspace with medial + 1031
 c KRS   2.3.0   21-Oct-2009     Change to use normalized order. Improve Kinzi handling.
-c KRS   2.3.1   07-Dec-2009    Allow Asat with u103C
-c KRS   2.3.2    09-Feb-2010     Fix U+102F U+1032
+c KRS   2.3.1   07-Dec-2009     Allow Asat with u103C
+c KRS   2.3.2   09-Feb-2010     Fix U+102F U+1032
+c KRS   2.3.3   29-Sep-2010     Allow 102d, 102b after non-zero number or 2 digits
 
 NAME "my-Win 2.3.2 Unicode 5.2"
 VERSION 5.0
@@ -85,6 +86,8 @@ store(baseU)    U+1006 U+1010 U+1014 U+1019 U+1021 U+1015 U+1000 U+1004 \
 store(numK)     '1234567890' 
 store(numU)     U+1041 U+1042 U+1043 U+1044 U+1045 U+1046 U+1047 U+1048 U+1049 \
                 U+1040
+store(num1to9U) U+1041 U+1042 U+1043 U+1044 U+1045 U+1046 U+1047 U+1048 U+1049
+
 c Some numbers can be used incorrectly as letters
 store(numOrLetK) '078'
 store(numOrLetU) U+1040 U+1047 U+1048
@@ -225,8 +228,11 @@ U+1025 + 'm' > U+1009 U+102C
 U+1025 U+1037 + 'f' > U+1009 U+1037 U+103A
 U+1009 U+103A + any(lDotK) > U+1009 index(lDotU, 3) U+103A
 
+any(numU) any(numU) + 'd' > index(numU, 1) index(numU, 2) U+102d
+any(numU) any(numU) + 'g' > index(numU, 1) index(numU, 2) U+102b
+any(num1to9U) + 'g' > index(num1to9U, 1) U+102B
 any(numOrLetU) + 'm' > index(numAsLetU, 1) U+102C
-any(numOrLetU) + 'g' > index(numAsLetU, 1) U+102B
+U+1040 + 'g' > U+101d U+102B
 any(numOrLetU) + 'f' > index(numAsLetU, 1) U+103A
 any(numOrLetU) + any(anusvaraK) > index(numAsLetU, 1) index(anusvaraU, 2)
 U+1044 U+1004 U+103A + ';' >  U+104E U+1004 U+103A U+1038
@@ -263,6 +269,7 @@ U+1037 + any(anusvaraK) > index(anusvaraU, 2) U+1037
 
 c any(udiaU) + any(ldiaK) > index(ldiaU, 2) context
 any(ldiaU) + any(udiaK) > index(udiaU, 2) context
+any(num1to9U) + 'd' > index(num1to9U, 1) U+102D
 any(numOrLetU) + any(ldiaK) > index(numAsLetU, 1) index(ldiaU, 2)
 any(numOrLetU) + any(udiaK) > index(numAsLetU, 1) index(udiaU, 2)
  + any(ldiaK) > index(ldiaU, 1)
@@ -335,6 +342,7 @@ any(consU) any(mDia) + any(aftereDK) > index(consU, 1) index(aftereDU,3) index(m
 any(firstDiaU) any(secondDiaU) + any(sdiaK) > index(sdiaU, 3) context
 any(allDiaU) + any(sdiaK) > index(sdiaU, 2) context
 any(numOrLetU) + any(sdiaK) > index(numAsLetU, 1) index(sdiaU, 2)
+any(numOrLetU) any(allDiaU) + any(sdiaK) > index(numAsLetU, 1) index(sdiaU, 3) index(allDiaU, 2)
 U+1005 + 's' > U+1008
  + any(sdiaK) > index(sdiaU, 1)
 
@@ -352,6 +360,8 @@ any(consU) + any(kinziK) > index(kinziU, 2) U+103A U+1039 index(consU, 1)
 U+104E + any(kinziK) > index(kinziU, 2) U+103A U+1039 U+104E
 any(numOrLetU) + any(kinziK) > index(kinziU, 2) U+103A U+1039 index(numAsLetU, 1)
 any(numU) + any(kinziK) > index(kinziU, 2) U+103A U+1039  index(numU, 1)
+c allow number abbreviations if it looks like a real number
+
 any(consU) U+1039 any(consU) + any(kinziK) > index(kinziU, 4) U+103A U+1039 context
 any(consU) U+1039 any(consU) any(diaU) + any(kinziK) > index(kinziU, 5) U+103A U+1039 context
 any(consU) U+1039 any(consU) any(diaU) any(diaU) + any(kinziK) > index(kinziU, 6) U+103A U+1039 context
