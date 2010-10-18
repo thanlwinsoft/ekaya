@@ -33,9 +33,11 @@ install: build
 	dh_testroot
 	dh_clean -k 
 	dh_installdirs
-	dh_install myWin*.kmn  usr/share/scim/kmfl
-	dh_install myWin.bmp usr/share/scim/kmfl/icons
-	dh_link usr/share/scim/kmfl/icons/myWin.bmp usr/share/scim/kmfl/myWin.bmp
+	dh_install myWin*.kmn  usr/share/kmfl
+	dh_install myWin.bmp usr/share/kmfl/icons
+	dh_link usr/share/kmfl/icons/myWin.kmn usr/share/scim/kmfl/myWin.kmn
+	dh_link usr/share/kmfl/icons/myWin.bmp usr/share/scim/kmfl/myWin.bmp
+	dh_link usr/share/kmfl/icons/myWin.bmp usr/share/scim/kmfl/icons/myWin.bmp	
 
 # Build architecture-independent files here.
 binary-indep: build install

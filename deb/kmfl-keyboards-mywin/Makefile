@@ -62,5 +62,5 @@ uninstall:
 	dpkg -r $(packageName)
 
 test:
-	kmfltest	$(keyboardDir)/$(kmnFile) $(kmnBase)Test.txt
+	kmfltest	$(keyboardDir)/$(kmnFile) $(keyboardDir)/tests/$(kmnBase)Test.txt
 

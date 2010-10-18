@@ -35,7 +35,9 @@ install: build
 	dh_installdirs
 	dh_install pa-oh*.kmn  usr/share/scim/kmfl
 	dh_install pa-oh.bmp usr/share/scim/kmfl/icons
-	dh_link usr/share/scim/kmfl/icons/pa-oh.bmp usr/share/scim/kmfl/pa-oh.bmp
+	dh_link usr/share/kmfl/pa-oh.kmn usr/share/scim/kmfl/pa-oh.kmn
+	dh_link usr/share/kmfl/icons/pa-oh.bmp usr/share/scim/kmfl/pa-oh.bmp
+	dh_link usr/share/kmfl/icons/pa-oh.bmp usr/share/scim/kmfl/icons/pa-oh.bmp
 
 # Build architecture-independent files here.
 binary-indep: build install

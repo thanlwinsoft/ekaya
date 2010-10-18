@@ -33,9 +33,11 @@ install: build
 	dh_testroot
 	dh_clean -k 
 	dh_installdirs
-	dh_install SgawKaren.kmn usr/share/scim/kmfl
-	dh_install SgawKaren.bmp usr/share/scim/kmfl/icons
-	dh_link usr/share/scim/kmfl/icons/SgawKaren.bmp usr/share/scim/kmfl/SgawKaren.bmp
+	dh_install SgawKaren.kmn usr/share/kmfl
+	dh_install SgawKaren.bmp usr/share/kmfl/icons
+	dh_link usr/share/kmfl/icons/SgawKaren.kmn usr/share/scim/kmfl/SgawKaren.kmn
+	dh_link usr/share/kmfl/icons/SgawKaren.bmp usr/share/scim/kmfl/icons/SgawKaren.bmp
+	dh_link usr/share/kmfl/icons/SgawKaren.bmp usr/share/scim/kmfl/SgawKaren.bmp
 
 # Build architecture-independent files here.
 binary-indep: build install

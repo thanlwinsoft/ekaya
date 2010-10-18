@@ -36,15 +36,15 @@ c KRS   2.2.7   26-Sep-2009     Fix backspace with medial + 1031
 c KRS   2.3.0   21-Oct-2009     Change to use normalized order. Improve Kinzi handling.
 c KRS   2.3.1   07-Dec-2009     Allow Asat with u103C
 c KRS   2.3.2   09-Feb-2010     Fix U+102F U+1032
-c KRS   2.3.3   29-Sep-2010     Allow 102d, 102b after non-zero number or 2 digits
+c KRS   2.3.3   29-Sep-2010     Allow 102d, 102b, 1032 after non-zero number or 2 digits
 
-NAME "my-Win 2.3.2 Unicode 5.2"
+NAME "my-Win 2.3.3 Unicode 5.2"
 VERSION 5.0
 store(&Copyright) "© 2004-2009 SIL & ThanLwinSoft.org (License: LGPL)"
 store( &Message ) "Myanmar keyboard for typing Burmese with Unicode 5.2.0. "\
 "<http://www.unicode.org/versions/Unicode5.2.0/>. "\
 "This keyboard is freely redistributable under the terms of the GNU Lesser General Public License."
-LANGUAGE   55,1
+LANGUAGE   55,4
 
 BITMAP myWin.bmp
 HOTKEY  "^+M"
@@ -230,7 +230,9 @@ U+1009 U+103A + any(lDotK) > U+1009 index(lDotU, 3) U+103A
 
 any(numU) any(numU) + 'd' > index(numU, 1) index(numU, 2) U+102d
 any(numU) any(numU) + 'g' > index(numU, 1) index(numU, 2) U+102b
+any(numU) any(numU) + 'J' > index(numU, 1) index(numU, 2) U+1032
 any(num1to9U) + 'g' > index(num1to9U, 1) U+102B
+any(num1to9U) + 'J' > index(num1to9U, 1) U+1032
 any(numOrLetU) + 'm' > index(numAsLetU, 1) U+102C
 U+1040 + 'g' > U+101d U+102B
 any(numOrLetU) + 'f' > index(numAsLetU, 1) U+103A
@@ -358,8 +360,11 @@ c The above line doesn't seem to work reliably
 U+0020 + any(kinziK) > U+0020 index(kinziU, 2) U+103A U+1039
 any(consU) + any(kinziK) > index(kinziU, 2) U+103A U+1039 index(consU, 1)
 U+104E + any(kinziK) > index(kinziU, 2) U+103A U+1039 U+104E
-any(numOrLetU) + any(kinziK) > index(kinziU, 2) U+103A U+1039 index(numAsLetU, 1)
-any(numU) + any(kinziK) > index(kinziU, 2) U+103A U+1039  index(numU, 1)
+any(consU) any(numOrLetU) + any(kinziK) > index(consU, 1) index(kinziU, 3) U+103A U+1039  index(numAsLetU, 2)
+U+101E U+102D any(numOrLetU) + any(kinziK) > U+101E U+102D index(kinziU, 4) U+103A U+1039  index(numAsLetU, 3)
+any(numU) any(numU) + any(kinziK) > index(numU, 1) index(kinziU, 3) U+103A U+1039  index(numU, 2)
+any(num1to9U) + any(kinziK) > index(kinziU, 2) U+103A U+1039  index(num1to9U, 1)
+U+1040 + any(kinziK) > index(kinziU, 2) U+103A U+1039 U+101D
 c allow number abbreviations if it looks like a real number
 
 any(consU) U+1039 any(consU) + any(kinziK) > index(kinziU, 4) U+103A U+1039 context
