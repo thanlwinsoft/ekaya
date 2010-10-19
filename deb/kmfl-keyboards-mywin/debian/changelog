@@ -1,3 +1,9 @@
+kmfl-keyboards-mywin (2.3.3-1ubuntu1) maverick; urgency=low
+
+  * Allow some vowels and kinzi to be typed with numbers
+
+ -- Keith Stribley <devel@thanlwinsoft.org>  Tue, 19 Oct 2010 13:52:31 +0630
+
 kmfl-keyboards-mywin (2.3.2-1ubuntu1) karmic; urgency=low
 
   * Fix sequence of U+102F U+1032 to conform to UTN11-3

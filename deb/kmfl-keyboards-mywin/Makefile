@@ -13,10 +13,9 @@ packageName=kmfl-keyboards-mywin
 keyboardVersion=
 
 include version.mk
+# pkgVersion:=$(shell head -n 1 debian/changelog | sed 's/[^\(]*(\(.*\)).*/\1/' )
 
 all: lint
-
-
 
 lint: $(packageName)_$(pkgVersion)_all.deb
 	lintian -i -I --display-experimental --pedantic --show-overrides --checksums --color auto $(packageName)_$(pkgVersion)_`dpkg-architecture -qDEB_BUILD_ARCH`.changes

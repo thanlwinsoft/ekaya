@@ -17,26 +17,33 @@ c KRS   1.01    31-May-2004     Added 25CC to consU
 c KRS   1.02    01-Jul-2004     Improved behaviour when deleting 1031
 c                               Added option to type 1031 + stack key for Kinzi
 c                               Shift+Space = ZNSP and ~ = WJ
-c KRS   1.03    04-Sep-2004     Now uses U+200D with YRWH medials following U+1004
+c KRS   1.03    04-Sep-2004     Now uses U+200D with YRWH medials following
+c                               U+1004
 c MJPH  1.1     21-APR-2006     Convert to proposed new Unicode 5.1 model n3043
-c KRS   2.1     22-Jul-2006     Correct handling of u102A when types as composite
-c KRS	2.1.1	12-Dec-2007	    Change references to Unicode 5.1
-c                               Change filler to 200C, since 200B causes problems in OOo
-c KRS   2.2     23-Apr-2008     Add extra rules to correct 0478 when used as consonants
+c KRS   2.1     22-Jul-2006     Correct handling of u102A when types as
+c                               composite
+c KRS	2.1.1	12-Dec-2007	        Change references to Unicode 5.1
+c                               Change filler to 200C, since 200B causes
+c                               problems in OOo
+c KRS   2.2     23-Apr-2008     Add extra rules to correct 0478 when used as
+c                               consonants
 c                               Additional rules to correct common typos
 c                               Change hot key to Ctrl+Alt+M for Windows
-c KRS   2.2.1   21-May-2008     Add full syllable context for medial substitutions
+c KRS   2.2.1   21-May-2008     Add full syllable context for medial
+c                               substitutions
 c KRS   2.2.2                   Fix medial regressions
 c KRS   2.2.3   19-Jul-2008     More corrections for when numbers are used
 c                               and out of sequence upper/lower dot
-c KRS   2.2.4   30-Jul-2008     Fixed 078 cons cons bug                            
+c KRS   2.2.4   30-Jul-2008     Fixed 078 cons cons bug
 c KRS   2.2.5   15-Nov-2008     Kinzi with 104e
 c KRS   2.2.6   28-Aug-2009     Fix typing U+100B U+1039 U+100C U+1031
 c KRS   2.2.7   26-Sep-2009     Fix backspace with medial + 1031
-c KRS   2.3.0   21-Oct-2009     Change to use normalized order. Improve Kinzi handling.
+c KRS   2.3.0   21-Oct-2009     Change to use normalized order.
+c                               Improve Kinzi handling.
 c KRS   2.3.1   07-Dec-2009     Allow Asat with u103C
 c KRS   2.3.2   09-Feb-2010     Fix U+102F U+1032
-c KRS   2.3.3   29-Sep-2010     Allow 102d, 102b, 1032 after non-zero number or 2 digits
+c KRS   2.3.3   19-Oct-2010     Allow 102d, 102b, 1032, kinzi after non-zero
+c                               number or 2 digits
 
 NAME "my-Win 2.3.3 Unicode 5.2"
 VERSION 5.0
