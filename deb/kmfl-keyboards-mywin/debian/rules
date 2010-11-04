@@ -35,7 +35,7 @@ install: build
 	dh_installdirs
 	dh_install myWin*.kmn  usr/share/kmfl
 	dh_install myWin.bmp usr/share/kmfl/icons
-	dh_link usr/share/kmfl/icons/myWin.kmn usr/share/scim/kmfl/myWin.kmn
+	dh_link usr/share/kmfl/myWin.kmn usr/share/scim/kmfl/myWin.kmn
 	dh_link usr/share/kmfl/icons/myWin.bmp usr/share/scim/kmfl/myWin.bmp
 	dh_link usr/share/kmfl/icons/myWin.bmp usr/share/scim/kmfl/icons/myWin.bmp	
 
