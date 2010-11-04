@@ -35,7 +35,7 @@ install: build
 	dh_installdirs
 	dh_install SgawKaren.kmn usr/share/kmfl
 	dh_install SgawKaren.bmp usr/share/kmfl/icons
-	dh_link usr/share/kmfl/icons/SgawKaren.kmn usr/share/scim/kmfl/SgawKaren.kmn
+	dh_link usr/share/kmfl/SgawKaren.kmn usr/share/scim/kmfl/SgawKaren.kmn
 	dh_link usr/share/kmfl/icons/SgawKaren.bmp usr/share/scim/kmfl/icons/SgawKaren.bmp
 	dh_link usr/share/kmfl/icons/SgawKaren.bmp usr/share/scim/kmfl/SgawKaren.bmp
 
