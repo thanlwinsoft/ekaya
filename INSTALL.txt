@@ -1,0 +1,50 @@
+Building and Installing Ekaya
+=============================
+
+Prerequisites:
+  * Visual Studio Express 2008
+  * Mercurial
+  * Subversion
+  * CMake from http://www.cmake.org/
+  * NSIS (for installer)
+
+The following commands are assumed to be run in a console setup as the Visual
+Studio Command Prompt.
+
+1. Clone the Ekaya repository into a directory ekaya. e.g.
+
+hg clone http://www.thanlwinsoft.org/cgi-bin/hgwebdir.cgi/ekaya/ ekaya
+
+2. Checkout win-iconv into the same directory:
+
+svn checkout http://win-iconv.googlecode.com/svn/trunk win-iconv
+
+3. Make a subdirectory under the top level ekaya directory and configure cmake 
+in that directory. e.g.
+
+cd ekaya
+mkdir buildVS9
+cmake .. -G "Visual Studio 9 2008" -i
+
+4. Open the resulting ekaya\buildVS9\thanlwinsoft_ekaya.sln in Visual Studio
+and build.
+
+5. Use the installer target to build the NSIS installer. This will register the
+ekaya.dll. 
+
+The dll can also be registered on the command line in the build directory
+containing ekaya.dll.
+
+regsvr32 ekaya.dll
+
+The iconv.dll and winkmfl.dll libraries must be available in the same directory
+as ekaya.dll for the registration to succeed.
+
+Ekaya can also be built using nmake rather than visual studio.
+
+cd ekaya
+mkdir build
+cmake .. -G "Nmake Makefiles" -i
+nmake
+
+
