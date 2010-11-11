@@ -6,6 +6,7 @@
 #include <ole2.h>
 #include "msctf.h"
 #include "Ekaya.h"
+#include "Register.h"
 
 namespace EKAYA_NS {
 
@@ -43,21 +44,66 @@ BOOL RegisterProfiles()
 
     cchIconFile = MultiByteToWideChar(CP_ACP, 0, achFileNameA, cchA, achIconFile, ARRAYSIZE(achIconFile)-1);
     achIconFile[cchIconFile] = '\0';
-
+    // always add Ekaya to en_US
     hr = pInputProcessProfiles->AddLanguageProfile(CLSID_EKAYA_SERVICE,
                                   TEXTSERVICE_LANGID, 
                                   GUID_PROFILE, 
-                                  TEXTSERVICE_DESC, 
+                                  TEXTSERVICE_DESC,
                                   (ULONG)wcslen(TEXTSERVICE_DESC),
                                   achIconFile,
                                   cchIconFile,
                                   TEXTSERVICE_ICON_INDEX);
-
+    AddLanguageProfiles(pInputProcessProfiles);
 Exit:
     pInputProcessProfiles->Release();
     return (hr == S_OK);
 }
 
+
+void AddLanguageProfiles(ITfInputProcessorProfiles *pInputProcessProfiles)
+{
+    HRESULT hr = S_OK;
+    if (pInputProcessProfiles == NULL)
+    {
+        hr = CoCreateInstance(CLSID_TF_InputProcessorProfiles, NULL, CLSCTX_INPROC_SERVER,
+                          IID_ITfInputProcessorProfiles, (void**)&pInputProcessProfiles);
+    }
+    else
+    {
+        pInputProcessProfiles->AddRef();
+    }
+    if (hr != S_OK)
+        return;
+    WCHAR achIconFile[MAX_PATH];
+    char achFileNameA[MAX_PATH];
+    int cchIconFile;
+    DWORD cchA = GetModuleFileNameA(g_hInst, achFileNameA, ARRAYSIZE(achFileNameA));
+    cchIconFile = MultiByteToWideChar(CP_ACP, 0, achFileNameA, cchA, achIconFile, ARRAYSIZE(achIconFile)-1);
+    achIconFile[cchIconFile] = '\0';
+
+    // now add Ekaya to each language which already has an installed layout
+    LANGID * pLangIds = NULL;
+    ULONG numLanguages = 0;
+    hr = pInputProcessProfiles->GetLanguageList(&pLangIds, &numLanguages);
+    // This requires admin permission, which on Vista, Win7 it probably won't have
+    // when run as an input method for a normal app
+    if (SUCCEEDED(hr))
+    {
+        for (size_t i = 0; i < numLanguages; i++)
+        {
+            hr = pInputProcessProfiles->AddLanguageProfile(CLSID_EKAYA_SERVICE,
+                                      pLangIds[i], 
+                                      GUID_PROFILE, 
+                                      TEXTSERVICE_DESC, 
+                                      (ULONG)wcslen(TEXTSERVICE_DESC),
+                                      achIconFile,
+                                      cchIconFile,
+                                      TEXTSERVICE_ICON_INDEX);
+        }
+        CoTaskMemFree(pLangIds);
+    }
+    pInputProcessProfiles->Release();
+}
 //+---------------------------------------------------------------------------
 //  UnregisterProfiles
 //----------------------------------------------------------------------------
