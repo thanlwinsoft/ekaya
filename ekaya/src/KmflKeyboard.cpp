@@ -121,14 +121,14 @@ std::pair<size_t, size_t> KmflKeyboard::processKey(long keyId, std::basic_string
     size_t contextLen = ::std::min(static_cast<size_t>(KMFL_MAX_CONTEXT), contextPos);
     bool replaceHistory = false;
     size_t iKmfl = 1; // KMFL history is offset by 1
-    // Skip over dead keys in kmfl history, since they aren't in the real context
-    while (mKmsi->history[iKmfl] & 0x5000000)
+    for (UINT i = 0; i < contextLen; i++, iKmfl++)
     {
-        ++iKmfl;
-    }
-	for (UINT i = 0; i < contextLen; i++, iKmfl++)
-	{
-		contextItems[i] = context[contextLen - 1 - i];//[contextPos - contextLen + i];
+        // Skip over dead keys in kmfl history, since they aren't in the real context
+        while (mKmsi->history[iKmfl] & 0x5000000)
+        {
+            ++iKmfl;
+        }
+        contextItems[i] = context[contextLen - 1 - i];
         // have a peek at the raw history and see if we need to set it
         // otherwise, we may lose dead keys.
         if (mKmsi->nhistory < iKmfl ||
