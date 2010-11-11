@@ -4,7 +4,7 @@
 
 ; Some useful definitions that may need changing for different versions
 !ifndef VERSION
-  !define VERSION '0.1.5'
+  !define VERSION '0.1.6'
 !endif
 
 !ifndef EKAYA_BINARY_DIR

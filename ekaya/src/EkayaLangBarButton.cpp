@@ -70,7 +70,7 @@ EkayaLangBarButton::EkayaLangBarButton(EkayaInputProcessor *pTextService)
 			if (test)
 			{
 				fclose(test);
-				MessageLogger::logMessage("Icon exists");
+				MessageLogger::logMessage("Icon exists\n");
 				exists = true;
 			}
 			Gdiplus::Bitmap * bm = Gdiplus::Bitmap::FromFile(wName.c_str(), TRUE);
@@ -94,7 +94,7 @@ EkayaLangBarButton::EkayaLangBarButton(EkayaInputProcessor *pTextService)
 			if (test)
 			{
 				fclose(test);
-				MessageLogger::logMessage("HTML exists");
+				MessageLogger::logMessage("HTML exists\n");
 				exists = true;
 				mHelpHtml.push_back(wName);
 			}

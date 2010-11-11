@@ -185,7 +185,7 @@ int kmfl_detach_keyboard(KMSI *p_kmsi)
 
 XKEYBOARD * kmfl_load_keyboard_from_file(const char *filename)
 {
-	XKEYBOARD *p_kbd;
+	XKEYBOARD *p_kbd = NULL;
 	FILE *fp;
 	char version_string[6]={0};
 	unsigned int filelen, kbver=0;
@@ -205,6 +205,8 @@ XKEYBOARD * kmfl_load_keyboard_from_file(const char *filename)
         if (errcode == 0)
         {
             compile_keyboard_to_buffer(filename, (void *) &p_kbd);
+            if (!p_kbd)
+                return NULL;
     		memcpy(version_string,p_kbd->version,3); // Copy to ensure terminated
     		kbver = (unsigned)atoi(version_string);
         } 

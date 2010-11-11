@@ -41,10 +41,12 @@ The iconv.dll and winkmfl.dll libraries must be available in the same directory
 as ekaya.dll for the registration to succeed.
 
 Ekaya can also be built using nmake rather than visual studio.
+This is especially useful for building the 64 bit version using the Windows SDK.
+Open the Windows SDK v7 command prompt and run:
 
+SetEnv /x64 /Release
 cd ekaya
 mkdir build
-cmake .. -G "Nmake Makefiles" -i
+cmake .. -G "NMake Makefiles" -i
 nmake
-
-
+nmake installer

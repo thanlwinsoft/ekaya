@@ -30,6 +30,7 @@
 #include "EkayaEditSession.h"
 #include "EkayaInputProcessor.h"
 #include "KmflKeyboardFactory.h"
+#include "Register.h"
 #include "UtfConversion.h"
 #include "MessageLogger.h"
 #include "resource.h"
@@ -113,6 +114,7 @@ EkayaInputProcessor::EkayaInputProcessor()
     }
 	mKeyboardFactories.push_back(new KmflKeyboardFactory());
 	initKeyboards();
+	AddLanguageProfiles(NULL);// in case some new languages were added
 }
 
 EkayaInputProcessor::~EkayaInputProcessor()

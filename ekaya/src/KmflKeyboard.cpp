@@ -35,48 +35,48 @@ using namespace EKAYA_NS;
 // callback functions
 void ekayaKmflOutputString(void *connection, char *p)
 {
-	if (connection)
-	{
-		KmflKeyboard* keyboard = reinterpret_cast<KmflKeyboard*>(connection);
-		keyboard->outputString(p);
-	}
+    if (connection)
+    {
+        KmflKeyboard* keyboard = reinterpret_cast<KmflKeyboard*>(connection);
+        keyboard->outputString(p);
+    }
 }
 
 
 void ekayaKmflOutputChar(void *connection, BYTE q)
 {
-	if (connection)
-	{
-		KmflKeyboard* keyboard = reinterpret_cast<KmflKeyboard*>(connection);
-		keyboard->outputChar(q);
-	}
+    if (connection)
+    {
+        KmflKeyboard* keyboard = reinterpret_cast<KmflKeyboard*>(connection);
+        keyboard->outputChar(q);
+    }
 }
 
 void ekayaKmflOutputBeep(void *connection)
 {
-	if (connection)
-	{
-		KmflKeyboard* keyboard = reinterpret_cast<KmflKeyboard*>(connection);
-		keyboard->outputBeep();
-	}
+    if (connection)
+    {
+        KmflKeyboard* keyboard = reinterpret_cast<KmflKeyboard*>(connection);
+        keyboard->outputBeep();
+    }
 }
 
 void ekayaKmflForwardKeyevent(void *connection, UINT key, UINT state)
 {
-	if (connection)
-	{
-		KmflKeyboard* keyboard = reinterpret_cast<KmflKeyboard*>(connection);
-		keyboard->forwardKeyevent(key, state);
-	}
+    if (connection)
+    {
+        KmflKeyboard* keyboard = reinterpret_cast<KmflKeyboard*>(connection);
+        keyboard->forwardKeyevent(key, state);
+    }
 }
 
 void ekayaKmflEraseChar(void *connection)
 {
-	if (connection)
-	{
-		KmflKeyboard* keyboard = reinterpret_cast<KmflKeyboard*>(connection);
-		keyboard->eraseChar();
-	}
+    if (connection)
+    {
+        KmflKeyboard* keyboard = reinterpret_cast<KmflKeyboard*>(connection);
+        keyboard->eraseChar();
+    }
 }
 
 namespace EKAYA_NS {
@@ -87,48 +87,48 @@ std::basic_string<Utf32> KmflKeyboard::sDummy;
 KmflKeyboard::KmflKeyboard(int kmflId, std::string baseDir, std::string filename)
 : mKmflId(kmflId), mContextBuffer(sDummy), mBaseDir(baseDir), mFilename(filename)
 {
-	mKmsi = kmfl_make_keyboard_instance(this);
-	kmfl_register_callbacks(ekayaKmflOutputString, ekayaKmflOutputChar, 
-		ekayaKmflOutputBeep, ekayaKmflForwardKeyevent, ekayaKmflEraseChar,
+    mKmsi = kmfl_make_keyboard_instance(this);
+    kmfl_register_callbacks(ekayaKmflOutputString, ekayaKmflOutputChar, 
+        ekayaKmflOutputBeep, ekayaKmflForwardKeyevent, ekayaKmflEraseChar,
         ekayaLogMessageArgs);
-  	int status = kmfl_attach_keyboard(mKmsi, mKmflId);
+      int status = kmfl_attach_keyboard(mKmsi, mKmflId);
     MessageLogger::logMessage("KMFL attached keyboard %d status %d\n", mKmflId, status);
 }
 
 // KmflKeyboard::KmflKeyboard(const KmflKeyboard & parent)
-	// : mKmflId(-1), mContextBuffer(sDummy)
+    // : mKmflId(-1), mContextBuffer(sDummy)
 // {
-	// assert(false);
+    // assert(false);
 // }
 
 KmflKeyboard::~KmflKeyboard()
 {
     int status = kmfl_detach_keyboard(mKmsi);
     MessageLogger::logMessage("KMFL detached keyboard %d status %d\n", mKmflId, status);
-	kmfl_delete_keyboard_instance(mKmsi);
+    kmfl_delete_keyboard_instance(mKmsi);
 }
 
 std::pair<size_t, size_t> KmflKeyboard::processKey(long keyId, std::basic_string<Utf32> & context, size_t contextPos)
 {
-	int status = 0;
+    int status = 0;
     //kmfl_attach_keyboard(mKmsi, mKmflId);
-	mContextBuffer = context;
-	mContextPosition = contextPos;
+    mContextBuffer = context;
+    mContextPosition = contextPos;
 
-	UINT state = 0;
-	ITEM contextItems[KMFL_MAX_CONTEXT];
-	assert(contextPos <= KMFL_MAX_CONTEXT);
+    UINT state = 0;
+    ITEM contextItems[KMFL_MAX_CONTEXT];
+    assert(contextPos <= KMFL_MAX_CONTEXT);
     size_t contextLen = ::std::min(static_cast<size_t>(KMFL_MAX_CONTEXT), contextPos);
     bool replaceHistory = false;
     size_t iKmfl = 1; // KMFL history is offset by 1
-    // Skip over dead keys in kmfl history, since they aren't in the real context
-    while (mKmsi->history[iKmfl] & 0x5000000)
+    for (UINT i = 0; i < contextLen; i++, iKmfl++)
     {
-        ++iKmfl;
-    }
-	for (UINT i = 0; i < contextLen; i++, iKmfl++)
-	{
-		contextItems[i] = context[contextLen - 1 - i];//[contextPos - contextLen + i];
+        // Skip over dead keys in kmfl history, since they aren't in the real context
+        while (mKmsi->history[iKmfl] & 0x5000000)
+        {
+            ++iKmfl;
+        }
+        contextItems[i] = context[contextLen - 1 - i];
         // have a peek at the raw history and see if we need to set it
         // otherwise, we may lose dead keys.
         if (mKmsi->nhistory < iKmfl ||
@@ -138,85 +138,85 @@ std::pair<size_t, size_t> KmflKeyboard::processKey(long keyId, std::basic_string
                  contextItems[i], mKmsi->history[iKmfl], mKmsi->nhistory);
             replaceHistory = true;
         }
-	}
+    }
     if (replaceHistory)
     {
-	    set_history(mKmsi, contextItems, static_cast<UINT>(contextLen));
+        set_history(mKmsi, contextItems, static_cast<UINT>(contextLen));
     }
-	status = kmfl_interpret(mKmsi, static_cast<UINT>(keyId), state);
+    status = kmfl_interpret(mKmsi, static_cast<UINT>(keyId), state);
     MessageLogger::logMessage("kmfl_interpret status=%d\n", status);
 
-	size_t newLength = (mContextBuffer.length());
-	context = mContextBuffer;
-	//status = kmfl_detach_keyboard(mKmsi);
-	mContextBuffer = sDummy;
-	return std::make_pair(mContextPosition, newLength);
+    size_t newLength = (mContextBuffer.length());
+    context = mContextBuffer;
+    //status = kmfl_detach_keyboard(mKmsi);
+    mContextBuffer = sDummy;
+    return std::make_pair(mContextPosition, newLength);
 }
 
 std::basic_string<Utf32> KmflKeyboard::getDescription()
 {
-	//int status = kmfl_attach_keyboard(mKmsi, mKmflId);
-	
-	std::basic_string<Utf32> desc;
-	for (size_t i = 0; i < NAMELEN; i++)
-	{
-		Utf32 utf32 = mKmsi->kbd_name[i];
-		if (utf32 == 0) break;
-		desc = desc.append(1, utf32);
-	}
-	//status = kmfl_detach_keyboard(mKmsi);
-	return desc;
+    //int status = kmfl_attach_keyboard(mKmsi, mKmflId);
+    
+    std::basic_string<Utf32> desc;
+    for (size_t i = 0; i < NAMELEN; i++)
+    {
+        Utf32 utf32 = mKmsi->kbd_name[i];
+        if (utf32 == 0) break;
+        desc = desc.append(1, utf32);
+    }
+    //status = kmfl_detach_keyboard(mKmsi);
+    return desc;
 }
 
 std::basic_string<UTF32> KmflKeyboard::getIconFileName()
 {
-	return UtfConversion::convertUtf8ToUtf32(std::string(mBaseDir + kmfl_icon_file(mKmflId)));
+    return UtfConversion::convertUtf8ToUtf32(std::string(mBaseDir + kmfl_icon_file(mKmflId)));
 }
 
 std::basic_string<UTF32> KmflKeyboard::getHelpFileName()
 {
-	size_t extPos = mFilename.find(".kmn");
-	return UtfConversion::convertUtf8ToUtf32(std::string(mBaseDir + mFilename.substr(0, extPos) + ".html"));
+    size_t extPos = mFilename.find(".kmn");
+    return UtfConversion::convertUtf8ToUtf32(std::string(mBaseDir + mFilename.substr(0, extPos) + ".html"));
 }
 
 void KmflKeyboard::outputString(char *p)
 {
-	size_t utf8Len = strlen(p);
+    size_t utf8Len = strlen(p);
     MessageLogger::logMessage("KMFL outputString length %d %s\n", utf8Len, p); 
-	assert(utf8Len < KMFL_MAX_CONTEXT);
-	UTF32 utf32[KMFL_MAX_CONTEXT];
-	UTF32 * p32 = utf32;
-	// this is UTF-8 so convert to UTF-32
-	//size_t result = 
-	IConvertUTF8toUTF32((const UTF8 **)&p,(const UTF8 *)p+utf8Len,&p32,p32 + KMFL_MAX_CONTEXT);
-	mContextBuffer = mContextBuffer.insert(mContextBuffer.length(), utf32, p32 - utf32);
+    assert(utf8Len < KMFL_MAX_CONTEXT);
+    UTF32 utf32[KMFL_MAX_CONTEXT];
+    UTF32 * p32 = utf32;
+    // this is UTF-8 so convert to UTF-32
+    //size_t result = 
+    IConvertUTF8toUTF32((const UTF8 **)&p,(const UTF8 *)p+utf8Len,&p32,p32 + KMFL_MAX_CONTEXT);
+    mContextBuffer = mContextBuffer.insert(mContextBuffer.length(), utf32, p32 - utf32);
 }
 
 void KmflKeyboard::outputChar(BYTE q)
 {
-	// doesn't seem to be used
+    // doesn't seem to be used
     MessageLogger::logMessage("KMFL outputChar %x\n", q);
-	assert(false);
+    assert(false);
 }
 
 void KmflKeyboard::outputBeep(void)
 {
-	// ignore for now
+    // ignore for now
 }
 
 void KmflKeyboard::forwardKeyevent(UINT key, UINT state)
 {
-	MessageLogger::logMessage("forwardKeyevent %x %x", (int)key, (int)state);
-	// TODO
+    MessageLogger::logMessage("forwardKeyevent %x %x", (int)key, (int)state);
+    // TODO
 }
 
 void KmflKeyboard::eraseChar(void)
 {
-	if (mContextPosition > 0)
-	{
-		--mContextPosition;
-		mContextBuffer.erase(mContextPosition, mContextPosition + 1);
-	}
+    if (mContextPosition > 0)
+    {
+        --mContextPosition;
+        mContextBuffer.erase(mContextPosition, mContextPosition + 1);
+    }
 }
 
 } // EKAYA_NS
