@@ -395,16 +395,19 @@ STDAPI EkayaLangBarButton::GetIcon(HICON *phIcon)
 {
     *phIcon = NULL;
     if (mpTextService && mpTextService->isKeyboardOpen() &&
-	   mpTextService->getActiveKeyboard() > -1 && mIcons.size() > 0)
+        mpTextService->getActiveKeyboard() > -1 && mIcons.size() > 0)
     {
-		if (mIcons[mpTextService->getActiveKeyboard()]->GetHICON(phIcon) != S_OK)
-			*phIcon = NULL;
+        if (mIcons[mpTextService->getActiveKeyboard()]->GetHICON(phIcon) != S_OK)
+            *phIcon = NULL;
+        if (*phIcon == NULL)
+        {
+            *phIcon = (HICON)LoadImageW(g_hInst, MAKEINTRESOURCEW(IDI_EKAYA_KEYBOARD), IMAGE_ICON, 16, 16, 0);
+        }
     }
     // use default icon
     if (*phIcon == NULL)
     {
-        *phIcon = (HICON)LoadImageW(g_hInst, MAKEINTRESOURCEW(IDI_TEXTSERVICE), IMAGE_ICON, 16, 16, 0);
-		//*phIcon = LoadIconW(g_hInst, MAKEINTRESOURCEW(IDI_TEXTSERVICE));
+        *phIcon = (HICON)LoadImageW(g_hInst, MAKEINTRESOURCEW(IDI_EKAYA_NO_KEYBOARD), IMAGE_ICON, 16, 16, 0);
     }
 
     return (*phIcon != NULL) ? S_OK : E_FAIL;

@@ -4,6 +4,8 @@ LANGUAGE LANG_ENGLISH,SUBLANG_ENGLISH_US
 #include "resource.h"
 
 IDI_TEXTSERVICE ICON ekaya.ico
+IDI_EKAYA_KEYBOARD ICON ekayaKeyboard.ico
+IDI_EKAYA_NO_KEYBOARD ICON ekayaNoKeyboard.ico
 IDI_EKAYA_HELP ICON help.ico
 
 
