@@ -36,6 +36,9 @@
 
   !include "MUI.nsh"
 
+; SendMessage
+  !include WinMessages.nsh
+
 ;--------------------------------
 ;General
 
@@ -199,6 +202,14 @@ Section /o "Source" SecSource
 	File ..\ekaya-${VERSION}.tar.bz2
 SectionEnd
 
+; Set an environment variable to allow Windows GTK apps to use Ekaya and other
+; IMEs by default
+Section "GTK IM Module" SecGtkImModule
+    WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" \
+        "GTK_IM_MODULE" "ime"
+    SendMessage HWND_BROADCAST WM_SETTINGCHANGE 0 "STR:Environment" /TIMEOUT=5000
+SectionEnd
+
 ; Add more keyboard sections here as needed
 Section "MyWin Burmese Unicode 5.2 keyboard" SecMyWin
 	SetOutPath "$INSTDIR\${APP_NAME}\kmfl"
@@ -253,10 +264,22 @@ SectionEnd
 
   ;Language strings
   LangString DESC_SecApp ${LANG_ENGLISH} "Install the ${APP_NAME} (version ${VERSION})."
+  LangString DESC_SecSource ${LANG_ENGLISH} "Install the source code for ${APP_NAME} (version ${VERSION}) - only useful if you are a software developer."
+  LangString DESC_SecGtkImModule ${LANG_ENGLISH} "Set the GTK_IM_MODULE environment variable to 'ime' to allow Ekaya to work in Windows GTK applications like the GIMP, Pidgin etc."
+  LangString DESC_SecMyWin ${LANG_ENGLISH} "Myanmar (Burmese) Unicode keyboard"
+  LangString DESC_SecMyanmar3 ${LANG_ENGLISH} "Myanmar (Burmese) Unicode keyboard"
+  LangString DESC_SecSgawKaren ${LANG_ENGLISH} "Sgaw Karen Unicode keyboard"
+  LangString DESC_SecPaO ${LANG_ENGLISH} "Pa-O Unicode keyboard"
 
   ;Assign language strings to sections
   !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
     !insertmacro MUI_DESCRIPTION_TEXT ${SecApp} $(DESC_SecApp)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecSource} $(DESC_SecSource)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecGtkImModule} $(DESC_SecGtkImModule)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecMyWin} $(DESC_SecMyWin)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecMyanmar3} $(DESC_SecMyanmar3)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecSgawKaren} $(DESC_SecSgawKaren)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecPaO} $(DESC_SecPaO)
   !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 Function .onInstFailed
