@@ -38,6 +38,7 @@
 
 ; SendMessage
   !include WinMessages.nsh
+  !include "FileFunc.nsh"
 
 ;--------------------------------
 ;General
@@ -46,7 +47,7 @@
   Name "${APP_NAME} (${VERSION} ${ARCH})"
   Caption "Ekaya Input Method"
 
-  OutFile "${APP_NAME}-${VERSION}_${ARCH}.exe"
+  OutFile "${APP_NAME}-${VERSION}+MyanmarFonts_${ARCH}.exe"
   
   ;Get installation folder from registry if available
   InstallDirRegKey HKLM "Software\${INSTALL_SUFFIX}\${APP_NAME}_${ARCH}" ""
@@ -62,7 +63,7 @@
 ;Pages
 
   !insertmacro MUI_PAGE_WELCOME
-  !insertmacro MUI_PAGE_LICENSE "COPYING"
+  !insertmacro MUI_PAGE_LICENSE "licenses.txt"
   !insertmacro MUI_PAGE_COMPONENTS
   !insertmacro MUI_PAGE_DIRECTORY
   !insertmacro MUI_PAGE_INSTFILES
@@ -111,10 +112,8 @@ NoOverwrite:
 !endif
 
   File "ekaya.ico"
-  File /oname=license.txt "COPYING"
+  File /oname=licenses.txt "licenses.txt"
 
-  ;File "Uninstall.ico"
-  
   File "${EKAYA_BINARY_DIR}\ekaya.dll"
   File /nonfatal "${EKAYA_BINARY_DIR}\ekaya.dll*.manifest*"
   File "${WINKMFL_BINARY_DIR}\winkmfl.dll"
@@ -126,10 +125,6 @@ NoOverwrite:
   
   ; Redist dlls
   File redist\${REDIST}
-  #File "C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\msvcp90.dll"
-  #File "C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\msvcr90.dll"
-  #File "C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\msvcm90.dll"
-  #File "C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest"
 
   ClearErrors
   ExecWait '$INSTDIR\${APP_NAME}\${REDIST} /q' $0
@@ -259,6 +254,64 @@ Section /o "Pa-O Unicode 5.2 keyboard" SecPaO
 		"" 0 SW_SHOWNORMAL \
 		"" "Pa-O Keyboard"
 SectionEnd
+
+!macro removeFont font
+    StrCpy $0 "$WINDIR\Fonts\${font}"
+    IfFileExists $0 0 RemoveComplete${font}
+        ClearErrors
+        System::Call 'Gdi32::RemoveFontResource(t) b (r0.).r1'
+        IfErrors 0 +2
+            MessageBox MB_OK|MB_ICONEXCLAMATION "RemoveFontResource Failed ${font} ($0 $1)"
+        IntCmpU $1 0 0 0 DeleteFont${font}
+            Rename "$WINDIR\Fonts\${font}" "$WINDIR\Fonts\${font}.old"
+            IfErrors 0 +2
+                MessageBox MB_OK|MB_ICONEXCLAMATION "Failed to rename font ${font} ($0 $1)"
+            Delete /REBOOTOK "$WINDIR\Fonts\${font}.old"
+            Goto RemoveComplete${font}
+DeleteFont${font}:
+        Delete $0
+
+RemoveComplete${font}:
+!macroend
+
+!macro installFont font
+    # Use push "fontpath" to specify font
+    SetOutpath $WINDIR\Fonts
+    File "..\fonts\${font}"
+    Push $0
+    Push $1
+    StrCpy $0 "$WINDIR\Fonts\${font}"
+    DetailPrint "Copied font $0"
+    System::Call 'Gdi32::AddFontResource(t) i (r0.).r1'
+    IntCmpU $1 0 0 0 +2
+        MessageBox MB_OK|MB_ICONEXCLAMATION "Failed to install font $0 ($1)"
+    DetailPrint "AddFontResource $0 $1"
+    Pop $1
+    Pop $0
+!macroend
+
+Section "ThanLwin Fonts" SecThanLwinFont
+    !insertmacro removeFont "thanlwinMedium.ttf"
+    !insertmacro installFont "thanlwinMedium.ttf"
+    !insertmacro removeFont "thanlwinLight.ttf"
+    !insertmacro installFont "thanlwinLight.ttf"
+    !insertmacro removeFont "thanlwinBold.ttf"
+    !insertmacro installFont "thanlwinBold.ttf"
+    !insertmacro removeFont "thanlwinFixed.ttf"
+    !insertmacro installFont "thanlwinFixed.ttf"
+    !insertmacro removeFont "thanlwinFixedBold.ttf"
+    !insertmacro installFont "thanlwinFixedBold.ttf"
+    SendMessage HWND_BROADCAST WM_FONTCHANGE 0 0 /TIMEOUT=1000
+SectionEnd
+
+Section "Myanmar 3 Font" SecMM3Font
+    !insertmacro removeFont "mm3.ttf"
+    !insertmacro removeFont "myanmar3.ttf"
+    !insertmacro removeFont "mm3_05-Jan-2011.ttf"
+    !insertmacro installFont "mm3_05-Jan-2011.ttf"
+    SendMessage HWND_BROADCAST WM_FONTCHANGE 0 0 /TIMEOUT=1000
+SectionEnd
+
 ;--------------------------------
 ;Descriptions
 
@@ -319,14 +372,23 @@ AppFound:
 
   Delete "$INSTDIR\ekaya-${VERSION}.tar.bz2"
 
-  Delete /REBOOTOK "$INSTDIR\ekayaUninstall.exe"
+  Delete /REBOOTOK "$INSTDIR\Uninstall.exe"
 
   Delete  "$DESKTOP\${APP_NAME}.lnk"
   RMDir /r "$SMPROGRAMS\${APP_NAME}"
 
   DeleteRegKey /ifempty HKLM "Software\${INSTALL_SUFFIX}"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}"
-  
+
+  MessageBox MB_YESNO "Do you want to remove the fonts as well?" IDYES 0 IDNO RemoveInstallDir
+    !insertmacro removeFont "thanlwinMedium.ttf"
+    !insertmacro removeFont "thanlwinLight.ttf"
+    !insertmacro removeFont "thanlwinBold.ttf"
+    !insertmacro removeFont "thanlwinFixed.ttf"
+    !insertmacro removeFont "thanlwinFixedBold.ttf"
+    !insertmacro removeFont "mm3_05-Jan-2011.ttf"
+
+RemoveInstallDir:
   RMDir /REBOOTOK /r "$INSTDIR"
 
 SectionEnd
