@@ -30,7 +30,8 @@ using namespace EKAYA_NS;
 STDAPI EkayaEditSession::DoEditSession(TfEditCookie ec)
 {
 	EkayaKeyboard * keyboard = NULL;
-	if (mpTextService->getActiveKeyboard() > -1)
+	if ((mpTextService->getActiveKeyboard() > -1) &&
+        (mpTextService->getActiveKeyboard() < (signed)mpTextService->getKeyboards().size()))
 	{
 		keyboard = mpTextService->getKeyboards()[mpTextService->getActiveKeyboard()];
 	}

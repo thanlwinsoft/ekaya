@@ -176,7 +176,22 @@ std::basic_string<UTF32> KmflKeyboard::getIconFileName()
 std::basic_string<UTF32> KmflKeyboard::getHelpFileName()
 {
     size_t extPos = mFilename.find(".kmn");
-    return UtfConversion::convertUtf8ToUtf32(std::string(mBaseDir + mFilename.substr(0, extPos) + ".html"));
+    std::string helpFileName(mBaseDir + mFilename.substr(0, extPos) + ".html");
+    FILE * test = NULL;
+    fopen_s(&test, helpFileName.c_str(), "r");
+    if (test)
+    {
+        fclose(test);
+        return UtfConversion::convertUtf8ToUtf32(helpFileName);
+    }
+    helpFileName = std::string(mBaseDir + mFilename.substr(0, extPos) + ".pdf");
+    fopen_s(&test, helpFileName.c_str(), "r");
+    if (test)
+    {
+        fclose(test);
+        return UtfConversion::convertUtf8ToUtf32(helpFileName);
+    }
+    return std::basic_string<UTF32>();
 }
 
 void KmflKeyboard::outputString(char *p)

@@ -87,21 +87,8 @@ EkayaLangBarButton::EkayaLangBarButton(EkayaInputProcessor *pTextService)
 		std::basic_string<Utf32> helpFileName = mpTextService->getKeyboards()[i]->getHelpFileName();
 	    if (helpFileName.length() > 0)
 	    {
-	        std::wstring wName = UtfConversion::convertUtf32ToUtf16(helpFileName);
-			FILE * test = NULL;
-			fopen_s(&test, UtfConversion::convertUtf32ToUtf8(helpFileName).c_str(), "r");
-			bool exists = false;
-			if (test)
-			{
-				fclose(test);
-				MessageLogger::logMessage("HTML exists\n");
-				exists = true;
-				mHelpHtml.push_back(wName);
-			}
-			else
-			{
-				mHelpHtml.push_back(L"");
-			}
+			std::wstring wName = UtfConversion::convertUtf32ToUtf16(helpFileName);
+			mHelpHtml.push_back(wName);
 		}
 		else mHelpHtml.push_back(L"");
 	}
@@ -397,7 +384,8 @@ STDAPI EkayaLangBarButton::GetIcon(HICON *phIcon)
     if (mpTextService && mpTextService->isKeyboardOpen() &&
         mpTextService->getActiveKeyboard() > -1 && mIcons.size() > 0)
     {
-        if (mIcons[mpTextService->getActiveKeyboard()]->GetHICON(phIcon) != S_OK)
+        if ((mpTextService->getActiveKeyboard() >= (signed)mIcons.size()) ||
+            (mIcons[mpTextService->getActiveKeyboard()]->GetHICON(phIcon) != S_OK))
             *phIcon = NULL;
         if (*phIcon == NULL)
         {
