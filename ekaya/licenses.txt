@@ -1,10 +1,15 @@
 Ekaya is licensed under the GNU General Public License v2.
 
 Keyboards are licensed under the GNU Lesser General Public License v2+
+
 ThanLwin fonts are licensed under the Open Font License v1.1
-with reserved name "ThanLwin"
+with reserved name "ThanLwin".
 
 Myanmar3 font is Copyright Myanmar NLP 2005-2011 and is included by permission.
+
+The Padauk font family is Copyright SIL International and is licensed under the
+Open font License v1.1 with reserved name "Padauk".
+
 --------------------------------------------------------------------------------
 		    GNU GENERAL PUBLIC LICENSE
 		       Version 2, June 1991

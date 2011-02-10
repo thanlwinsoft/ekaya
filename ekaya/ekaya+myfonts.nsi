@@ -87,9 +87,9 @@
 
 
 Section "-!${APP_NAME}" SecApp
-  
+
   IfFileExists "$INSTDIR\${APP_NAME}" 0 BranchNoExist
-    
+
     MessageBox MB_YESNO|MB_ICONQUESTION "Would you like to overwrite existing ${APP_NAME} directory?" IDNO  NoOverwrite ; skipped if file doesn't exist
 
     BranchNoExist:
@@ -255,23 +255,51 @@ Section /o "Pa-O Unicode 5.2 keyboard" SecPaO
 		"" "Pa-O Keyboard"
 SectionEnd
 
-!macro removeFont font
+!macro removeFont font fontname
+    Push $0
+    Push $1
+    Push $2
     StrCpy $0 "$WINDIR\Fonts\${font}"
-    IfFileExists $0 0 RemoveComplete${font}
+    IfFileExists $0 0 RemoveCompleteA${font}
         ClearErrors
-        System::Call 'Gdi32::RemoveFontResource(t) b (r0.).r1'
-        IfErrors 0 +2
+        System::Call 'Gdi32::RemoveFontResource(t) i (r0.).r1'
+        IfErrors 0 CheckRemoveFontA${font}
             MessageBox MB_OK|MB_ICONEXCLAMATION "RemoveFontResource Failed ${font} ($0 $1)"
-        IntCmpU $1 0 0 0 DeleteFont${font}
-            Rename "$WINDIR\Fonts\${font}" "$WINDIR\Fonts\${font}.old"
-            IfErrors 0 +2
-                MessageBox MB_OK|MB_ICONEXCLAMATION "Failed to rename font ${font} ($0 $1)"
-            Delete /REBOOTOK "$WINDIR\Fonts\${font}.old"
-            Goto RemoveComplete${font}
-DeleteFont${font}:
-        Delete $0
+CheckRemoveFontA${font}:
+        IntCmpU $1 0 0 0 DeleteFontA${font}
+            MessageBox MB_OK|MB_ICONEXCLAMATION "Failed to remove font ${font} please close any applications using the font. ($0 $1)"
+DeleteFontA${font}:
+            Delete $0
+            IfErrors 0 RemoveCompleteA${font}
+                MessageBox MB_OK|MB_ICONEXCLAMATION "Failed to delete font ${font} please close any applications using the font. ($0 $1)"
 
-RemoveComplete${font}:
+RemoveCompleteA${font}:
+
+    ReadRegStr $2 HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts" "${fontname} (TrueType)"
+    IfErrors RemoveFontComplete${font} 0
+    DetailPrint "Old fontname found: $2"
+    StrCmp $2 ${font} RemoveCompleteB${font} 0
+    # stored under another name
+    StrCpy $0 "$WINDIR\Fonts\$2"
+    IfFileExists $0 0 RemoveCompleteB${font}
+        ClearErrors
+        System::Call 'Gdi32::RemoveFontResource(t) i (r0.).r1'
+        IfErrors 0 CheckRemoveFontB${font}
+            MessageBox MB_OK|MB_ICONEXCLAMATION "RemoveFontResource Failed $2 ($0 $1)"
+CheckRemoveFontB${font}:
+        IntCmpU $1 0 0 0 DeleteFontB${font}
+            MessageBox MB_OK|MB_ICONEXCLAMATION "Failed to remove font $2 please close any applications using the font. ($0 $1)"
+DeleteFontB${font}:
+            Delete $0
+            IfErrors 0 RemoveCompleteB${font}
+                MessageBox MB_OK|MB_ICONEXCLAMATION "Failed to delete font $2 please close any applications using the font. ($0 $1)"
+
+RemoveCompleteB${font}:
+    DeleteRegValue HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts" "${fontname} (TrueType)"
+RemoveFontComplete${font}:
+    Pop $2
+    Pop $1
+    Pop $0
 !macroend
 
 !macro installFont font
@@ -286,29 +314,61 @@ RemoveComplete${font}:
     IntCmpU $1 0 0 0 +2
         MessageBox MB_OK|MB_ICONEXCLAMATION "Failed to install font $0 ($1)"
     DetailPrint "AddFontResource $0 $1"
+
+    Push $R0
+    Push $R1
+    Push $R2
+    # strlen in R1, buffer in R2
+    System::Call *(i${NSIS_MAX_STRLEN})i.R1
+    System::Alloc ${NSIS_MAX_STRLEN}
+    Pop $R2
+    System::Call 'gdi32::GetFontResourceInfoW(wr0,iR1,iR2,i1)i.R0'
+    IntCmp $R0 0 GFN_error${font}
+    System::Call *$R2(&w${NSIS_MAX_STRLEN}.R0)
+    WriteRegStr HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts" "$R0 (TrueType)" "${font}"
+    Goto GFN_errordone${font}
+GFN_error${font}:
+    DetailPrint "GetFontResourceInfo error for $0"
+GFN_errordone${font}:
+        System::Free $R1
+        System::Free $R2
+
+    Pop $R2
+    Pop $R1
+    Pop $R0
+    
     Pop $1
     Pop $0
 !macroend
 
-Section "ThanLwin Fonts" SecThanLwinFont
-    !insertmacro removeFont "thanlwinMedium.ttf"
-    !insertmacro installFont "thanlwinMedium.ttf"
-    !insertmacro removeFont "thanlwinLight.ttf"
-    !insertmacro installFont "thanlwinLight.ttf"
-    !insertmacro removeFont "thanlwinBold.ttf"
-    !insertmacro installFont "thanlwinBold.ttf"
-    !insertmacro removeFont "thanlwinFixed.ttf"
-    !insertmacro installFont "thanlwinFixed.ttf"
-    !insertmacro removeFont "thanlwinFixedBold.ttf"
-    !insertmacro installFont "thanlwinFixedBold.ttf"
+Section "Myanmar 3 Font" SecMM3Font
+    !insertmacro removeFont "mm3_05-Jan-2011.ttf" "Myanmar3"
+    !insertmacro installFont "mm3_05-Jan-2011.ttf"
     SendMessage HWND_BROADCAST WM_FONTCHANGE 0 0 /TIMEOUT=1000
 SectionEnd
 
-Section "Myanmar 3 Font" SecMM3Font
-    !insertmacro removeFont "mm3.ttf"
-    !insertmacro removeFont "myanmar3.ttf"
-    !insertmacro removeFont "mm3_05-Jan-2011.ttf"
-    !insertmacro installFont "mm3_05-Jan-2011.ttf"
+Section "Padauk Font" SecPadaukFont
+    !insertmacro removeFont "Padauk.ttf" "Padauk"
+    !insertmacro installFont "Padauk.ttf"
+    !insertmacro removeFont "Padauk-bold.ttf" "Padauk Bold"
+    !insertmacro installFont "Padauk-bold.ttf"
+    !insertmacro removeFont "Padauk-book.ttf" "Padauk Book"
+    !insertmacro installFont "Padauk-book.ttf"
+    !insertmacro removeFont "Padauk-boldbold.ttf" "Padauk Book Bold"
+    !insertmacro installFont "Padauk-bookbold.ttf"
+SectionEnd
+
+Section "ThanLwin Fonts" SecThanLwinFont
+    !insertmacro removeFont "thanlwinMedium.ttf" "ThanLwin"
+    !insertmacro installFont "thanlwinMedium.ttf"
+    !insertmacro removeFont "thanlwinLight.ttf" "ThanLwin Light"
+    !insertmacro installFont "thanlwinLight.ttf"
+    !insertmacro removeFont "thanlwinBold.ttf" "ThanLwin Bold"
+    !insertmacro installFont "thanlwinBold.ttf"
+    !insertmacro removeFont "thanlwinFixed.ttf" "ThanLwin Fixed"
+    !insertmacro installFont "thanlwinFixed.ttf"
+    !insertmacro removeFont "thanlwinFixedBold.ttf" "ThanLwin Fixed Bold"
+    !insertmacro installFont "thanlwinFixedBold.ttf"
     SendMessage HWND_BROADCAST WM_FONTCHANGE 0 0 /TIMEOUT=1000
 SectionEnd
 
@@ -323,6 +383,9 @@ SectionEnd
   LangString DESC_SecMyanmar3 ${LANG_ENGLISH} "Myanmar (Burmese) Unicode keyboard"
   LangString DESC_SecSgawKaren ${LANG_ENGLISH} "Sgaw Karen Unicode keyboard"
   LangString DESC_SecPaO ${LANG_ENGLISH} "Pa-O Unicode keyboard"
+  LangString DESC_SecMM3Font ${LANG_ENGLISH} "Myanmar3 Burmese Unicode Font from Myanmar NLP Lab"
+  LangString DESC_SecPadaukFont ${LANG_ENGLISH} "SIL Padauk font family covering the whole of the Myanmar Unicode block including Burmese, Mon, Karen and Shan"
+  LangString DESC_SecThanLwinFont ${LANG_ENGLISH} "ThanLwin font family for Burmese from ThanLwinSoft"
 
   ;Assign language strings to sections
   !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
@@ -333,6 +396,9 @@ SectionEnd
     !insertmacro MUI_DESCRIPTION_TEXT ${SecMyanmar3} $(DESC_SecMyanmar3)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecSgawKaren} $(DESC_SecSgawKaren)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecPaO} $(DESC_SecPaO)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecMM3Font} $(DESC_SecMM3Font)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecPadaukFont} $(DESC_SecPadaukFont)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecThanLwinFont} $(DESC_SecThanLwinFont)
   !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 Function .onInstFailed
@@ -381,12 +447,16 @@ AppFound:
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}"
 
   MessageBox MB_YESNO "Do you want to remove the fonts as well?" IDYES 0 IDNO RemoveInstallDir
-    !insertmacro removeFont "thanlwinMedium.ttf"
-    !insertmacro removeFont "thanlwinLight.ttf"
-    !insertmacro removeFont "thanlwinBold.ttf"
-    !insertmacro removeFont "thanlwinFixed.ttf"
-    !insertmacro removeFont "thanlwinFixedBold.ttf"
-    !insertmacro removeFont "mm3_05-Jan-2011.ttf"
+    !insertmacro removeFont "thanlwinMedium.ttf" "ThanLwin"
+    !insertmacro removeFont "thanlwinLight.ttf" "ThanLwin Light"
+    !insertmacro removeFont "thanlwinBold.ttf" "ThanLwin Bold"
+    !insertmacro removeFont "thanlwinFixed.ttf" "ThanLwin Fixed"
+    !insertmacro removeFont "thanlwinFixedBold.ttf" "ThanLwin Fixed Bold"
+    !insertmacro removeFont "mm3_05-Jan-2011.ttf" "Myanmar3"
+    !insertmacro removeFont "Padauk.ttf" "Padauk"
+    !insertmacro removeFont "Padauk-bold.ttf" "Padauk Bold"
+    !insertmacro removeFont "Padauk-book.ttf" "Padauk Book"
+    !insertmacro removeFont "Padauk-boldbold.ttf" "Padauk Book Bold"
 
 RemoveInstallDir:
   RMDir /REBOOTOK /r "$INSTDIR"
