@@ -1,0 +1,3 @@
+Ekaya uses Windows Advanced Text Services Framework to provide a Smart Input method (keyboard) suitable for typing languages using Complex Scripts such as Myanmar (Burmese). This means that it can do context sensitive reordering and substitution of characters as you type.
+
+The keyboard rules are written in the same kmn format that the commercial Tavultesoft Keyman uses for its keyboards. The main advantage of Ekaya is that it is free and Open Source (GPL). It uses the Open Source KMFL library to parse the .kmn files.
